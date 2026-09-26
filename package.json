@@ -1,0 +1,41 @@
+{
+  "name": "@gramlot/serverless",
+  "version": "0.0.0-dev.1",
+  "type": "module",
+  "description": "Serverless Gramlot integration: standalone Browser/Worker HTML exporter",
+  "license": "Apache-2.0",
+  "bin": {
+    "gramlot-serverless": "./src/cli.js"
+  },
+  "exports": {
+    ".": "./src/build.js",
+    "./directory": "./src/build-directory.js",
+    "./standalone": "./src/standalone.js",
+    "./worker-host": "./src/worker-host.js"
+  },
+  "files": [
+    "src/build.js",
+    "src/build-directory.js",
+    "src/cli.js",
+    "README.md",
+    "LICENSE",
+    "src/standalone.js",
+    "src/worker-host.js",
+    "src/worker-transport.js",
+    "src/runtime-notices.js"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@jsr/genro__gramlot": "^0.1.2",
+    "@jsr/genro__builders": "^0.1.5",
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "jsdom": "27.0.1"
+  }
+}
