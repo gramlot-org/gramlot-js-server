@@ -25,9 +25,8 @@ Host/Page/Worker contract. No registry publication or deployment is authorized.
 ## Approved Minimal boundary — 2026-09-24
 
 The owner approved the integration-repository name `gramlot-minimal` for the
-Python/Uvicorn and Browser/Worker standalone profiles. Native Python ASGI belongs
-here; Kajenn depends on it and owns only its Kajenn mount integration. The JavaScript
-package is `@gramlot/minimal` with the `gramlot-minimal` command. Historical
+Python/Uvicorn and Browser/Worker standalone profiles. The JavaScript
+package is `@gramlot/serverless` with the `gramlot-serverless` command. Historical
 standalone names are not compatibility aliases. Keep existing GS document/block IDs.
 The published Gramlot 0.1.0 archives are immutable; this change is development work.
 
