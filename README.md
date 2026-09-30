@@ -1,7 +1,7 @@
 # Gramlot Node.js native HTML host
 
 The native 0.1.0 profile exports `startNativeServer` from
-`gramlot-nodejs/native` for Node and `gramlot-nodejs/bun` for Bun. It hosts
+`gramlot-js-server/native` for Node and `gramlot-js-server/bun` for Bun. It hosts
 trusted JavaScript Gramlot Page modules through the clean core's Host. The
 reusable working launchers are in the [Hello World application](https://github.com/gramlot-org/gramlot-examples/tree/main/apps/hello-world):
 
@@ -48,3 +48,17 @@ The runtime test additionally requires the laboratory's existing
 `js/dom/node_modules/jsdom` installation. No test dependency is needed by the host.
 
 See [architecture and verification](docs/005-node-host.md).
+
+
+## Shared examples and documentation
+
+Gramlot is the primary source of framework documentation, teaching examples,
+runner and theme. This integration is a downstream consumer: it owns hosting
+and setup, and must use the shared examples through its Gramlot dependency
+without maintaining a copied suite. Node.js and Bun execute the shared JavaScript pages using their respective host adapters.
+
+Read the Gramlot manual first, then this integration's guide. Update the Gramlot
+dependency and restart or regenerate exports to receive example changes.
+Uniform packaging and launch commands across all integrations are still pending;
+this describes the agreed model, not a completed rollout. See
+[shared example ownership](docs/010-native-html.md#gn-010-015) for details.

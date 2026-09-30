@@ -6,8 +6,8 @@ Document ID: **GN-010**. Development implementation, not a released package.
 
 ## 005 · Node and Bun
 
-The current clean-core profile is exported as `gramlot-nodejs/native` (Node) and
-`gramlot-nodejs/bun` (Bun). Each exports `startNativeServer({pages, hostname, port})`.
+The current clean-core profile is exported as `gramlot-js-server/native` (Node) and
+`gramlot-js-server/bun` (Bun). Each exports `startNativeServer({pages, hostname, port})`.
 `pages` is the installed application's trusted JS pages directory; `port: 0` selects
 an available port. The result exposes `url`, `host`, `server` and asynchronous
 `close()`, which closes sockets and clears page registrations.
@@ -50,3 +50,31 @@ First-party dependencies are floating. The new core/generic package graph is loc
 development work; upstream source availability and clean upstream installation
 remain separate gates. Isolated archive tests must not be represented as published
 package support. No package release or deployment is part of this profile.
+
+
+<a id="gn-010-015"></a>
+
+## 015 · Shared examples from Gramlot
+
+Node.js and Bun execute the shared JavaScript pages using their respective host adapters.
+
+Gramlot is the upstream reference for framework documentation and the shared
+teaching suite: pages, READMEs, runner, logo and theme. Read its manual first,
+then the chosen integration's guide; clone that downstream repository for its
+adapter, configuration and launch instructions. Read the Docs is the documentation
+target, not a claim that all integration sites are already published.
+
+Integrations consume Gramlot's examples without maintaining local source copies.
+Python runs in Flask/FastAPI/Django/Kajenn or Minimal with Uvicorn; JavaScript runs
+in Node.js/Bun or Minimal's browser Worker. The integration selects the language.
+Update the Gramlot dependency, then restart or regenerate the standalone export
+to receive changes. Installed environments and exports do not refresh themselves.
+Generated assets are outputs, not another source. First-party dependencies remain
+unpinned; published 0.1.0 archives are immutable.
+
+Agreed model, not completed ecosystem rollout: sources exist in `examples/html_svg`,
+`examples/00-runner` and `themes/gramlot-base`; uniform dependency packaging and
+launch commands for all six integrations remain to be implemented and verified.
+Historical demos and existing Hello World smoke launchers are separate evidence.
+
+See the [Gramlot guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-020) for the authoritative shared policy. Public documentation follows `main`; unpublished development changes are not yet part of that public reference.

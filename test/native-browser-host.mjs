@@ -1,5 +1,5 @@
 import {Host, Page, source} from '@gramlot/native-html/server';
-const {startNativeServer} = await import(globalThis.Bun ? 'gramlot-nodejs/bun' : 'gramlot-nodejs/native');
+const {startNativeServer} = await import(globalThis.Bun ? 'gramlot-js-server/bun' : 'gramlot-js-server/native');
 class HtmlPage extends Page {
  main(root) { root.h1('Hello World'); root.div(null, {id:'slot'}); }
  details(root) { root.span('Remote HTML'); }

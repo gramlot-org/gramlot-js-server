@@ -1,9 +1,9 @@
 {
-  "name": "gramlot-nodejs",
+  "name": "gramlot-js-server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Local Gramlot Node.js hosting proof of concept without a database",
+  "description": "Gramlot JavaScript server integration for Node.js and Bun",
   "license": "Apache-2.0",
   "scripts": {
     "start": "node src/start.mjs",
