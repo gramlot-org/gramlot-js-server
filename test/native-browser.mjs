@@ -8,7 +8,7 @@ const {chromium}=await import(pathToFileURL(playwright));
 const child=spawn(runtime,[fileURLToPath(new URL('./native-browser-host.mjs',import.meta.url))],{stdio:['ignore','pipe','inherit']});
 let browser;
 try {
- const url=await new Promise((res,rej)=>{const timer=setTimeout(()=>rej(Error('startup timeout')),10000);createInterface({input:child.stdout}).once('line',line=>{clearTimeout(timer);res(line);});child.once('exit',code=>{clearTimeout(timer);rej(Error(`exit ${code}`));});});
+ const {plain:url,strict,permissive}=JSON.parse(await new Promise((res,rej)=>{const timer=setTimeout(()=>rej(Error('startup timeout')),10000);createInterface({input:child.stdout}).once('line',line=>{clearTimeout(timer);res(line);});child.once('exit',code=>{clearTimeout(timer);rej(Error(`exit ${code}`));});}));
  browser=await chromium.launch({headless:true,executablePath});
  const page=await browser.newPage(), errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.goto(url);await page.waitForFunction(()=>window.gramlot?.state==='started');
@@ -37,5 +37,22 @@ try {
   await new Promise(resolve=>setTimeout(resolve,50));
  }
  assert.equal(closed,true,'pagehide beacon closes the server page');
- assert.deepEqual(errors,[]);console.log('PASS installed native host '+runtime);
+ assert.deepEqual(errors,[]);
+ // Mount prefix /app behind a stripping front; the application CSP in both profiles.
+ const open=async address=>{const response=await page.goto(address);await page.waitForFunction(()=>['started','failed'].includes(window.gramlot?.state));return response;};
+ for(const base of [strict,permissive]){
+  const response=await open(base+'/avvio');
+  assert.match(response.headers()['content-security-policy'],/script-src 'nonce-[\w-]+'/);
+  assert.deepEqual(await page.evaluate(()=>({state:window.gramlot.state,pronto:document.getElementById('pronto').textContent,
+   sentinel:globalThis.gramlotSentinel,aux:performance.getEntriesByType('resource').some(e=>new URL(e.name).pathname==='/app/avvio_aux.js')})),
+   {state:'started',pronto:'ok: init',sentinel:1,aux:true});
+ }
+ assert.deepEqual(errors,[]);
+ await open(permissive+'/inline');
+ assert.deepEqual(await page.evaluate(()=>[window.gramlot.state,document.getElementById('inline').textContent]),['started','42']);
+ assert.deepEqual(errors,[]);
+ await open(strict+'/inline');
+ assert.equal(await page.evaluate(()=>window.gramlot.state),'failed');
+ assert.equal(errors.length,1);
+ assert.match(errors[0],/div '.*' node value: inline code blocked by the Content Security Policy/);console.log('PASS installed native host, mount prefix and strict/permissive CSP '+runtime);
 }finally{await browser?.close();child.kill();await new Promise(r=>child.exitCode!==null?r():child.once('exit',r));}

@@ -12,6 +12,35 @@ The current clean-core profile is exported as `gramlot-js-server/native` (Node) 
 an available port. The result exposes `url`, `host`, `server` and asynchronous
 `close()`, which closes sockets and clears page registrations.
 
+Gramlot 0.2.0 minimal Host contract: `resolvePage(path)` returns the Page class,
+`resolveResources(path, PageClass)` returns `{css: [url], js: [{url, group}]}` and
+`openPage(path, {owner, prefix})` returns `{pageId, html, nonce}`. Without `host`, the
+adapter builds `new FileHost(pages, options)`; `options` are the Host URL, TTL and
+capacity options. A custom `host` implements the two resolve methods.
+
+- `mountPath` (default `""`) is passed to `openPage` as the mount prefix at each
+  opening. Request paths arrive without it: at the root, or behind a server that
+  strips the mount before dispatch, as in `gramlot-uvicorn`.
+- `contentSecurityPolicy` (default `null`) is the application's policy. The adapter
+  sends it as the `Content-Security-Policy` header of each HTML page, with `{nonce}`
+  replaced by the bootstrap nonce of that opening. Strict profile:
+  `script-src 'nonce-{nonce}'; object-src 'none'; base-uri 'none'`, named logic only.
+  Permissive profile: the same with `'unsafe-eval'`, inline code active.
+- GET and HEAD serve a `.css` or `_aux.js` file whose real path is below the pages
+  folder (`host.pagesDir`): the FileHost companions and `Page.css` files placed there.
+  Every other file of the folder, and every path whose real path leaves it, is 404;
+  another method is 405. `Page.css` URLs outside the folder are application assets.
+
+`@gramlot/native-html` is a peer dependency: the adapter must use the same package
+instance as the application's pages, or `instanceof Page` fails. Until the core is
+published, link a local core checkout without saving a path in `package.json`:
+
+```sh
+npm install --no-save ../gramlot/js
+```
+
+A later plain `npm install` removes the link; repeat the command.
+
 Both bridges use `@gramlot/native-html/server` and serve the packaged
 `@gramlot/native-html/runtime` asset. Node translates HTTP streams to Fetch requests;
 Bun uses native Fetch requests. Shared `native-fetch.mjs` owns HTTP routing,
@@ -42,7 +71,11 @@ node test/native-browser.mjs bun /path/to/playwright/index.mjs /path/to/chromium
 ```
 
 The browser check covers initial main, typed Source insert/delete/update, a remote
-HTML block, disposal and JavaScript errors. Framework fixtures may manipulate Source;
+HTML block, disposal and JavaScript errors. It then opens the core's `avvio` page
+(`js/tests/fixtures/logic/avvio.js` with `avvio_aux.js`, from the linked core checkout)
+with mount prefix `/app` behind a stripping front, under the strict and the permissive
+CSP. Named logic starts under both; an inline page starts under the permissive profile
+and fails under the strict one with the core's error naming the node. Framework fixtures may manipulate Source;
 application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
