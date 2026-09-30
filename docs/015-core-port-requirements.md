@@ -6,9 +6,10 @@ Document ID: **GS-015**.
 ## 005 · Required integration
 
 The integration imports Gramlot from @jsr/genro__gramlot and Host/Page through
-the browser-safe /host and /page public entries. Serverless owns /worker-host and
-/standalone; it requires the matching development core with /host. Published
-0.1.0 archives are unchanged and do not provide this new package boundary. It consumes packaged runtime notices and HtmlBuilder's
+the browser-safe /host and /page public entries, and `PageBootstrap` from the root
+entry. Serverless owns /worker-host and /standalone. It requires core >=0.2.0 and
+`@jsr/genro__builders` >=0.4.0; core 0.2.0 is not yet published. Published 0.1.x
+archives are unchanged and do not provide this boundary. It consumes packaged runtime notices and HtmlBuilder's
 static renderer. Attribute-only template interpolation is required so embedded
 JavaScript template literals remain unchanged. No installed dependency is patched.
 

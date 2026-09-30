@@ -31,6 +31,10 @@ source(Page.prototype.details);
 Page.main is executed when the HTML opens, not when building. Runtime transport
 is owned by Gramlot. There is no additional standalone Page subclass.
 
+Named logic lives in the companion `page_aux.js` beside `page.js`, which exports
+`Logic`. The exporter bundles it for the window only. Inline code is blocked by the
+single-file CSP (GS-005-020).
+
 <a id="gs-010-015"></a>
 ## 015 · Open and close
 
@@ -56,7 +60,7 @@ with bundled Worker source under `assets/workers/`, a shared
 `assets/standalone.js` runtime, runtime notices, and only listed assets. Each page
 loads scripts through relative paths. The bootstrap creates a Blob Worker, passes
 the directory root to Serverless mount for declared `Page.css` and exported assets,
-then revokes the Blob URL. Pages are not run at build time and `Page.css` is not
+embeds a companion `<page>_aux.js` for the window, then revokes the Blob URLs. Pages are not run at build time and `Page.css` is not
 altered. Open `index.html` with `file://`; no HTTP server is required. This
 directory profile is browser-verified in Chromium only; the single-HTML exporter
 remains separate.
@@ -93,8 +97,11 @@ See the [Gramlot guide](https://github.com/gramlot-org/gramlot/blob/main/docs/pu
 <a id="gs-010-040"></a>
 ## 040 · Development standalone ownership
 
-Serverless owns WorkerHost, WorkerTransport and standalone startup, including CSS
-loading and local export asset resolution. It consumes the shared core Host through
-`@jsr/genro__gramlot/host` and the ordinary Gramlot renderer. Use the matching
-development core; the published 0.1.0 archives remain unchanged. There is no
-compatibility wrapper for the former core standalone entries.
+Serverless owns WorkerHost, WorkerTransport and standalone startup, including local
+export asset resolution and the companion module URL. CSS links and Logic
+registration belong to the core `PageBootstrap`. Serverless consumes the shared core
+Host through `@jsr/genro__gramlot/host`. It requires core 0.2.0
+(`@jsr/genro__gramlot >=0.2.0`), not yet published. Local verification links the
+core checkout with `npm install --no-save @jsr/genro__gramlot@file:../gramlot/js`.
+The published 0.1.x archives remain unchanged. There is no compatibility wrapper for
+the former core standalone entries.

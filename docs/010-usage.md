@@ -31,6 +31,10 @@ source(Page.prototype.details);
 Page.main is executed when the HTML opens, not when building. Runtime transport
 is owned by Gramlot. There is no additional standalone Page subclass.
 
+Named logic lives in the companion `page_aux.js` beside `page.js`, which exports
+`Logic`. The exporter bundles it for the window only. Inline code is blocked by the
+single-file CSP (GS-005-020).
+
 <a id="gs-010-015"></a>
 ## 015 · Open and close
 
@@ -78,8 +82,9 @@ Open `dist/index.html` directly from disk; child pages are at
 `dist/e01/index.html`. Each page loads the shared runtime and its own bootstrap
 through relative file paths. The bootstrap contains the bundled Worker source,
 creates a Blob Worker, and passes the directory root to Serverless mount so declared
-`Page.css` and other exported assets resolve without changing the Page. Blob URLs
-are revoked after startup. The directory profile requires no HTTP server and does
+`Page.css` and other exported assets resolve without changing the Page. A companion
+`<page>_aux.js` is embedded in the same bootstrap and imported by the window from a
+Blob URL. Blob URLs are revoked after startup. The directory profile requires no HTTP server and does
 not execute Pages on the server. Chromium is the browser verified for this profile;
 other browsers have not yet been verified.
 
@@ -128,8 +133,11 @@ See the [Gramlot guide](https://github.com/gramlot-org/gramlot/blob/main/docs/pu
 <a id="gs-010-040"></a>
 ## 040 · Development standalone ownership
 
-Serverless owns WorkerHost, WorkerTransport and standalone startup, including CSS
-loading and local export asset resolution. It consumes the shared core Host through
-`@jsr/genro__gramlot/host` and the ordinary Gramlot renderer. Use the matching
-development core; the published 0.1.0 archives remain unchanged. There is no
-compatibility wrapper for the former core standalone entries.
+Serverless owns WorkerHost, WorkerTransport and standalone startup, including local
+export asset resolution and the companion module URL. CSS links and Logic
+registration belong to the core `PageBootstrap`. Serverless consumes the shared core
+Host through `@jsr/genro__gramlot/host`. It requires core 0.2.0
+(`@jsr/genro__gramlot >=0.2.0`), not yet published. Local verification links the
+core checkout with `npm install --no-save @jsr/genro__gramlot@file:../gramlot/js`.
+The published 0.1.x archives remain unchanged. There is no compatibility wrapper for
+the former core standalone entries.

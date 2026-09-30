@@ -52,8 +52,9 @@ this describes the agreed model, not a completed rollout. See
 [shared example ownership](docs/010-usage.md#gs-010-035) for details.
 
 
-Development ownership: Serverless now owns the standalone WorkerHost, WorkerTransport
-and startup (CSS, export paths and app availability). Shared Host/Page execution
-and rendering remain in core. This development package requires the matching core
-with the browser-safe `/host` entry; unchanged 0.1.0 archives are not compatible
-with this new boundary. No release or publication is implied.
+Development ownership: Serverless owns the standalone WorkerHost, WorkerTransport
+and startup (export paths, the companion `page_aux.js` and the core `PageBootstrap`).
+Shared Host/Page execution and rendering remain in core. This development package
+requires core 0.2.0 (`@jsr/genro__gramlot >=0.2.0`), not yet published; unchanged
+0.1.x archives are not compatible with this boundary. No release or publication is
+implied.
