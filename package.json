@@ -13,7 +13,7 @@
   "engines": {
     "node": ">=22"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@gramlot/native-html": "*"
   },
   "exports": {
