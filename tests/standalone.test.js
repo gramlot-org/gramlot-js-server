@@ -50,7 +50,7 @@ test('Worker host uses shared main/Source execution, typed Source and normal liv
     assert.equal(doc.querySelector('#details').textContent, 'From Worker');
     nodes[0].setValue('Live');
     assert.equal(doc.querySelector('h1').textContent, 'Live');
-    await assert.rejects(app.remoteSource(nodes[1], 'main'), /Source method not found/);
+    await assert.rejects(app.remoteSource(nodes[1], 'main'), /Unknown Source method/);
     await assert.rejects(app.remoteSource(nodes[1], 'broken'), {name: 'TypeError', message: 'Page failed'});
     assert.equal(host.pages.size, 1);
     app.dispose();
@@ -102,7 +102,7 @@ test('Worker rejects unsupported operations, pages and malformed CSS', async () 
     const {transport} = channel(Hello);
     await assert.rejects(transport.request('fetch', {}), /Unknown Worker operation/);
     const {pageId} = await transport.open();
-    await assert.rejects(transport.source(pageId, null, {}), /Source method not found/);
+    await assert.rejects(transport.source(pageId, null, {}), /Unknown Source method/);
     await assert.rejects(transport.source('unknown', 'details', {}), /Unknown, expired or unowned page/);
     await assert.rejects(transport.source(pageId, 'details', {uncloneable() {}}), {name: 'DataCloneError'});
     assert.equal(transport.pending.size, 0);
