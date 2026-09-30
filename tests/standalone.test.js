@@ -9,7 +9,7 @@ import {mount} from '../src/standalone.js';
 
 // Browser-like endpoints with structured cloning; actual Worker execution is
 // covered by scripts/verify_worker_host_browser.mjs.
-function channel(PageClass) {
+function channel(PageClass, options) {
     const worker = new EventTarget();
     const scope = new EventTarget();
     let terminated = false;
@@ -23,7 +23,7 @@ function channel(PageClass) {
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'self');
     globalThis.self = scope;
     let host;
-    try { host = new WorkerHost(PageClass); }
+    try { host = new WorkerHost(PageClass, options); }
     finally { if (previous) Object.defineProperty(globalThis, 'self', previous); else delete globalThis.self; }
     return {worker, host, transport: new WorkerTransport(worker), terminated: () => terminated};
 }
@@ -97,7 +97,7 @@ test('Worker rejects unsupported operations, pages and malformed CSS', async () 
     }
     class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
     const styled = channel(Styled);
-    assert.deepEqual((await styled.transport.open()).css, Styled.css);
+    assert.deepEqual((await styled.transport.open()).resources, {css: Styled.css, js: []});
     styled.transport.dispose();
     const {transport} = channel(Hello);
     await assert.rejects(transport.request('fetch', {}), /Unknown Worker operation/);
@@ -129,70 +129,87 @@ test('standalone mount owns startup and failure cleanup', async t => {
     assert.equal(endpoints[1].terminated(), true);
 });
 
-test('standalone waits for Page.css and removes its styles on disposal or load failure', async t => {
-    class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
+function workers(t, PageClass, options) {
     const endpoints = [];
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'Worker');
     t.after(() => { if (previous) Object.defineProperty(globalThis, 'Worker', previous); else delete globalThis.Worker; });
     globalThis.Worker = function () {
-        const endpoint = channel(Styled);
+        const endpoint = channel(PageClass, options);
         endpoint.worker.removeEventListener('message', endpoint.transport.receive);
         endpoints.push(endpoint);
         return endpoint.worker;
     };
-    const doc = document();
-    const loading = mount({workerUrl: 'page-worker.js', document: doc});
-    await new Promise(resolve => setImmediate(resolve));
-    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')];
-    assert.deepEqual(links.map(link => link.getAttribute('href')), Styled.css);
-    assert.equal(doc.querySelector('h1'), null);
-    links[0].dispatchEvent(new doc.defaultView.Event('load'));
-    await new Promise(resolve => setImmediate(resolve));
-    assert.equal(doc.querySelector('h1'), null);
-    links[1].dispatchEvent(new doc.defaultView.Event('load'));
-    const app = await loading;
-    assert.equal(doc.querySelector('h1').textContent, 'Hello Worker');
-    app.renderer.onDispose(app.source.getItem('main').getNodes()[0], () => {
-        throw new Error('injected cleanup failure');
-    });
-    assert.throws(() => app.dispose(), /Renderer cleanup failed/);
-    app.dispose();
-    assert.equal(doc.querySelectorAll('link[rel="stylesheet"]').length, 0);
-    assert.equal(endpoints[0].terminated(), true);
+    return endpoints;
+}
+const module = text => `data:text/javascript,${encodeURIComponent(text)}`;
 
-    const failedDoc = document();
-    const failed = mount({workerUrl: 'page-worker.js', document: failedDoc});
-    await new Promise(resolve => setImmediate(resolve));
-    failedDoc.querySelector('link').dispatchEvent(new failedDoc.defaultView.Event('error'));
-    await assert.rejects(failed, /Stylesheet failed to load/);
-    assert.equal(failedDoc.querySelectorAll('link[rel="stylesheet"]').length, 0);
+class Formula extends Page {
+    static title = 'Companion';
+    main(root) {
+        root.div('^pronto', {id: 'pronto'});
+        root.dataFormula({result_path: 'pronto', func: 'prepara', base: '=base', _init: true});
+        root.dataSetter({destination_path: 'base', value: 'ok'});
+    }
+}
+
+test('PageBootstrap writes Page.css links and receives the Worker transport in its config', async t => {
+    class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
+    const endpoints = workers(t, Styled);
+    const doc = document();
+    const app = await mount({workerUrl: 'page-worker.js', document: doc});
+    assert.equal(doc.title, 'Gramlot');
+    assert.deepEqual([...doc.querySelectorAll('link[rel="stylesheet"]')].map(link => link.getAttribute('href')), Styled.css);
+    assert.equal(doc.querySelector('h1').textContent, 'Hello Worker');
+    assert.equal(app.transport, doc.defaultView.gramlot.transport);
+    assert.equal(app.transport.worker, endpoints[0].worker);
+    app.dispose();
+    assert.equal(endpoints[0].terminated(), true);
+});
+
+test('the window imports the companion named by the Worker and registers its Logic', async t => {
+    const endpoints = workers(t, Formula, {aux: '/page_aux.js'});
+    const doc = document();
+    const app = await mount({workerUrl: 'page-worker.js', document: doc, modules: {
+        '/page_aux.js': module('export class Logic { prepara(kwargs) { return `${kwargs.base}: window`; } }'),
+    }});
+    assert.equal(doc.title, 'Companion');
+    assert.equal(doc.querySelector('#pronto').textContent, 'ok: window');
+    assert.equal(endpoints[0].host.aux, '/page_aux.js');
+    app.dispose();
+    assert.equal(endpoints[0].terminated(), true);
+});
+
+test('a missing or failing companion stops startup and releases the Worker', async t => {
+    const endpoints = workers(t, Formula, {aux: '/page_aux.js'});
+    await assert.rejects(mount({workerUrl: 'page-worker.js', document: document()}),
+        {name: 'TypeError', message: 'Standalone module not provided: /page_aux.js'});
+    assert.equal(endpoints[0].terminated(), true);
+    const doc = document();
+    const beacons = [];
+    doc.defaultView.navigator.sendBeacon = url => { beacons.push(url); return true; };
+    await assert.rejects(mount({workerUrl: 'page-worker.js', document: doc,
+        modules: {'/page_aux.js': module('throw new Error("broken companion");')}}), /import failed: broken companion/);
+    // WorkerBootstrap.closePage releases the Worker instead of sending a close beacon.
+    assert.deepEqual(beacons, []);
     assert.equal(endpoints[1].terminated(), true);
+    assert.equal(doc.defaultView.gramlot, undefined);
 });
 
 test('explicit assetRoot resolves declared root CSS inside a local export directory', async t => {
     class Styled extends Hello { static css = ['/themes/theme.css']; }
-    const previous = Object.getOwnPropertyDescriptor(globalThis, 'Worker');
-    t.after(() => { if (previous) Object.defineProperty(globalThis, 'Worker', previous); else delete globalThis.Worker; });
-    const endpoints = [];
-    globalThis.Worker = function () {
-        const endpoint = channel(Styled);
-        endpoint.worker.removeEventListener('message', endpoint.transport.receive);
-        endpoints.push(endpoint);
-        return endpoint.worker;
-    };
+    const endpoints = workers(t, Styled);
     const doc = document();
-    const loading = mount({workerUrl: 'page-worker.js', document: doc,
-        assetRoot: 'file:///export/site/'});
-    await new Promise(resolve => setImmediate(resolve));
-    const link = doc.querySelector('link[rel="stylesheet"]');
-    assert.equal(link.href, 'file:///export/site/themes/theme.css');
-    link.dispatchEvent(new doc.defaultView.Event('load'));
-    const app = await loading;
+    const app = await mount({workerUrl: 'page-worker.js', document: doc, assetRoot: 'file:///export/site/'});
+    assert.equal(doc.querySelector('link[rel="stylesheet"]').href, 'file:///export/site/themes/theme.css');
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
-    assert.equal(doc.querySelector('link'), null);
 
     await assert.rejects(mount({workerUrl: 'page-worker.js', document: document(),
-        assetRoot: 'file:///export/site'}), /ending in \/|directory URL/);
-    assert.equal(endpoints[1].terminated(), true);
+        assetRoot: 'file:///export/site'}), /ending in \//);
+    assert.equal(endpoints.length, 1);
+    class Escaping extends Hello { static css = ['../outside.css']; }
+    const escaping = workers(t, Escaping);
+    await assert.rejects(mount({workerUrl: 'page-worker.js', document: document(),
+        assetRoot: 'file:///export/site/'}), /root-relative without traversal/);
+    assert.equal(escaping[0].terminated(), true);
 });

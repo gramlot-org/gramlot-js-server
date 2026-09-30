@@ -39,7 +39,8 @@ test('exports two static routes, one runtime, Worker bundles, and only listed as
         const worker = await readFile(join(output, 'assets/workers', `${route}.js`), 'utf8');
         assert.match(worker, /Directory page/);
         assert.match(worker, /URL.createObjectURL\(new Blob/);
-        assert.match(worker, /URL.revokeObjectURL\(workerUrl\)/);
+        assert.match(worker, /URL.revokeObjectURL\(url\)/);
+        assert.match(worker, /GramlotStandalone.mount\(\{workerUrl, modules, assetRoot: /);
         assert.ok(worker.includes(`assetRoot: new URL("${route === 'index' ? './' : '../'}", document.baseURI).href`));
     }
     assert.ok((await stat(join(output, 'assets/standalone.js'))).size > 0);
@@ -71,4 +72,15 @@ test('failed bundling leaves output absent and existing output is refused', asyn
     await writeFile(output, 'existing');
     await assert.rejects(buildDirectory({pages: {index: bad}, output}), /already exists/);
     assert.equal(await readFile(output, 'utf8'), 'existing');
+});
+
+test('a companion beside the page reaches the window bootstrap; a *_aux page is refused', async t => {
+    const {folder, output} = await fixture(t);
+    const page = join(root, 'tests/fixtures/companion/page.js');
+    await buildDirectory({pages: {index: page}, output});
+    const bootstrap = await readFile(join(output, 'assets/workers/index.js'), 'utf8');
+    assert.ok(bootstrap.includes('"/page_aux.js":'));
+    assert.match(bootstrap, /gramlotSentinel/);
+    await assert.rejects(buildDirectory({pages: {index: join(root, 'tests/fixtures/companion/page_aux.js')},
+        output: join(folder, 'aux')}), /page companion, not a page/);
 });

@@ -1,10 +1,13 @@
 import {Host, PageNotFound} from '@jsr/genro__gramlot/host';
 
-/** One JS Page hosted inside a dedicated Worker; execution belongs to Host. */
+/** One JS Page hosted inside a dedicated Worker; execution belongs to Host.
+ * aux is the URL that names the page companion (foo_aux.js), or null. The Worker
+ * only returns it: the window maps it to the module and imports it there. */
 export class WorkerHost extends Host {
-    constructor(PageClass, options = {}) {
+    constructor(PageClass, {aux = null, ...options} = {}) {
         super(options);
         this.PageClass = PageClass;
+        this.aux = aux;
         this.scope = self;
         this.scope.addEventListener('message', event => this.dispatch(event.data));
     }
@@ -16,6 +19,11 @@ export class WorkerHost extends Host {
             throw new TypeError('Standalone Page.css must be an array of strings');
         }
         return this.PageClass;
+    }
+
+    /** Page.css URLs as written, then the companion. */
+    async resolveResources(path, PageClass) {
+        return {css: [...PageClass.css], js: this.aux === null ? [] : [{url: this.aux, group: null}]};
     }
 
     async dispatch({id, operation, args}) {

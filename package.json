@@ -16,6 +16,7 @@
   "files": [
     "src/build.js",
     "src/build-directory.js",
+    "src/bundles.js",
     "src/cli.js",
     "README.md",
     "LICENSE",
@@ -28,12 +29,12 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "@jsr/genro__gramlot": "^0.1.2",
-    "@jsr/genro__builders": "^0.1.5",
+    "@jsr/genro__gramlot": ">=0.2.0",
+    "@jsr/genro__builders": ">=0.4.0",
     "esbuild": "0.28.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "devDependencies": {
     "jsdom": "27.0.1"

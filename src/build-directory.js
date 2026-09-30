@@ -1,11 +1,11 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
+import {checkPage, companion, companionBundle, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@jsr/genro__builders';
 import {copyFile, mkdir, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const fromServerless = createRequire(import.meta.url);
-const workerHost = fileURLToPath(new URL('./worker-host.js', import.meta.url));
 const standalone = fileURLToPath(new URL('./standalone.js', import.meta.url));
 import {randomUUID} from 'node:crypto';
 import {dirname, extname, isAbsolute, join, resolve} from 'node:path';
@@ -43,6 +43,7 @@ function validate({pages, output, assets}) {
         if (typeof page !== 'string' || !isAbsolute(page) || !['.js', '.mjs'].includes(extname(page))) {
             throw new TypeError(`Page for ${route} must be an absolute .js or .mjs file`);
         }
+        checkPage(page);
     }
     if (typeof output !== 'string' || !output.trim()) {
         throw new TypeError('output must be a directory path');
@@ -97,14 +98,16 @@ function documentFor(route) {
     return '<!doctype html>' + document.render();
 }
 
-function bootstrapFor(worker, route) {
+function bootstrapFor(worker, modules, route) {
     const relativeRoot = route === 'index' ? './' : '../';
     return `(() => {
-    const workerUrl = URL.createObjectURL(new Blob([${JSON.stringify(worker)}], {type: 'text/javascript'}));
-    GramlotStandalone.mount({workerUrl, assetRoot: new URL(${JSON.stringify(relativeRoot)}, document.baseURI).href})
+    const blob = text => URL.createObjectURL(new Blob([text], {type: 'text/javascript'}));
+    const workerUrl = blob(${JSON.stringify(worker)});
+    const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));
+    GramlotStandalone.mount({workerUrl, modules, assetRoot: new URL(${JSON.stringify(relativeRoot)}, document.baseURI).href})
         .then(app => { globalThis.gramlot = app; })
         .catch(error => { console.error(error); })
-        .finally(() => { URL.revokeObjectURL(workerUrl); });
+        .finally(() => { for (const url of [workerUrl, ...Object.values(modules)]) URL.revokeObjectURL(url); });
 })();`;
 }
 
@@ -142,13 +145,10 @@ export async function buildDirectory({pages, output, assets = []}) {
         await writeFile(join(stage, 'assets/runtime-notices.json'),
             JSON.stringify(await runtimeNotices(core.runtime), null, 2) + '\n');
         for (const [route, page] of entries) {
-            const worker = (await bundle({...workerOptions, stdin: {
-                resolveDir: dirname(page),
-                contents: `import {WorkerHost} from ${JSON.stringify(workerHost)};
-import {Page} from ${JSON.stringify(page)};
-new WorkerHost(Page);`,
-            }})).outputFiles[0].text;
-            await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, route));
+            const aux = await companion(page);
+            const worker = (await workerBundle(page, aux, workerOptions)).text;
+            const modules = aux ? {[aux.url]: await companionBundle(aux, workerOptions)} : {};
+            await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});
             await writeFile(htmlPath, documentFor(route));

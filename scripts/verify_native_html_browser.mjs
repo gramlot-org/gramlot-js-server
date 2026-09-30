@@ -22,7 +22,8 @@ try {
     const result = await page.evaluate(async method => {
         const app = globalThis.gramlot;
         const contents = app.source.getItem('main');
-        if (contents.constructor.tytxSuffix !== 'SOURCE') throw Error('main lost its typed Source');
+        // The 0.2.0 wire names the Source class (__cls): main holds the root's GramlotBuilderBag class.
+        if (contents.constructor !== app.source.constructor) throw Error('main lost its typed Source');
         const heading = contents.getNodes()[0];
         heading.setValue('Updated');
         const update = document.querySelector('h1').textContent;
