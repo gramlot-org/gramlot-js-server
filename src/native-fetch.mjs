@@ -1,7 +1,7 @@
 /** Native HTML host protocol, shared by Node and Bun socket bridges. */
 import {readFile, realpath, stat} from 'node:fs/promises';
 import {isAbsolute, join, relative, sep} from 'node:path';
-import {FileHost, PageExpired, PageNotFound, HostCapacity} from '@gramlot/native-html/server';
+import {FileHost, PageExpired, PageNotFound, SourceNotFound, HostCapacity} from '@gramlot/native-html/server';
 
 const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '_aux.js': 'text/javascript; charset=utf-8'};
 
@@ -98,6 +98,7 @@ export async function createNativeDispatch({pages, host = null, ownerForRequest 
                 : {'Content-Security-Policy': contentSecurityPolicy.replaceAll('{nonce}', nonce)};
             return reply(html, 200, 'text/html; charset=utf-8', headers);
         } catch (error) {
+            if (error instanceof SourceNotFound) return reply('Unknown Source method', 404);
             if (error instanceof PageExpired || error instanceof PageNotFound) return reply('Not found', 404);
             if (error instanceof HostCapacity) return reply('Page registry capacity reached', 503);
             // Unexpected application errors remain visible to the owning adapter.

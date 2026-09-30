@@ -43,7 +43,11 @@ test('real listener serves packaged runtime and typed main/remote; errors and sh
         assert.equal(remote.status, 200);
         assert.match(await remote.text(), /Remote HTML/);
         assert.equal((await post('/gramlot/main', {pageId}, 'bob')).status, 404);
-        assert.equal((await post('/gramlot/source', {pageId, method: 'main'})).status, 404);
+        for (const method of ['main', 'missing', 'constructor']) {
+            const unknown = await post('/gramlot/source', {pageId, method});
+            assert.equal(unknown.status, 404, method);
+            assert.equal(await unknown.text(), 'Unknown Source method', method);
+        }
         assert.equal((await post('/gramlot/main', {pageId, excess: 'a'.repeat(5000)})).status, 413);
         assert.equal((await fetch(app.url + '/gramlot/main')).status, 405);
         assert.equal((await fetch(app.url + '/missing')).status, 404);
