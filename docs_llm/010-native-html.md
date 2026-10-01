@@ -1,10 +1,12 @@
 # 010 · Native HTML hosts
 
-Document ID: **GN-010**. Development implementation, not a released package.
+Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract; the adapter itself is not a published package.
 
 <a id="gn-010-005"></a>
 
 ## 005 · Node and Bun
+
+Block ID: **GN-010-005**.
 
 The current clean-core profile is exported as `gramlot-js-server/native` (Node) and
 `gramlot-js-server/bun` (Bun). Each exports `startNativeServer({pages, hostname, port})`.
@@ -51,6 +53,8 @@ runtime and tests do not establish compatibility for this native profile.
 
 ## 010 · Verification and distribution
 
+Block ID: **GN-010-010**.
+
 Run `npm run test:native` for the real Node listener contract and
 `bun test test/native.test.mjs` for Bun. The browser harness accepts an installed
 Playwright module and Chromium executable:
@@ -68,15 +72,19 @@ with the core's error naming the node. Framework fixtures may manipulate Source;
 application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
-First-party dependencies are floating. The new core/generic package graph is local
-development work; upstream source availability and clean upstream installation
-remain separate gates. Isolated archive tests must not be represented as published
-package support. No package release or deployment is part of this profile.
+Gramlot 0.2.0 is released (PyPI, JSR, GitHub `v0.2.0`); the npm name
+`@gramlot/native-html` is unpublished, so the adapter links a core checkout
+(`npm install --no-save ../gramlot/js`). CI (`.github/workflows/tests.yml`) runs
+the Node and Bun contract tests only against the core's `main`, informational;
+the published-core job waits for the package name decision. No adapter release
+or deployment is part of this profile.
 
 
 <a id="gn-010-015"></a>
 
 ## 015 · Shared examples from Gramlot
+
+Block ID: **GN-010-015**.
 
 Node.js and Bun execute the shared JavaScript pages using their respective host adapters.
 
@@ -92,7 +100,7 @@ in Node.js/Bun or Minimal's browser Worker. The integration selects the language
 Update the Gramlot dependency, then restart or regenerate the standalone export
 to receive changes. Installed environments and exports do not refresh themselves.
 Generated assets are outputs, not another source. First-party dependencies remain
-unpinned; published 0.1.0 archives are immutable.
+unpinned; published 0.1.x and 0.2.0 releases are immutable.
 
 Agreed model, not completed ecosystem rollout: sources exist in `examples/html_svg`,
 `examples/00-runner` and `themes/gramlot-base`; uniform dependency packaging and

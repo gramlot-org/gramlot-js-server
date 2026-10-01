@@ -1,10 +1,12 @@
 # 010 · Native HTML hosts
 
-Document ID: **GN-010**. Development implementation, not a released package.
+Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract; the adapter itself is not a published package.
 
 <a id="gn-010-005"></a>
 
 ## 005 · Node and Bun
+
+Block ID: **GN-010-005**.
 
 The current clean-core profile is exported as `gramlot-js-server/native` (Node) and
 `gramlot-js-server/bun` (Bun). Each exports `startNativeServer({pages, hostname, port})`.
@@ -61,6 +63,8 @@ runtime and tests do not establish compatibility for this native profile.
 
 ## 010 · Verification and distribution
 
+Block ID: **GN-010-010**.
+
 Run `npm run test:native` for the real Node listener contract and
 `bun test test/native.test.mjs` for Bun. The browser harness accepts an installed
 Playwright module and Chromium executable:
@@ -79,15 +83,21 @@ and fails under the strict one with the core's error naming the node. Framework 
 application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
-First-party dependencies are floating. The new core/generic package graph is local
-development work; upstream source availability and clean upstream installation
-remain separate gates. Isolated archive tests must not be represented as published
-package support. No package release or deployment is part of this profile.
+Gramlot 0.2.0 is released (PyPI `gramlot`, JSR `@genro/gramlot`, GitHub release
+`v0.2.0`). The npm name `@gramlot/native-html` of the core `js/` package is not
+published on any registry, so this adapter cannot be installed against a published
+core: link a core checkout with `npm install --no-save ../gramlot/js`. The CI
+workflow `.github/workflows/tests.yml` runs the Node and Bun contract tests only
+against the core's `main` checkout, as an informational job; a job against a
+published core will be added when the package name question is settled. No release
+or deployment of this adapter is part of this profile.
 
 
 <a id="gn-010-015"></a>
 
 ## 015 · Shared examples from Gramlot
+
+Block ID: **GN-010-015**.
 
 Node.js and Bun execute the shared JavaScript pages using their respective host adapters.
 
@@ -113,8 +123,8 @@ runner does not ask users to switch between Python and JavaScript.
 To receive changed examples, update the Gramlot dependency following the chosen
 integration's setup instructions, then restart the host or rebuild the standalone
 export. An existing installation or exported folder does not update itself when
-upstream changes. First-party dependencies remain unpinned; the published 0.1.0
-archives remain immutable.
+upstream changes. First-party dependencies remain unpinned; the published 0.1.x and 0.2.0
+releases remain immutable.
 
 This is the agreed distribution model. The teaching sources already live in
 Gramlot under `examples/html_svg`, the runner under `examples/00-runner`, and the

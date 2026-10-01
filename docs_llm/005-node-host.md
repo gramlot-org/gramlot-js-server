@@ -8,6 +8,8 @@ Document ID: **GN-005**. [Expanded version](../docs/005-node-host.md).
 <a id="gn-005-005"></a>
 ## 005 · Scope and ownership
 
+Block ID: **GN-005-005**.
+
 The owner approved JavaScript authoring for this local PoC on 2026-09-16 and
 selected native node:http. Node creates a fresh HtmlBuilder and SourceBag for
 each page request. Its fluent grammar declares the UI, Data seeds, formula and
@@ -22,6 +24,8 @@ Data or development reload is implemented. Data resets on page reload.
 
 <a id="gn-005-010"></a>
 ## 010 · Dependency and reproduction
+
+Block ID: **GN-005-010**.
 
 Consume the existing sibling laboratory distribution in place; no bulk port or
 framework copy is performed. Evidence: gramlot-poc HEAD
@@ -39,6 +43,8 @@ jsdom dependency for DOM integration. No external network service is required.
 <a id="gn-005-015"></a>
 ## 015 · Verification and limitations
 
+Block ID: **GN-005-015**.
+
 Tests cover HTTP pages, TYTX reconstruction, health, GET/HEAD/405/404 handling,
 manifest asset delivery, traversal rejection and malformed asset URLs. DOM tests
 mount serialized Source into the compiled runtime and exercise live input to
@@ -55,6 +61,8 @@ anchors are established; no documentation site is created.
 
 <a id="gn-005-020"></a>
 ## 020 · Demo presentation convention
+
+Block ID: **GN-005-020**.
 
 Owner direction, 2026-09-16: every demo exposes Show source and the shared
 Inspector launcher in a bottom corner, with a polished, engaging presentation.
