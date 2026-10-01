@@ -5,105 +5,125 @@
 [![Documentation](https://readthedocs.org/projects/gramlot-js-server/badge/?version=latest)](https://gramlot-js-server.readthedocs.io/en/latest/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
-Node.js and Bun host adapter for [Gramlot](https://github.com/gramlot-org/gramlot)
-pages. It serves trusted JavaScript Page modules through the Gramlot 0.2.0
-minimal Host contract: `resolvePage`, `resolveResources` and `openPage` of the
-core's `FileHost`, or of a custom `host`. The adapter owns HTTP routing, bounded
-payload parsing, response and error mapping and request identity; the core's
-Host owns page execution, registrations, ownership checks and TTL. No database,
-no Python process.
+Gramlot describes web interfaces in Python or JavaScript and keeps them bound to
+application state in the browser. See
+[The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html)
+for the core and the other repositories.
 
-`gramlot-js-server/native` exports `startNativeServer` for Node (`node:http`);
-`gramlot-js-server/bun` exports the same function on Bun's native `fetch` server.
+## What this repository is
 
-## Install
+gramlot-js-server serves JavaScript Gramlot pages from Node.js 22 or Bun. Choose
+it when your pages are written in JavaScript and you serve them from a Node.js
+or Bun process: it connects a folder of Page modules to the core's `FileHost`,
+sends the bootstrap document, answers the main and remote Source requests and
+serves the page companions, with a mount prefix and a Content Security Policy
+of your choice. It is not for Python pages, which
+[gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn) serves, nor for
+pages without a server, which
+[gramlot-serverless](https://github.com/gramlot-org/gramlot-serverless) exports
+as one HTML file or a static folder.
 
-Gramlot 0.2.0 is released on PyPI (`gramlot`) and JSR (`@genro/gramlot`). The
-core's npm package `@gramlot/native-html`, which this adapter takes as a peer
-dependency, is not published on any registry yet. Link a core checkout placed
-beside this repository, without saving the path in `package.json`:
+## Quick start
+
+Gramlot 0.2.0 is released on PyPI and JSR. The core's npm package
+`@gramlot/native-html`, which this adapter takes as a peer dependency, is not
+published yet: link a core checkout and this adapter, both cloned beside your
+application.
+
+```sh
+mkdir hello && cd hello
+printf '{"name":"hello","private":true,"type":"module"}\n' > package.json
+npm install --no-save ../gramlot/js ../gramlot-js-server
+mkdir pages
+```
+
+`pages/index.js`, the page served at `/`:
+
+```js
+import {Page as BasePage} from '@gramlot/native-html/page';
+
+export class Page extends BasePage {
+    static title = 'Hello';
+
+    main(root) {
+        const pane = root.div({datapath: 'person'});
+        pane.html_label('Name', {for: 'name'});
+        pane.input({id: 'name', value: '^.name', live: true});
+        pane.p('^.greeting');
+        pane.dataFormula({result_path: '.greeting', func: 'greeting', name: '^.name', _init: true});
+        pane.dataSetter({destination_path: '.name', value: 'Ada'});
+    }
+}
+```
+
+`pages/index_aux.js`, the named logic of the page:
+
+```js
+export class Logic {
+    greeting(kwargs) { return 'Hello, ' + kwargs.name; }
+}
+```
+
+`serve.mjs`:
+
+```js
+import {fileURLToPath} from 'node:url';
+import {startNativeServer} from 'gramlot-js-server/native';
+
+const app = await startNativeServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
+console.log(app.url);
+```
+
+```sh
+node serve.mjs
+```
+
+Open `http://127.0.0.1:8080/`. The page shows a field with `Ada` and the text
+`Hello, Ada`; typing `Grace` in the field changes the text to `Hello, Grace` at
+every keystroke. On Bun, import from `gramlot-js-server/bun` and run
+`bun serve.mjs`. This page is executed by `test/quickstart.test.mjs` in CI on
+Node and Bun; the browser behavior was verified with Chromium.
+
+## Next steps
+
+- This repository's guides on Read the Docs:
+  [Introduction](https://gramlot-js-server.readthedocs.io/en/latest/005-introduction.html),
+  [Tutorial](https://gramlot-js-server.readthedocs.io/en/latest/010-tutorial.html),
+  [Writing pages for this host](https://gramlot-js-server.readthedocs.io/en/latest/015-writing-pages.html),
+  [Configuration](https://gramlot-js-server.readthedocs.io/en/latest/020-configuration.html),
+  [Deployment](https://gramlot-js-server.readthedocs.io/en/latest/025-deployment.html),
+  [Reference](https://gramlot-js-server.readthedocs.io/en/latest/030-reference.html),
+  [Troubleshooting](https://gramlot-js-server.readthedocs.io/en/latest/040-troubleshooting.html).
+  Sources in [docs/](docs/) and the concise view in [docs_llm/](docs_llm/).
+- The core: [The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html),
+  [Classes, repository and server adapters](https://gramlot.readthedocs.io/en/latest/docs/public/090-classes-and-hosts.html)
+  (the shared adapter contract: mount prefix, companions, CSP profiles),
+  [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
+- Example pages of the core, each in Python and JavaScript:
+  [examples/binding](https://github.com/gramlot-org/gramlot/tree/main/examples/binding) and
+  [examples/controllers](https://github.com/gramlot-org/gramlot/tree/main/examples/controllers).
+
+## Compatibility
+
+| | Verified |
+| --- | --- |
+| Gramlot | 0.2.0 (core `main`, linked as `@gramlot/native-html`) |
+| Runtimes | Node.js 22 (CI) and 23.11, Bun 1.3.14 |
+| Browsers | Chromium 153, WebKit 26.6, Firefox 155 (core qualification of 0.2.0, strict and permissive CSP, Node and Bun) |
+
+## Tests and contributing
 
 ```sh
 npm install --no-save ../gramlot/js
+npm run test:native                                        # Node contract and quick-start tests
+bun test test/native.test.mjs test/quickstart.test.mjs     # the same on Bun
+npm run test:coverage                                      # Node tests with lcov in coverage/
+python scripts/check_docs.py                               # paired guides and Sphinx build
 ```
 
-The adapter and the application's pages must resolve the same package instance,
-or `instanceof Page` fails. The adapter itself is not published; applications
-use it from a checkout or a workspace. Node 22 or later.
-
-## Usage
-
-```js
-import {startNativeServer} from 'gramlot-js-server/native';   // or 'gramlot-js-server/bun'
-
-const app = await startNativeServer({
-    pages: '/path/to/pages',          // trusted JS Page modules
-    hostname: '127.0.0.1', port: 0,   // port 0 selects a free port
-    mountPath: '/app',
-    contentSecurityPolicy: "script-src 'nonce-{nonce}'; object-src 'none'; base-uri 'none'",
-});
-console.log(app.url);   // app.host, app.server, await app.close()
-```
-
-- `mountPath` (default `""`) is passed to `openPage` as the mount prefix of the
-  browser URLs. Request paths arrive without it: at the root, or behind a front
-  server that strips the mount before dispatch.
-- `contentSecurityPolicy` (default `null`) is the application's policy, sent as
-  the `Content-Security-Policy` header of each HTML page with `{nonce}` replaced
-  by the bootstrap nonce of that opening. The strict profile above admits named
-  logic only; adding `'unsafe-eval'` to `script-src` activates inline code.
-- Companions: `GET` and `HEAD` serve a `.css` or `_aux.js` file whose real path
-  is below the pages folder. Every other file of the folder, and every path whose
-  real path leaves it, answers 404; other methods answer 405.
-- `host` replaces the default `new FileHost(pages, options)`;
-  `ownerForRequest(request)` supplies the owner identity; `onError` receives
-  unexpected errors, answered with HTTP 500.
-
-The working launchers are in the
-[Hello World application](https://github.com/gramlot-org/gramlot-examples/tree/main/apps/hello-world)
-(`npm run start:node`, `bun run start:bun`).
-
-## Tests
-
-```sh
-npm run test:native            # Node contract tests
-bun test test/native.test.mjs  # Bun contract tests
-npm run test:coverage          # Node tests with lcov in coverage/
-```
-
-Both need the linked core. `npm test` also runs the historical PoC tests of
-`src/start.mjs`, which need the sibling `gramlot-poc` checkout. The browser
-harness `test/native-browser.mjs` takes a runtime, a Playwright module and a
-Chromium executable; see the [native host guide](docs/010-native-html.md#gn-010-010).
-
-CI (`.github/workflows/tests.yml`) runs the Node and Bun contract tests and the
-documentation build. The test job links the core's `main` checkout and is
-informational, because no published core can be installed while
-`@gramlot/native-html` is unpublished; a job against the published core will
-be added when the package name is settled. Coverage of the Node run is
-uploaded to Codecov.
-
-## Documentation
-
-- `docs/` (expanded) and `docs_llm/` (concise), namespace GN, built with Sphinx
-  (`.readthedocs.yaml`). Build locally: `python scripts/check_docs.py`.
-- [GN-010 · Native HTML hosts](docs/010-native-html.md): API, verification,
-  shared examples. [GN-005](docs/005-node-host.md): the historical PoC server.
-- Core reference: [Classes, repository and server adapters](https://github.com/gramlot-org/gramlot/blob/main/docs/public/090-classes-and-hosts.md).
-- Rules for contributors and coding agents: `AGENTS.md`, `CONTRIBUTING.md`.
-  No AI, LLM or assistant references in commits, pull requests, code or
-  documents.
-
-## Shared examples
-
-Gramlot owns the teaching examples, their READMEs, the runner and the theme.
-This adapter is a downstream consumer: it owns hosting and setup and uses the
-shared examples through the Gramlot dependency, without a copied suite. See
-[shared example ownership](docs/010-native-html.md#gn-010-015).
-
-## Historical PoC server
-
-`npm start` runs the older sibling-PoC server (`src/start.mjs`, port 8070),
-which needs the `gramlot-poc` browser distribution beside this repository
-(`GRAMLOT_BROWSER_DIR` overrides the path). It is preserved as experimental
-history outside the native profile; see [GN-005](docs/005-node-host.md).
+CI runs the Node and Bun tests against the core's `main` checkout as an
+informational job, since no published core can be installed, and builds the
+documentation; coverage goes to Codecov. See [CONTRIBUTING.md](CONTRIBUTING.md)
+and [AGENTS.md](AGENTS.md). The historical PoC server (`npm start`,
+`src/start.mjs`) and the internal notes are described in
+[docs/internal/](docs/internal/).

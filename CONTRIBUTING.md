@@ -13,8 +13,8 @@ registry; the local link is the only install path.
 ## Checks before a commit
 
 ```sh
-npm run test:native                   # Node contract tests
-bun test test/native.test.mjs         # Bun contract tests
+npm run test:native                                       # Node contract and quick-start tests
+bun test test/native.test.mjs test/quickstart.test.mjs    # the same on Bun
 npm run test:coverage                 # Node tests with lcov in coverage/
 .venv/bin/python scripts/check_docs.py   # when documentation changes
 ```
@@ -33,6 +33,10 @@ npm run test:coverage                 # Node tests with lcov in coverage/
   lines.
 - Pair `docs/` and `docs_llm/` guides: namespace GN, shared Document and Block
   IDs, lowercase anchors. `scripts/check_docs.py` validates and builds both.
+  User guides GN-105 to GN-140 are the published manual; internal notes
+  (GN-005, GN-010) stay in `docs/internal/` and `docs_llm/internal/`.
+- The README quick start is `test/fixtures/quickstart/`, run by
+  `test/quickstart.test.mjs`: keep the README, the tutorial and the fixture equal.
 
 ## Releases
 
