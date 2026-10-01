@@ -7,5 +7,10 @@ lives in the repository's docs directory.
 .. toctree::
    :maxdepth: 2
 
-   005-node-host
-   010-native-html
+   005-introduction
+   010-tutorial
+   015-writing-pages
+   020-configuration
+   025-deployment
+   030-reference
+   040-troubleshooting

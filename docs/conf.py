@@ -18,7 +18,7 @@ def paired_view_links(app, docname, source):
     """Offer the paired Markdown guide as a download in standalone documentation builds."""
     import re
 
-    source[0] = re.sub(r'\[(Concise mirror|Expanded version|Paired view)\]\((\.\./docs(?:_llm)?/[^)]+\.md)\)',
+    source[0] = re.sub(r'\[(Concise mirror|Expanded version|Paired view)\]\(((?:\.\./)+docs(?:_llm)?/[^)]+\.md)\)',
                        r'{download}`\1 <\2>`', source[0])
 
 

@@ -1,9 +1,13 @@
+---
+orphan: true
+---
+
 # 005 · Node hosting experiment
 
 Historical sibling-PoC `npm start` server, outside native 0.1.0. Use
 [GN-010](010-native-html.md) for current Node/Bun APIs and launchers.
 
-Document ID: **GN-005**. [Expanded version](../docs/005-node-host.md).
+Document ID: **GN-005**. [Expanded version](../../docs/internal/005-node-host.md).
 
 <a id="gn-005-005"></a>
 ## 005 · Scope and ownership

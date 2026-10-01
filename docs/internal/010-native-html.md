@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # 010 · Native HTML hosts
 
 Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract; the adapter itself is not a published package.
