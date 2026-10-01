@@ -94,7 +94,7 @@ the adapter posts `{pageId, method, params}` to `/gramlot/source` and the Host r
 the method on a new Page instance.
 
 ```js
-import {Page as BasePage, source} from '@gramlot/native-html/page';
+import {Page as BasePage, source} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     main(root) { root.section({node_id: 'details'}); }

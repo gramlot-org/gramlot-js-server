@@ -33,12 +33,12 @@ implements both resolve methods.
   (companions and `Page.css` files there); any other file or escaping path 404, other
   methods 405. `Page.css` URLs outside the folder are application assets.
 
-`@gramlot/native-html` is a peer dependency (same instance as the pages, or
+`@gramlot/gramlot` is a peer dependency (same instance as the pages, or
 `instanceof Page` fails). Before core publication, link it without a path in
 `package.json`: `npm install --no-save ../gramlot/js`; repeat after a plain `npm install`.
 
-Both bridges use `@gramlot/native-html/server` and serve the packaged
-`@gramlot/native-html/runtime` asset. Node translates HTTP streams to Fetch requests;
+Both bridges use `@gramlot/gramlot/server` and serve the packaged
+`@gramlot/gramlot/runtime` asset. Node translates HTTP streams to Fetch requests;
 Bun uses native Fetch requests. Shared `native-fetch.mjs` owns HTTP routing,
 bounded payload parsing, response/error mapping and request identity extraction.
 Neutral Host owns page execution, page registrations, ownership checks and TTL.
@@ -77,7 +77,7 @@ application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
 Gramlot 0.2.0 is released (PyPI, JSR, GitHub `v0.2.0`); the npm name
-`@gramlot/native-html` is unpublished, so the adapter links a core checkout
+`@gramlot/gramlot` is unpublished, so the adapter links a core checkout
 (`npm install --no-save ../gramlot/js`). CI (`.github/workflows/tests.yml`) runs
 the Node and Bun contract tests only against the core's `main`, informational;
 the published-core job waits for the package name decision. No adapter release

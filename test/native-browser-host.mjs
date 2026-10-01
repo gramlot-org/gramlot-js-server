@@ -2,7 +2,7 @@ import {createServer} from 'node:http';
 import {copyFile, mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {Host, Page, source} from '@gramlot/native-html/server';
+import {Host, Page, source} from '@gramlot/gramlot/server';
 const {startNativeServer} = await import(globalThis.Bun ? 'gramlot-js-server/bun' : 'gramlot-js-server/native');
 class HtmlPage extends Page {
  main(root) { root.h1('Hello World'); root.div(null, {id:'slot'}); }
@@ -17,7 +17,7 @@ const STRICT_CSP = "script-src 'nonce-{nonce}'; object-src 'none'; base-uri 'non
 const PERMISSIVE_CSP = "script-src 'nonce-{nonce}' 'unsafe-eval'; object-src 'none'; base-uri 'none'";
 const MOUNT = '/app';
 // The core's avvio page (named logic in avvio_aux.js) from the linked core checkout, and an inline page.
-const pageModule = import.meta.resolve('@gramlot/native-html/page');
+const pageModule = import.meta.resolve('@gramlot/gramlot/page');
 const fixtures = new URL('../../tests/fixtures/logic/', pageModule);
 const pages = await mkdtemp(join(tmpdir(), 'gramlot-js-server-browser-'));
 await writeFile(join(pages, 'avvio.js'), `export {Page} from ${JSON.stringify(new URL('avvio.js', fixtures).href)};\n`);

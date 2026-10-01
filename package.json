@@ -15,7 +15,7 @@
     "node": ">=22"
   },
   "peerDependencies": {
-    "@gramlot/native-html": "*"
+    "@gramlot/gramlot": ">=0.2.1"
   },
   "exports": {
     "./native": "./src/native-node.mjs",

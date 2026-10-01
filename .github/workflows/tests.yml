@@ -1,10 +1,8 @@
 name: tests
 
-# Published core job: not possible yet. The adapter's peer dependency
-# @gramlot/native-html (the core js/ package) is not published on any registry,
-# so no job can install the released core 0.2.0 from npm. Until the package
-# name question is settled, the only test job links the core's main checkout
-# and is informational (continue-on-error). See README.md, "Tests".
+# The core is published as @gramlot/gramlot from 0.2.1. This job links the core's
+# main checkout and is informational (continue-on-error) until a published-core
+# job installs it from npm.
 
 on:
   push:
@@ -48,7 +46,7 @@ jobs:
         run: |
           npm --prefix js install --ignore-scripts --package-lock=false
           npm --prefix js run build
-      - name: Link the core as @gramlot/native-html
+      - name: Link the core as @gramlot/gramlot
         run: npm install --no-save ../gramlot/js
       - name: Node contract tests with coverage
         run: npm run test:coverage

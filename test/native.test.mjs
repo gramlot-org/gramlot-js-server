@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdir, mkdtemp, rm, symlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {Host, Page, source} from '@gramlot/native-html/server';
+import {Host, Page, source} from '@gramlot/gramlot/server';
 const {startNativeServer} = await import(globalThis.Bun ? '../src/native-bun.mjs' : '../src/native-node.mjs');
 
 class HtmlPage extends Page {
@@ -78,7 +78,7 @@ test('real listener serves packaged runtime and typed main/remote; errors and sh
 
 const STRICT_CSP = "script-src 'nonce-{nonce}'; object-src 'none'; base-uri 'none'";
 const PERMISSIVE_CSP = "script-src 'nonce-{nonce}' 'unsafe-eval'; object-src 'none'; base-uri 'none'";
-const PAGE_MODULE = import.meta.resolve('@gramlot/native-html/page');
+const PAGE_MODULE = import.meta.resolve('@gramlot/gramlot/page');
 
 /** The nonce, runtime URL and PageBootstrap argument of a bootstrap document. */
 function bootstrap(html) {

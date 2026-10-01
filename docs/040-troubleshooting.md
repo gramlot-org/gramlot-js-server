@@ -69,7 +69,7 @@ Block ID: **GN-140-020**.
 extends `Page`.
 
 **Cause.** The page and the adapter import two different copies of
-`@gramlot/native-html`: one through the application's `node_modules`, another
+`@gramlot/gramlot`: one through the application's `node_modules`, another
 through the adapter's. `instanceof Page` fails across copies.
 
 **Fix.** Link one core checkout for both: in the application,
