@@ -2,8 +2,13 @@
 
 Document ID: **GS-005**.
 
+[Paired view](../docs_llm/005-architecture.md).
+
 <a id="gs-005-005"></a>
+
 ## 005 · Responsibility boundary
+
+Block ID: **GS-005-005**.
 
 Serverless owns JS bundling and HTML packaging, and
 the standalone WorkerHost, WorkerTransport and mount orchestration. It uses
@@ -17,7 +22,10 @@ registers its `Logic` and exposes the app before start. The Worker transport rea
 `closePage()`: it disposes the Worker transport instead of sending a close beacon.
 
 <a id="gs-005-010"></a>
+
 ## 010 · Browser/Worker profile
+
+Block ID: **GS-005-010**.
 
 One JS Page, one classic bundled Worker, one browser runtime and one HTML file.
 The module is bundled, not imported/executed by the exporter. At runtime mount
@@ -32,13 +40,19 @@ companion never runs in the Worker. A `*_aux` file is never a page. The core inl
 compiler (`binding/inline.js`) is not in the WorkerHost bundle.
 
 <a id="gs-005-015"></a>
+
 ## 015 · Data boundary
+
+Block ID: **GS-005-015**.
 
 Database and application-data import/export are excluded. The former envelope and
 complete-v1 provider are removed from the active package, not emulated.
 
 <a id="gs-005-020"></a>
+
 ## 020 · Limits
+
+Block ID: **GS-005-020**.
 
 Node-specific imports fail browser bundling.
 The single-file profile requires self-contained styling; its CSP blocks external CSS.

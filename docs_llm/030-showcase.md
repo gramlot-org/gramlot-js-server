@@ -2,7 +2,10 @@
 
 Document ID: **GS-030**.
 
+[Paired view](../docs/030-showcase.md).
+
 <a id="gs-030-005"></a>
+
 ## 005 · Open the archive
 
 Block ID: **GS-030-005**.
@@ -13,6 +16,7 @@ Inspector are retained. Original Python sources and bundled assets are included.
 The export changes the catalog URL strategy and host label, not lesson bodies.
 
 <a id="gs-030-010"></a>
+
 ## 010 · Offline boundary
 
 Block ID: **GS-030-010**.
@@ -26,6 +30,7 @@ This PoC development export does not accept core ports or complete the generic
 single-file compiler integration.
 
 <a id="gs-030-015"></a>
+
 ## 015 · Rebuild and verification
 
 Block ID: **GS-030-015**.

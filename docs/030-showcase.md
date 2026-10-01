@@ -2,7 +2,10 @@
 
 Document ID: **GS-030**.
 
+[Paired view](../docs_llm/030-showcase.md).
+
 <a id="gs-030-005"></a>
+
 ## 005 · Open the archive
 
 Block ID: **GS-030-005**.
@@ -22,6 +25,7 @@ network-loaded editor/Inspector resources and enables the existing frame channel
 for related local file windows, with sender-window checks.
 
 <a id="gs-030-010"></a>
+
 ## 010 · Offline boundary
 
 Block ID: **GS-030-010**.
@@ -37,6 +41,7 @@ single-file core compiler integration and does not claim accepted core ports.
 The optional static server cannot execute Python endpoints.
 
 <a id="gs-030-015"></a>
+
 ## 015 · Rebuild and verification
 
 Block ID: **GS-030-015**.

@@ -2,22 +2,33 @@
 
 Document ID: **GS-010**.
 
+[Paired view](../docs/010-usage.md).
+
 <a id="gs-010-005"></a>
+
 ## 005 · Build
 
-Install local core, NodeJS, Serverless and Hello World npm archives in a consumer
-directory. From there run:
+Block ID: **GS-010-005**.
+
+Clone and `npm install`: `.npmrc` resolves `@jsr/genro__gramlot` 0.2.0 (JSR,
+released 2026-09-30) and `@jsr/genro__builders` from the registry. The exporter is
+not published; run it from the checkout:
 
 ```sh
-npx --no-install gramlot-serverless build node_modules/gramlot-example-app/js/pages/index.js -o dist/hello-world.html
+node src/cli.js build examples/hello-world/page.js -o build/hello-world.html
 ```
+
+Installed as a dependency, the command is `npx --no-install gramlot-serverless build`.
 
 The command takes exactly one .js or .mjs page and an .html/.htm output. It does not
 read the old TOML project format. Paths resolve against the current directory.
 Failed builds do not replace an existing output; successful writes are atomic.
 
 <a id="gs-010-010"></a>
+
 ## 010 · Author a page
+
+Block ID: **GS-010-010**.
 
 ```javascript
 import {Page as BasePage, source} from '@jsr/genro__gramlot/page';
@@ -36,7 +47,10 @@ Named logic lives in the companion `page_aux.js` beside `page.js`, which exports
 single-file CSP (GS-005-020).
 
 <a id="gs-010-015"></a>
+
 ## 015 · Open and close
+
+Block ID: **GS-010-015**.
 
 Open the output from disk. globalThis.gramlot is the started instance; its normal
 Source APIs and remoteSource operate without a server. dispose terminates its Worker.
@@ -47,6 +61,8 @@ Runtime startup errors are reported to the browser console. No database is inclu
 <a id="gs-010-030"></a>
 
 ## 030 · Export a static directory
+
+Block ID: **GS-010-030**.
 
 `buildDirectory` from `@gramlot/serverless/directory` builds several JavaScript Pages
 that open directly from disk. It requires an `index` route, absolute `.js`/`.mjs` Page
@@ -69,6 +85,8 @@ remains separate.
 <a id="gs-010-035"></a>
 
 ## 035 · Shared examples from Gramlot
+
+Block ID: **GS-010-035**.
 
 Serverless packages JavaScript pages for a browser Worker without a server.
 
@@ -95,13 +113,18 @@ See the [Gramlot guide](https://github.com/gramlot-org/gramlot/blob/main/docs/pu
 
 
 <a id="gs-010-040"></a>
+
 ## 040 · Development standalone ownership
+
+Block ID: **GS-010-040**.
 
 Serverless owns WorkerHost, WorkerTransport and standalone startup, including local
 export asset resolution and the companion module URL. CSS links and Logic
 registration belong to the core `PageBootstrap`. Serverless consumes the shared core
 Host through `@jsr/genro__gramlot/host`. It requires core 0.2.0
-(`@jsr/genro__gramlot >=0.2.0`), not yet published. Local verification links the
-core checkout with `npm install --no-save @jsr/genro__gramlot@file:../gramlot/js`.
-The published 0.1.x archives remain unchanged. There is no compatibility wrapper for
-the former core standalone entries.
+(`@jsr/genro__gramlot >=0.2.0`), published on JSR on 2026-09-30 and installed from
+the registry by `npm install`. Verification against the core `main` branch links a
+checkout beside this repository with
+`npm install --no-save @jsr/genro__gramlot@file:../gramlot/js`; the CI job
+`core main` does the same. The 0.1.x archives remain unchanged. There is no
+compatibility wrapper for the former core standalone entries.
