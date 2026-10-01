@@ -2,6 +2,11 @@
 
 Document ID: **GS-030**.
 
+Removed on 2026-10-01: `showcase.zip` and `examples/showcase/` were built from
+gramlot-poc with APIs the 0.2.0 core removed, and no test ran them. They remain in
+the history up to commit `9cbbd11` (`serverless/showcase.zip`,
+`serverless/examples/showcase/`). This note records them; it is not a guide.
+
 [Paired view](../../../docs_llm/internal/serverless/030-showcase.md).
 
 <a id="gs-030-005"></a>
