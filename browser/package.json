@@ -1,9 +1,15 @@
 {
   "name": "@gramlot/gramlot-browser",
-  "version": "0.0.0-dev.1",
-  "type": "module",
+  "version": "0.2.1",
   "description": "Gramlot exporter: pages as one HTML file or a static directory, run in a browser Web Worker",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gramlot-org/gramlot-js-server.git",
+    "directory": "browser"
+  },
+  "homepage": "https://gramlot-js-server.readthedocs.io/",
+  "type": "module",
   "bin": {
     "gramlot-browser": "./src/cli.js"
   },
