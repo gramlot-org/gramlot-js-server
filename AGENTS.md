@@ -10,10 +10,10 @@ Follow ../gramlot/AGENTS.md and its constitution for framework matters.
   It owns JS bundling, HTML and directory packaging, `WorkerHost`,
   `WorkerTransport` and the standalone startup. It does not own Gramlot Source,
   Data Bags, Host or the browser runtime; `WorkerHost` delegates Page execution
-  to the core Host through `@jsr/genro__gramlot/host`.
-- The core is `@jsr/genro__gramlot >=0.2.0`, installed from the JSR registry by
+  to the core Host through `@gramlot/gramlot/host`.
+- The core is `@gramlot/gramlot >=0.2.0`, installed from the JSR registry by
   `npm install`. Verification against the core `main` branch links a checkout with
-  `npm install --no-save @jsr/genro__gramlot@file:../gramlot/js`. Never save a
+  `npm install --no-save @gramlot/gramlot@file:../gramlot/js`. Never save a
   local path in `package.json`; never copy the framework into this repository.
 - Never ship a substitute runtime, a manual application DOM, an eval bootstrap
   or a fallback compiler. Fail if an accepted integration is unavailable.

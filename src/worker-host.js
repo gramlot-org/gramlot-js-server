@@ -1,4 +1,4 @@
-import {Host, PageNotFound} from '@jsr/genro__gramlot/host';
+import {Host, PageNotFound} from '@gramlot/gramlot/host';
 
 /** One JS Page hosted inside a dedicated Worker; execution belongs to Host.
  * aux is the URL that names the page companion (foo_aux.js), or null. The Worker

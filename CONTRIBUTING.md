@@ -10,7 +10,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-docs.txt   # docu
 
 To test against the core `main` branch, place a `gramlot` checkout beside this
 repository, build its runtime (`npm --prefix js install && npm --prefix js run build`)
-and link it: `npm install --no-save @jsr/genro__gramlot@file:../gramlot/js`.
+and link it: `npm install --no-save @gramlot/gramlot@file:../gramlot/js`.
 The link is not saved in `package.json`.
 
 ## Checks before a commit

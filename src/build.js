@@ -1,7 +1,7 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {checkPage, companion, companionBundle, workerBundle} from './bundles.js';
-import {HtmlBuilder} from '@jsr/genro__builders';
+import {HtmlBuilder} from '@genrojs/builders';
 import {writeFile, mkdir, rename, rm} from 'node:fs/promises';
 import {dirname, resolve, extname, basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -42,7 +42,7 @@ mount({workerUrl, modules}).then(app => { globalThis.gramlot=app; })
     }})).outputFiles[0].text;
     // Prevent the HTML parser from ending the script inside bundled string data.
     const script = runtime.replace(/<\/script/gi, '<\\/script');
-    const notices = await runtimeNotices(require.resolve('@jsr/genro__gramlot/runtime'));
+    const notices = await runtimeNotices(require.resolve('@gramlot/gramlot/runtime'));
     const document = new HtmlBuilder();
     const html = document.root.html({lang: 'en'});
     const head = html.head();

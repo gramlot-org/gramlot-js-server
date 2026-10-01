@@ -14,8 +14,8 @@ Here: what is specific to the export.
 Block ID: **GS-115-005**.
 
 - `.js`/`.mjs` module exporting `class Page extends Page` of
-  `@jsr/genro__gramlot/page`; otherwise `Page modules must export a subclass of Page`.
-- Same core name as the exporter (`@jsr/genro__gramlot`, mapped by `.npmrc`);
+  `@gramlot/gramlot/page`; otherwise `Page modules must export a subclass of Page`.
+- Same core name as the exporter (`@gramlot/gramlot`, from npm);
   another name bundles a second core and fails with the same error.
 - `<name>_aux.js` beside `<name>.js` is the companion; never a page
   (`A *_aux file is a page companion, not a page`).

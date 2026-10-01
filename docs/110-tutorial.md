@@ -46,7 +46,7 @@ in JavaScript. Data-elements take one object; the greeting is a named method of
 the companion, because the single-file export allows no inline code:
 
 ```javascript
-import {Page as BasePage} from '@jsr/genro__gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     static title = 'Hello';

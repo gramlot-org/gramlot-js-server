@@ -30,7 +30,7 @@ npm install
 Block ID: **GS-110-010**.
 
 ```javascript
-import {Page as BasePage} from '@jsr/genro__gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     static title = 'Hello';

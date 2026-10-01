@@ -17,7 +17,7 @@ async function fixture(t) {
 test('exports a self-contained shell through HtmlBuilder without running the Page', async t => {
     const {folder, output} = await fixture(t);
     const page = join(folder, 'page.js');
-    await writeFile(page, `import {Page as BasePage} from '@jsr/genro__gramlot/page';
+    await writeFile(page, `import {Page as BasePage} from '@gramlot/gramlot/page';
 throw new Error('must run only in the Worker');
 export class Page extends BasePage { main(root) { root.h1('Hello'); } }`);
     const info = await build({page, output});

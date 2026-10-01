@@ -1,4 +1,4 @@
-import {Page as BasePage} from '@jsr/genro__gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 /** A page whose formula runs the named logic of its companion page_aux.js. */
 export class Page extends BasePage {

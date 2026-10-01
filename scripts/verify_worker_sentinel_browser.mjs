@@ -11,7 +11,7 @@ import {build} from '../src/build.js';
 const [playwrightEntry, engineName = 'chromium', executablePath] = process.argv.slice(2);
 if (!playwrightEntry) throw new Error('Usage: verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]');
 // The fixture exists only in a core checkout linked with npm install --no-save.
-const core = await realpath(fileURLToPath(new URL('../node_modules/@jsr/genro__gramlot', import.meta.url)));
+const core = await realpath(fileURLToPath(new URL('../node_modules/@gramlot/gramlot', import.meta.url)));
 const page = join(core, 'tests/fixtures/logic/avvio.js');
 const engine = (await import(pathToFileURL(resolve(playwrightEntry))))[engineName];
 const folder = await mkdtemp(join(tmpdir(), 'gramlot-serverless-sentinel-'));

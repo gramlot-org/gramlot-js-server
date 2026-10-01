@@ -46,7 +46,7 @@ Block ID: **GS-120-010**.
 | `assets` | array | `[]` | `{source, target}` pairs: `source` is an absolute file, `target` a relative path (`^[A-Za-z0-9._/-]+$`, no leading `/`, no `.` or `..` segment) that must not collide with a generated file or another asset. Only listed assets are copied. |
 
 Every page, and the exporter itself, must resolve the same installation of
-`@jsr/genro__gramlot`; otherwise `All Pages must resolve the same Gramlot core
+`@gramlot/gramlot`; otherwise `All Pages must resolve the same Gramlot core
 installation` or `Pages and Serverless must resolve the same Gramlot core
 installation`. It returns `{output, routes}`.
 

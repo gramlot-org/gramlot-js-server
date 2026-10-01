@@ -1,4 +1,4 @@
-import {Page as BasePage} from '@jsr/genro__gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 /** The Gramlot family example (core guide GC-055) for the standalone export:
  * the greeting is a named method of the companion page_aux.js, because the

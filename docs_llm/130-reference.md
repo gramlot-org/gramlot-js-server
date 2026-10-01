@@ -14,7 +14,7 @@ Block ID: **GS-130-005**.
 `@gramlot/serverless` → `build`; `/directory` → `buildDirectory`; `/standalone` →
 `mount` (window); `/worker-host` → `WorkerHost` (Worker). Command
 `gramlot-serverless build PAGE.js -o OUTPUT.html` (`node src/cli.js`). Dependencies
-`@jsr/genro__gramlot >=0.2.0`, `@jsr/genro__builders >=0.4.0`, `esbuild`.
+`@gramlot/gramlot >=0.2.0`, `@genrojs/builders >=0.4.0`, `esbuild`.
 
 <a id="gs-130-010"></a>
 

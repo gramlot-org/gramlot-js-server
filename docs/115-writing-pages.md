@@ -15,13 +15,12 @@ This guide covers what is specific to the standalone export.
 Block ID: **GS-115-005**.
 
 - A page is a `.js` or `.mjs` module that exports `class Page` extending the core
-  `Page` from `@jsr/genro__gramlot/page`. Any other export, or a module whose
+  `Page` from `@gramlot/gramlot/page`. Any other export, or a module whose
   `Page` does not extend the core class, fails at start with
   `Page modules must export a subclass of Page`.
 - The page imports the core under the same name the exporter uses,
-  `@jsr/genro__gramlot`: the `.npmrc` of this repository maps the `@jsr` scope to
-  `npm.jsr.io`. A page that imports another name of the same core bundles a second
-  copy, and the start fails with the error above.
+  `@gramlot/gramlot`, installed from npm. A page that imports another name of the
+  same core bundles a second copy, and the start fails with the error above.
 - `<name>_aux.js` beside `<name>.js` is the companion. A `*_aux.js` file is never
   accepted as a page: `A *_aux file is a page companion, not a page`.
 - Imports must be browser-compatible. The page and its imports are bundled for the

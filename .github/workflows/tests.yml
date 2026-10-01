@@ -24,7 +24,7 @@ jobs:
       - name: Install the released core and the exporter dependencies
         run: npm install --no-fund --no-audit
       - name: Show the core version
-        run: node -p "require('./node_modules/@jsr/genro__gramlot/package.json').version"
+        run: node -p "require('./node_modules/@gramlot/gramlot/package.json').version"
       - name: Test with coverage
         run: npm run test:coverage
       - name: Install Playwright Chromium
@@ -77,7 +77,7 @@ jobs:
       - name: Install the exporter dependencies and link the core
         run: |
           npm install --no-fund --no-audit
-          npm install --no-save --no-fund --no-audit @jsr/genro__gramlot@file:../gramlot/js
+          npm install --no-save --no-fund --no-audit @gramlot/gramlot@file:../gramlot/js
       - name: Test
         run: npm test
       - name: Install Playwright Chromium

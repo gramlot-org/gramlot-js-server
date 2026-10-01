@@ -1,4 +1,4 @@
-import {PageBootstrap} from '@jsr/genro__gramlot';
+import {PageBootstrap} from '@gramlot/gramlot';
 import {WorkerTransport} from './worker-transport.js';
 
 function exportRoot(assetRoot) {

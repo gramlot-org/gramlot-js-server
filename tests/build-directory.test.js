@@ -11,7 +11,7 @@ async function fixture(t) {
     const folder = await mkdtemp(join(root, 'tests/.directory-'));
     t.after(() => rm(folder, {recursive: true, force: true}));
     const page = join(folder, 'page.js');
-    await writeFile(page, `import {Page as BasePage} from '@jsr/genro__gramlot/page';
+    await writeFile(page, `import {Page as BasePage} from '@gramlot/gramlot/page';
 throw new Error('Page code must run only inside the Worker');
 export class Page extends BasePage { main(root) { root.h1('Directory page'); } }`);
     return {folder, page, output: join(folder, 'dist')};

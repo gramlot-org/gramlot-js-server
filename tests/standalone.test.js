@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {Page, source} from '@jsr/genro__gramlot/page';
+import {Page, source} from '@gramlot/gramlot/page';
 import {WorkerHost} from '../src/worker-host.js';
 import {WorkerTransport} from '../src/worker-transport.js';
-import {Gramlot} from '@jsr/genro__gramlot';
+import {Gramlot} from '@gramlot/gramlot';
 import {mount} from '../src/standalone.js';
 
 // Browser-like endpoints with structured cloning; actual Worker execution is

@@ -66,7 +66,7 @@ Block ID: **GS-125-015**.
 Block ID: **GS-125-020**.
 
 1. `npm test` and `scripts/verify_quickstart_browser.mjs` pass with the core
-   version you ship (`node -p "require('@jsr/genro__gramlot/package.json').version"`).
+   version you ship (`node -p "require('@gramlot/gramlot/package.json').version"`).
 2. Every `Page.css` URL of a directory export is root-relative and listed in
    `assets`; the single-file pages declare none.
 3. All logic is named: no `formula`, `script`, `==`, `action` or

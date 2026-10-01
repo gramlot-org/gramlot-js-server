@@ -25,8 +25,7 @@ pages use [gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn).
 
 ## Quick start
 
-Install, with the released core 0.2.0 from the JSR registry (the repository
-`.npmrc` maps the `@jsr` scope to `npm.jsr.io`). Node 22 or later:
+Install, with the released core `@gramlot/gramlot` 0.2.1 from npm. Node 22 or later:
 
 ```sh
 git clone https://github.com/gramlot-org/gramlot-serverless.git
@@ -38,7 +37,7 @@ A page is one module with its companion beside it. This is
 [`examples/quickstart/page.js`](examples/quickstart/page.js):
 
 ```javascript
-import {Page as BasePage} from '@jsr/genro__gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     static title = 'Hello';
@@ -101,7 +100,7 @@ at every keystroke. The file makes no network request. This example is run by
 
 | | Verified |
 | --- | --- |
-| Gramlot core | `@jsr/genro__gramlot` 0.2.0 (JSR, released 2026-09-30); `@jsr/genro__builders` 0.4.0 |
+| Gramlot core | `@gramlot/gramlot` 0.2.0 (JSR, released 2026-09-30); `@genrojs/builders` 0.4.0 |
 | Node | 22 (CI), 23.11 (local) |
 | Browsers | Chromium 153.0.8010.12 (CI and local, headless); Playwright WebKit 26.6 (2026-09-30); Firefox 155.0 (owner run, 2026-09-30). WebKit is not Safari; Safari is not verified. |
 

@@ -15,7 +15,7 @@ Block ID: **GS-140-005**.
 
 - `Page modules must export a subclass of Page`: no `Page` export, or a second core
   copy (page imports `@genro/gramlot` or `@gramlot/native-html`, or two
-  installations linked) → import `@jsr/genro__gramlot/page`, one installation.
+  installations linked) → import `@gramlot/gramlot/page`, one installation.
 - `Standalone module not provided: /<name>_aux.js`: custom `mount` without
   `modules` → pass the companion URL.
 - `/<name>_aux.js: import failed: <reason>`: the companion throws or has no valid

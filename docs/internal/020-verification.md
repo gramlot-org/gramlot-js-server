@@ -75,8 +75,8 @@ exporter tests pass. These results do not imply publication of the new packages.
 Block ID: **GS-020-020**.
 
 Local verification, 2026-09-30, with the core branch `wf/gramlot-0-2-0-binding`
-(`cb46c20`) linked in place of `@jsr/genro__gramlot`, `@jsr/genro__builders` 0.4.0 and
-`@jsr/genro__bag` 0.10.0: `npm test` passes (19 tests). The sentinel check passes in
+(`cb46c20`) linked in place of `@gramlot/gramlot`, `@genrojs/builders` 0.4.0 and
+`@genrojs/bag` 0.10.0: `npm test` passes (19 tests). The sentinel check passes in
 Chromium 153.0.8010.12 and Playwright WebKit 26.6 (window sentinel 1, Worker sentinel
 0, altered script blocked). `verify_native_html_browser.mjs` passes for Hello World
 and source-live in both engines. The core `scripts/verify_worker_host_browser.mjs`
@@ -90,7 +90,7 @@ that date; these results did not imply publication.
 Block ID: **GS-020-025**.
 
 Verification with the released core, 2026-10-01, in a clean clone with
-`@jsr/genro__gramlot` 0.2.0 and `@jsr/genro__builders` 0.4.0 installed from the
+`@gramlot/gramlot` 0.2.0 and `@genrojs/builders` 0.4.0 installed from the
 registry: `npm test` passes (19 tests); `verify_native_html_browser.mjs` passes for
 Hello World and source-live in headless Chromium 153.0.8010.12. With the core
 `main` checkout (`93cacf1`) linked in place of the registry package: the same 19

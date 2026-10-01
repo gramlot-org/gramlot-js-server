@@ -1,7 +1,7 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {checkPage, companion, companionBundle, workerBundle} from './bundles.js';
-import {HtmlBuilder} from '@jsr/genro__builders';
+import {HtmlBuilder} from '@genrojs/builders';
 import {copyFile, mkdir, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
@@ -121,15 +121,15 @@ export async function buildDirectory({pages, output, assets = []}) {
         await regularFile(page, `Page for ${route}`);
         const fromPage = createRequire(page);
         const resolved = {
-            entry: await realpath(fromPage.resolve('@jsr/genro__gramlot')),
-            runtime: await realpath(fromPage.resolve('@jsr/genro__gramlot/runtime')),
+            entry: await realpath(fromPage.resolve('@gramlot/gramlot')),
+            runtime: await realpath(fromPage.resolve('@gramlot/gramlot/runtime')),
         };
         if (core && (core.entry !== resolved.entry || core.runtime !== resolved.runtime)) {
             throw new Error('All Pages must resolve the same Gramlot core installation');
         }
         core = resolved;
     }
-    if (core.entry !== await realpath(fromServerless.resolve('@jsr/genro__gramlot'))) {
+    if (core.entry !== await realpath(fromServerless.resolve('@gramlot/gramlot'))) {
         throw new Error('Pages and Serverless must resolve the same Gramlot core installation');
     }
     await regularFile(join(dirname(core.runtime), 'runtime-notices.json'), 'Runtime notices');

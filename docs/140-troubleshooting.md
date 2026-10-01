@@ -16,7 +16,7 @@ Block ID: **GS-140-005**.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `Page modules must export a subclass of Page` | The module exports no `Page`, or its `Page` extends a second copy of the core: the page imports the core under another name (`@genro/gramlot`, `@gramlot/native-html`) than the exporter (`@jsr/genro__gramlot`), or two installations are linked | Import `@jsr/genro__gramlot/page` in the page; keep one core installation in `node_modules` |
+| `Page modules must export a subclass of Page` | The module exports no `Page`, or its `Page` extends a second copy of the core: the page imports the core under another name (`@genro/gramlot`, `@gramlot/native-html`) than the exporter (`@gramlot/gramlot`), or two installations are linked | Import `@gramlot/gramlot/page` in the page; keep one core installation in `node_modules` |
 | `Standalone module not provided: /<name>_aux.js` | A custom shell called `mount` without the companion in `modules` | Pass `modules: {'/<name>_aux.js': url}`; the exported documents do this themselves |
 | `/<name>_aux.js: import failed: <reason>` | The companion throws at import, or has no valid `Logic` class | Fix the companion; it must `export class Logic` with plain methods |
 | `Standalone Page.css must be an array of strings` | `static css` is not an array of strings | Declare `static css = ['/theme.css']` or leave it out |
@@ -69,5 +69,5 @@ Block ID: **GS-140-020**.
 | `Output must be an HTML file` | `-o` without `.html`/`.htm` | Name the output `.html` |
 | esbuild `Could not resolve "node:fs"` (or another Node module) | The page or an import needs Node | Keep page imports browser-compatible; the previous output is untouched |
 | `Output directory already exists: <path>` | `buildDirectory` never replaces a directory | Remove or rename it first |
-| `All Pages must resolve the same Gramlot core installation`, `Pages and Serverless must resolve the same Gramlot core installation` | Pages in different folders resolve different `node_modules`, or the core is linked twice | One `node_modules` with one `@jsr/genro__gramlot` for the pages and the exporter |
+| `All Pages must resolve the same Gramlot core installation`, `Pages and Serverless must resolve the same Gramlot core installation` | Pages in different folders resolve different `node_modules`, or the core is linked twice | One `node_modules` with one `@gramlot/gramlot` for the pages and the exporter |
 | `Invalid asset target`, `Asset target conflicts with generated output` | A target with `/` first, `.`/`..`, forbidden characters, or under `assets/workers/` or over a generated file | Use a relative target such as `themes/base/theme.css` |

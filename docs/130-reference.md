@@ -21,8 +21,8 @@ repository checkout) declares four entries, Node 22 or later:
 | `@gramlot/serverless/worker-host` | `WorkerHost` | Web Worker |
 
 Command: `gramlot-serverless build PAGE.js -o OUTPUT.html` (`bin` of the package;
-from the checkout, `node src/cli.js`). Dependencies: `@jsr/genro__gramlot >=0.2.0`,
-`@jsr/genro__builders >=0.4.0`, `esbuild`.
+from the checkout, `node src/cli.js`). Dependencies: `@gramlot/gramlot >=0.2.0`,
+`@genrojs/builders >=0.4.0`, `esbuild`.
 
 <a id="gs-130-010"></a>
 
