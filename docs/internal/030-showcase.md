@@ -2,7 +2,7 @@
 
 Document ID: **GS-030**.
 
-[Paired view](../docs_llm/030-showcase.md).
+[Paired view](../../docs_llm/internal/030-showcase.md).
 
 <a id="gs-030-005"></a>
 

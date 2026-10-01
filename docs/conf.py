@@ -9,7 +9,7 @@ release = json.loads((Path(__file__).resolve().parents[1] / "package.json").read
 version = release
 extensions = ["myst_parser"]
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
-exclude_patterns = ["_build", ".DS_Store"]
+exclude_patterns = ["_build", ".DS_Store", "internal"]  # internal notes stay out of the published build
 html_theme = "sphinx_rtd_theme"
 html_logo = "_static/gramlot-logo.png"
 
