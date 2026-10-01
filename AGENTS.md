@@ -45,7 +45,7 @@ The repository is an npm workspace with two packages:
   database adapters.
 - The README quick start is the page in `server/test/fixtures/quickstart/`,
   executed by `server/test/quickstart.test.mjs`; change both together.
-- Before a commit: `npm run test:server -w server` and, from `server/`,
+- Before a commit: `npm test -w server` and, from `server/`,
   `bun test test/server.test.mjs test/quickstart.test.mjs`; for behavior
   changes also the browser harness `server/test/browser.mjs`.
 
@@ -72,10 +72,11 @@ The repository is an npm workspace with two packages:
 
 The owner approved JavaScript page authoring for the local PoC on 2026-09-16,
 authorized the public `gramlot-js-server` repository on 2026-09-17 and accepted
-the clean-core native 0.1.0 profile on 2026-09-24. `server/src/start.mjs` and
-GN-005 (`docs/internal/005-node-host.md`) record the earlier sibling-PoC
-server; GN-010 (`docs/internal/010-native-html.md`) records the native profile
-and its verification. Neither overrides the native Host/Page contract.
+the clean-core native 0.1.0 profile on 2026-09-24. GN-005
+(`docs/internal/005-node-host.md`) records the earlier sibling-PoC server, whose
+code was removed on 2026-10-01 and remains in the history before that date;
+GN-010 (`docs/internal/010-native-html.md`) records the native profile and its
+verification. Neither overrides the native Host/Page contract.
 
 The Browser/Worker profile started in `gramlot-minimal` on 2026-09-24 (core
 constitution amendment 11.46 assigns the standalone Worker transport and

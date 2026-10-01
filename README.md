@@ -151,7 +151,7 @@ in CI.
 
 ```sh
 npm install
-npm run test:server -w server                                     # Node contract and quick-start tests
+npm test -w server                                     # Node contract and quick-start tests
 (cd server && bun test test/server.test.mjs test/quickstart.test.mjs)   # the same on Bun
 npm test -w browser                                            # exporter tests
 python scripts/check_docs.py                                      # paired guides and Sphinx build
@@ -160,5 +160,5 @@ python scripts/check_docs.py                                      # paired guide
 CI runs both packages against the released core and, as an informational job,
 against the core's `main` checkout, and builds the documentation; coverage goes
 to Codecov. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
-The historical PoC server (`server/src/start.mjs`) and the internal notes are
-described in [docs/internal/](docs/internal/).
+The internal notes, including the history of the earlier PoC server, are in
+[docs/internal/](docs/internal/).

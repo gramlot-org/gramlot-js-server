@@ -16,7 +16,7 @@ The link is not saved in `package.json`.
 ## Checks before a commit
 
 ```sh
-npm run test:server -w server            # Node contract and quick-start tests
+npm test -w server                       # Node contract and quick-start tests
 (cd server && bun test test/server.test.mjs test/quickstart.test.mjs)   # the same on Bun
 npm test -w browser                      # exporter tests
 npm run test:coverage -w server          # lcov in server/coverage/
@@ -31,9 +31,6 @@ node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs 
 node scripts/verify_export_browser.mjs <built.html> ../node_modules/playwright/index.mjs - '<h1 text>' [method]
 node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index.mjs   # linked core only
 ```
-
-`npm test -w server` also runs the historical PoC tests, which need the sibling
-`gramlot-poc` checkout.
 
 ## Commits and branches
 

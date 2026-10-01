@@ -5,9 +5,7 @@
   "description": "Gramlot JavaScript server integration for Node.js and Bun",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "node src/start.mjs",
-    "test": "node --test test/*.test.mjs",
-    "test:server": "node --test test/server.test.mjs test/quickstart.test.mjs",
+    "test": "node --test test/server.test.mjs test/quickstart.test.mjs",
     "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs"
   },
   "engines": {
