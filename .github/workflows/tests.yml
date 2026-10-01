@@ -53,7 +53,7 @@ jobs:
       - name: Node contract tests with coverage
         run: npm run test:coverage
       - name: Bun contract tests
-        run: bun test test/native.test.mjs
+        run: bun test test/native.test.mjs test/quickstart.test.mjs
       - name: Upload coverage
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
