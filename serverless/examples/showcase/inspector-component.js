@@ -1,0 +1,76 @@
+// Copyright 2026 Softwell S.r.l. - SPDX-License-Identifier: Apache-2.0
+import {registerComponentCollection, getCollection} from 'gramlot-dom';
+import {fromTytx} from 'genro-tytx';
+import {mountInspector} from './inspector.js';
+import {INSPECTOR_RECIPE, INSPECTOR_THEME_CSS} from './embedded-assets.js';
+
+/** Inspector owns its UI, while application owns the inspected live Bags. */
+export class GramlotInspector extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({mode: 'open'});
+        this.application = null;
+        this.tool = null;
+        this.disposed = false;
+    }
+    async initialize() {
+        const embedded = this.getAttribute('presentation') === 'embedded';
+        this.hidden = embedded;
+        const recipe = INSPECTOR_RECIPE;
+        if (this.disposed || this.application._disposed) return;
+        this.tool = mountInspector(this.shadowRoot, fromTytx(recipe, 'json'), this.application, {
+            shortcuts: false,
+            origins: this.origins,
+        });
+        if (!this.tool) return;
+        this.shadowRoot.querySelector('[data-inspector="toggle"]').hidden = true;
+        const style = this.ownerDocument.createElement('style');
+        style.textContent = INSPECTOR_THEME_CSS;
+        this.shadowRoot.append(style);
+        let lastOpened = this.opened;
+        this.onState = () => {
+            if (this.opened === lastOpened) return;
+            lastOpened = this.opened;
+            if (embedded) this.hidden = !lastOpened;
+            this.dispatchEvent(new CustomEvent('gramlot-inspector-change', {
+                detail: {opened: lastOpened}, bubbles: true, composed: true,
+            }));
+        };
+        this.tool.app.builder.data.subscribe('inspector-component-state', {any: this.onState});
+    }
+    get opened() { return Boolean(this.tool?.app.builder.data.getItem('opened')); }
+    set opened(value) {
+        if (this.tool && !this.disposed) this.tool.app.live(() => this.tool.app.builder.data.setItem('opened', Boolean(value)));
+    }
+    setOrigins(origins) {
+        this.origins = origins;
+        this.tool?.setOrigins(origins);
+    }
+    disconnectedCallback() { this.dispose(); }
+    dispose() {
+        if (this.disposed) return;
+        this.disposed = true;
+        this.tool?.app.builder.data.unsubscribe('inspector-component-state', {any: true});
+        this.tool?.dispose();
+    }
+}
+registerComponentCollection('inspector', {
+    components:[{name:'inspector', tag:'gramlot-inspector', capabilities:['application-tool']}],
+    defineComponents() {
+        if (!customElements.get('gramlot-inspector')) customElements.define('gramlot-inspector', GramlotInspector);
+    },
+});
+// The tool host explicitly imports this module; preserve its immediate activation.
+getCollection('inspector').defineComponents();
+export function createInspector(application, presentation = 'floating', origins = {}) {
+    const component = application.target.root.ownerDocument.createElement('gramlot-inspector');
+    component.application = application;
+    component.setOrigins(origins);
+    component.setAttribute('presentation', presentation);
+    if (presentation === 'embedded') {
+        component.hidden = true;
+        component.setAttribute('role', 'region');
+        component.setAttribute('aria-label', 'Inspector');
+    }
+    return component;
+}
