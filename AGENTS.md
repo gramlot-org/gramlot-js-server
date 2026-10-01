@@ -7,7 +7,7 @@ Follow ../gramlot/AGENTS.md and its constitution for framework matters.
   Gramlot 0.2.0 minimal Host contract (`resolvePage`, `resolveResources`,
   `openPage`) and owns only HTTP routing, payload parsing, response mapping and
   request identity. Page execution, registrations and TTL stay in the core Host.
-- `@gramlot/native-html` is a peer dependency, linked from a core checkout with
+- `@gramlot/gramlot` is a peer dependency, linked from a core checkout with
   `npm install --no-save ../gramlot/js`. Never save a local path in
   `package.json`; never copy the framework into this repository.
 - Use `node:http` on Node and the native `fetch` server on Bun; no Express, no

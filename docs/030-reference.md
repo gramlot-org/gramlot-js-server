@@ -13,11 +13,11 @@ Block ID: **GN-130-005**.
 | `gramlot-js-server/native` | `startNativeServer(options)` | Node.js 22 or later, `node:http` |
 | `gramlot-js-server/bun` | `startNativeServer(options)` | Bun, `Bun.serve`; throws `The Bun host requires Bun` elsewhere |
 
-`@gramlot/native-html` is a peer dependency: the application and the adapter
+`@gramlot/gramlot` is a peer dependency: the application and the adapter
 resolve the same copy of the core, or `instanceof Page` fails
 ([Troubleshooting](040-troubleshooting.md)). The Page base class, `source`,
-`Host` and `FileHost` are the core's: `@gramlot/native-html/page` and
-`@gramlot/native-html/server`.
+`Host` and `FileHost` are the core's: `@gramlot/gramlot/page` and
+`@gramlot/gramlot/server`.
 
 <a id="gn-130-010"></a>
 

@@ -26,7 +26,7 @@ as one HTML file or a static folder.
 ## Quick start
 
 Gramlot 0.2.0 is released on PyPI and JSR. The core's npm package
-`@gramlot/native-html`, which this adapter takes as a peer dependency, is not
+`@gramlot/gramlot`, which this adapter takes as a peer dependency, is not
 published yet: link a core checkout and this adapter, both cloned beside your
 application.
 
@@ -40,7 +40,7 @@ mkdir pages
 `pages/index.js`, the page served at `/`:
 
 ```js
-import {Page as BasePage} from '@gramlot/native-html/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     static title = 'Hello';
@@ -107,7 +107,7 @@ Node and Bun; the browser behavior was verified with Chromium.
 
 | | Verified |
 | --- | --- |
-| Gramlot | 0.2.0 (core `main`, linked as `@gramlot/native-html`) |
+| Gramlot | 0.2.0 (core `main`, linked as `@gramlot/gramlot`) |
 | Runtimes | Node.js 22 (CI) and 23.11, Bun 1.3.14 |
 | Browsers | Chromium 153, WebKit 26.6, Firefox 155 (core qualification of 0.2.0, strict and permissive CSP, Node and Bun) |
 

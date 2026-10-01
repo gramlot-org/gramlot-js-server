@@ -12,7 +12,7 @@ test `test/quickstart.test.mjs` of this repository in CI.
 
 Block ID: **GN-110-005**.
 
-Gramlot 0.2.0 is released, but the core's npm package `@gramlot/native-html` is
+Gramlot 0.2.0 is released, but the core's npm package `@gramlot/gramlot` is
 not published on any registry. The application links a core checkout and this
 adapter, both placed beside it:
 
@@ -35,7 +35,7 @@ hello/
     index_aux.js    its named logic
     index.css       its stylesheet
   node_modules/
-    @gramlot/native-html -> ../gramlot/js
+    @gramlot/gramlot -> ../gramlot/js
     gramlot-js-server    -> ../gramlot-js-server
 ```
 
@@ -49,7 +49,7 @@ Block ID: **GN-110-010**.
 calling element methods on `root`. Attributes go in one object, after the text.
 
 ```js
-import {Page as BasePage} from '@gramlot/native-html/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     static title = 'Hello';

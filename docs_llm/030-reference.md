@@ -10,9 +10,9 @@ Block ID: **GN-130-005**.
 
 `gramlot-js-server/native` → `startNativeServer` (Node 22+, `node:http`);
 `gramlot-js-server/bun` → `startNativeServer` (Bun; elsewhere throws `The Bun
-host requires Bun`). `@gramlot/native-html` is a peer: one copy for adapter and
-pages. `Page`, `source`: `@gramlot/native-html/page`; `Host`, `FileHost`:
-`@gramlot/native-html/server`.
+host requires Bun`). `@gramlot/gramlot` is a peer: one copy for adapter and
+pages. `Page`, `source`: `@gramlot/gramlot/page`; `Host`, `FileHost`:
+`@gramlot/gramlot/server`.
 
 <a id="gn-130-010"></a>
 

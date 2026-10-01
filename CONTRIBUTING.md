@@ -7,7 +7,7 @@ npm install --no-save ../gramlot/js    # core checkout beside this repository
 python3 -m venv .venv && .venv/bin/pip install -r requirements-docs.txt   # documentation only
 ```
 
-`@gramlot/native-html` is the core `js/` package and is not published on any
+`@gramlot/gramlot` is the core `js/` package and is not published on any
 registry; the local link is the only install path.
 
 ## Checks before a commit

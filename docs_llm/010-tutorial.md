@@ -11,7 +11,7 @@ executed by `test/quickstart.test.mjs` in CI.
 
 Block ID: **GN-110-005**.
 
-`@gramlot/native-html` is unpublished: link the core checkout and the adapter.
+`@gramlot/gramlot` is unpublished: link the core checkout and the adapter.
 
 ```sh
 mkdir hello && cd hello
@@ -29,7 +29,7 @@ mkdir pages
 Block ID: **GN-110-010**.
 
 ```js
-import {Page as BasePage} from '@gramlot/native-html/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 
 export class Page extends BasePage {
     static title = 'Hello';

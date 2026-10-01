@@ -41,7 +41,7 @@ server restarted, or a different owner. Reload; raise `pageTtl`; keep
 Block ID: **GN-140-020**.
 
 500 with `TypeError: Page modules must export a subclass of Page` on a page that
-extends `Page`: two copies of `@gramlot/native-html`. Link one checkout for both:
+extends `Page`: two copies of `@gramlot/gramlot`. Link one checkout for both:
 `npm install --no-save ../gramlot/js ../gramlot-js-server` in the application.
 
 <a id="gn-140-025"></a>

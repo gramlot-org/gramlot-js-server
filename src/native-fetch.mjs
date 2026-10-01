@@ -1,7 +1,7 @@
 /** Native HTML host protocol, shared by Node and Bun socket bridges. */
 import {readFile, realpath, stat} from 'node:fs/promises';
 import {isAbsolute, join, relative, sep} from 'node:path';
-import {FileHost, PageExpired, PageNotFound, SourceNotFound, HostCapacity} from '@gramlot/native-html/server';
+import {FileHost, PageExpired, PageNotFound, SourceNotFound, HostCapacity} from '@gramlot/gramlot/server';
 
 const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '_aux.js': 'text/javascript; charset=utf-8'};
 
@@ -33,7 +33,7 @@ export async function createNativeDispatch({pages, host = null, ownerForRequest 
     host ??= new FileHost(pages, options);
     const trimmed = mountPath.replace(/^\/+|\/+$/g, '');
     const prefix = trimmed ? `/${trimmed}` : '';
-    const runtime = await readFile(new URL(import.meta.resolve('@gramlot/native-html/runtime')));
+    const runtime = await readFile(new URL(import.meta.resolve('@gramlot/gramlot/runtime')));
     return {host, prefix, async fetch(request) {
         if (new URL(request.url).pathname === host.runtimeUrl) {
             if (!['GET', 'HEAD'].includes(request.method)) return new Response('Method not allowed', {status: 405});
