@@ -12,7 +12,7 @@ see `The Gramlot family
 the core and the other repositories.
 
 This repository publishes two packages: ``@gramlot/gramlot-js-server``, the
-Node.js and Bun host adapter, and ``@gramlot/gramlot-serverless``, the
+Node.js and Bun host adapter, and ``@gramlot/gramlot-browser``, the
 standalone exporter whose pages open without a server.
 
 .. toctree::
@@ -29,7 +29,7 @@ standalone exporter whose pages open without a server.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Serverless (Browser and Worker)
+   :caption: Browser (Web Worker, no server)
 
    105-introduction
    110-tutorial

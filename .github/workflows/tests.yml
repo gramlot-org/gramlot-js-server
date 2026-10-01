@@ -1,7 +1,7 @@
 name: tests
 
 # Both packages of the workspace: server/ (Node.js and Bun host adapter) and
-# serverless/ (standalone Browser/Worker exporter).
+# browser/ (exporter whose pages run in a browser Web Worker).
 
 on:
   push:
@@ -35,21 +35,21 @@ jobs:
         run: npm run test:coverage -w server
       - name: Server, Bun contract tests
         working-directory: server
-        run: bun test test/native.test.mjs test/quickstart.test.mjs
-      - name: Serverless, tests with coverage
-        run: npm run test:coverage -w serverless
+        run: bun test test/server.test.mjs test/quickstart.test.mjs
+      - name: Browser, tests with coverage
+        run: npm run test:coverage -w browser
       - name: Install Playwright Chromium
         run: |
           npm install --no-save --no-fund --no-audit playwright
           npx playwright install --with-deps chromium
-      - name: Serverless, browser check of exported files
-        working-directory: serverless
+      - name: Browser, check of exported files in Chromium
+        working-directory: browser
         run: |
           mkdir -p build
           node src/cli.js build examples/hello-world/page.js -o build/hello-world.html
           node src/cli.js build examples/source-live/page.js -o build/source-live.html
-          node scripts/verify_native_html_browser.mjs build/hello-world.html ../node_modules/playwright/index.mjs - 'Hello World'
-          node scripts/verify_native_html_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
+          node scripts/verify_export_browser.mjs build/hello-world.html ../node_modules/playwright/index.mjs - 'Hello World'
+          node scripts/verify_export_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
           node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs
       - name: Upload server coverage
         if: ${{ !cancelled() }}
@@ -60,13 +60,13 @@ jobs:
           flags: server
           disable_search: true
           fail_ci_if_error: false
-      - name: Upload serverless coverage
+      - name: Upload browser coverage
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
           use_oidc: true
-          files: serverless/coverage/lcov.info
-          flags: serverless
+          files: browser/coverage/lcov.info
+          flags: browser
           disable_search: true
           fail_ci_if_error: false
 
@@ -104,22 +104,22 @@ jobs:
           npm install --no-fund --no-audit
           npm install --no-save --no-fund --no-audit @gramlot/gramlot@file:../gramlot/js
       - name: Server, Node contract tests
-        run: npm run test:native -w server
+        run: npm run test:server -w server
       - name: Server, Bun contract tests
         working-directory: gramlot-js-server/server
-        run: bun test test/native.test.mjs test/quickstart.test.mjs
-      - name: Serverless, tests
-        run: npm test -w serverless
+        run: bun test test/server.test.mjs test/quickstart.test.mjs
+      - name: Browser, tests
+        run: npm test -w browser
       - name: Install Playwright Chromium
         run: |
           npm install --no-save --no-fund --no-audit playwright
           npx playwright install --with-deps chromium
-      - name: Serverless, browser checks, including the sentinel fixture of the core checkout
-        working-directory: gramlot-js-server/serverless
+      - name: Browser, checks in Chromium, including the sentinel fixture of the core checkout
+        working-directory: gramlot-js-server/browser
         run: |
           mkdir -p build
           node src/cli.js build examples/source-live/page.js -o build/source-live.html
-          node scripts/verify_native_html_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
+          node scripts/verify_export_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
           node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index.mjs
           node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs
 

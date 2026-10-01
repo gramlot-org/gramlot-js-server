@@ -32,7 +32,7 @@ Block ID: **GS-115-010**.
 `export class Logic`; methods are the root group (`func: 'greeting'`); formula
 `method(kwargs)` returns the value, controller `method(node, kwargs)`. Bundled as
 one ES module for the window; absent from the Worker bundle (checked by
-`serverless/tests/bundles.test.js`); the Worker returns only its URL, the window imports a
+`browser/tests/bundles.test.js`); the Worker returns only its URL, the window imports a
 Blob URL before start; a failed import stops the start and releases the Worker.
 One strict CSP profile: inline code (`formula`, `script`, `==`, `action`,
 `connect_on<event>`, `_if`/`_else`) raises the core `EvalError`

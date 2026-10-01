@@ -12,7 +12,7 @@ const [playwrightEntry, engineName = 'chromium', executablePath] = process.argv.
 if (!playwrightEntry) throw new Error('Usage: verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]');
 const examples = resolve(import.meta.dirname, '../examples/quickstart');
 const engine = (await import(pathToFileURL(resolve(playwrightEntry))))[engineName];
-const folder = await mkdtemp(join(tmpdir(), 'gramlot-serverless-quickstart-'));
+const folder = await mkdtemp(join(tmpdir(), 'gramlot-browser-quickstart-'));
 let browser;
 try {
     const file = join(folder, 'hello.html');

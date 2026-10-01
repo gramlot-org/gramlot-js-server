@@ -3,9 +3,9 @@ import {createInterface} from 'node:readline';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 const [runtime,playwright,executablePath]=process.argv.slice(2);
-if(!executablePath)throw Error('Usage: node test/native-browser.mjs RUNTIME PLAYWRIGHT_ENTRY CHROMIUM');
+if(!executablePath)throw Error('Usage: node test/browser.mjs RUNTIME PLAYWRIGHT_ENTRY CHROMIUM');
 const {chromium}=await import(pathToFileURL(playwright));
-const child=spawn(runtime,[fileURLToPath(new URL('./native-browser-host.mjs',import.meta.url))],{stdio:['ignore','pipe','inherit']});
+const child=spawn(runtime,[fileURLToPath(new URL('./browser-host.mjs',import.meta.url))],{stdio:['ignore','pipe','inherit']});
 let browser;
 try {
  const {plain:url,strict,permissive}=JSON.parse(await new Promise((res,rej)=>{const timer=setTimeout(()=>rej(Error('startup timeout')),10000);createInterface({input:child.stdout}).once('line',line=>{clearTimeout(timer);res(line);});child.once('exit',code=>{clearTimeout(timer);rej(Error(`exit ${code}`));});}));
@@ -54,5 +54,5 @@ try {
  await open(strict+'/inline');
  assert.equal(await page.evaluate(()=>window.gramlot.state),'failed');
  assert.equal(errors.length,1);
- assert.match(errors[0],/div '.*' node value: inline code blocked by the Content Security Policy/);console.log('PASS installed native host, mount prefix and strict/permissive CSP '+runtime);
+ assert.match(errors[0],/div '.*' node value: inline code blocked by the Content Security Policy/);console.log('PASS installed host, mount prefix and strict/permissive CSP '+runtime);
 }finally{await browser?.close();child.kill();await new Promise(r=>child.exitCode!==null?r():child.once('exit',r));}

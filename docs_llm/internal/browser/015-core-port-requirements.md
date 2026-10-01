@@ -2,7 +2,7 @@
 
 Document ID: **GS-015**.
 
-[Paired view](../../../docs_llm/internal/serverless/015-core-port-requirements.md).
+[Paired view](../../../docs/internal/browser/015-core-port-requirements.md).
 
 <a id="gs-015-005"></a>
 

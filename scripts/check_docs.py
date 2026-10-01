@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMESPACES = "GN|GS"  # GN: server guides, GS: serverless guides
+NAMESPACES = "GN|GS"  # GN: server guides, GS: browser guides
 
 
 def check_pairing():

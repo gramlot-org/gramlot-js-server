@@ -4,7 +4,7 @@ import {mkdir, mkdtemp, rm, symlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Host, Page, source} from '@gramlot/gramlot/server';
-const {startNativeServer} = await import(globalThis.Bun ? '../src/native-bun.mjs' : '../src/native-node.mjs');
+const {startServer} = await import(globalThis.Bun ? '../src/bun.mjs' : '../src/node.mjs');
 
 class HtmlPage extends Page {
     main(root) { root.h1('Hello World'); }
@@ -19,7 +19,7 @@ class TestHost extends Host {
 test('real listener serves packaged runtime and typed main/remote; errors and shutdown', async () => {
     const host = new TestHost();
     const failures = [];
-    const app = await startNativeServer({host, ownerForRequest: request => request.headers.get('x-owner'),
+    const app = await startServer({host, ownerForRequest: request => request.headers.get('x-owner'),
         onError: error => failures.push(error)});
     let pageId;
     try {
@@ -109,7 +109,7 @@ export class Page extends BasePage {
 
 test('mount prefix: bootstrap URLs carry it once; requests arrive without it', async () => {
     const {folder, pages} = await pagesFolder();
-    const app = await startNativeServer({pages, mountPath: '/app/'});
+    const app = await startServer({pages, mountPath: '/app/'});
     try {
         const html = await (await fetch(app.url + '/')).text();
         const {runtime, argument} = bootstrap(html);
@@ -131,7 +131,7 @@ test('mount prefix: bootstrap URLs carry it once; requests arrive without it', a
 for (const [name, policy] of [['strict', STRICT_CSP], ['permissive', PERMISSIVE_CSP]]) {
     test(`${name} CSP: the application policy is sent with the bootstrap nonce of each opening`, async () => {
         const {folder, pages} = await pagesFolder();
-        const app = await startNativeServer({pages, contentSecurityPolicy: policy});
+        const app = await startServer({pages, contentSecurityPolicy: policy});
         try {
             const first = await fetch(app.url + '/'), second = await fetch(app.url + '/');
             const nonces = [];
@@ -150,7 +150,7 @@ for (const [name, policy] of [['strict', STRICT_CSP], ['permissive', PERMISSIVE_
 
 test('companions and Page.css files below the pages folder; every other file 404', async () => {
     const {folder, pages} = await pagesFolder();
-    const app = await startNativeServer({pages, mountPath: '/app'});
+    const app = await startServer({pages, mountPath: '/app'});
     try {
         for (const [path, type, body] of [['/themes/theme.css', 'text/css', 'body { margin: 0; }'],
             ['/index.css', 'text/css', 'h1 { color: red; }'], ['/index_aux.js', 'text/javascript', 'export class Logic {}']]) {

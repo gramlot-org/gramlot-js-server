@@ -14,7 +14,7 @@ The adapter is started with the same prefix as `mountPath`, so the bootstrap
 URLs sent to the browser carry it.
 
 ```js
-const app = await startNativeServer({pages, hostname: '127.0.0.1', port: 8080, mountPath: '/app'});
+const app = await startServer({pages, hostname: '127.0.0.1', port: 8080, mountPath: '/app'});
 ```
 
 nginx location for that server:
@@ -29,7 +29,7 @@ location /app/ {
 The trailing slash in `proxy_pass` makes nginx replace `/app/` with `/`. The
 browser requests `/app/`, `/app/assets/gramlot.js`, `/app/gramlot/main` and
 `/app/index.css`; the adapter receives `/`, `/assets/gramlot.js`, `/gramlot/main`
-and `/index.css`. The test `server/test/native-browser-host.mjs` of this repository runs
+and `/index.css`. The test `server/test/browser-host.mjs` of this repository runs
 the same pattern with a stripping front written in `node:http`.
 
 Without a front server, leave `mountPath` at its default and bind `hostname`

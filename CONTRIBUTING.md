@@ -4,7 +4,7 @@
 
 ```sh
 npm install                                   # both packages, with the released core from npm
-npm install --no-save playwright && npx playwright install chromium   # serverless browser checks only
+npm install --no-save playwright && npx playwright install chromium   # browser checks only
 python3 -m venv .venv && .venv/bin/pip install -r requirements-docs.txt   # documentation only
 ```
 
@@ -16,19 +16,19 @@ The link is not saved in `package.json`.
 ## Checks before a commit
 
 ```sh
-npm run test:native -w server            # Node contract and quick-start tests
-(cd server && bun test test/native.test.mjs test/quickstart.test.mjs)   # the same on Bun
-npm test -w serverless                   # exporter tests
+npm run test:server -w server            # Node contract and quick-start tests
+(cd server && bun test test/server.test.mjs test/quickstart.test.mjs)   # the same on Bun
+npm test -w browser                      # exporter tests
 npm run test:coverage -w server          # lcov in server/coverage/
-npm run test:coverage -w serverless      # lcov in serverless/coverage/
+npm run test:coverage -w browser         # lcov in browser/coverage/
 .venv/bin/python scripts/check_docs.py   # when documentation changes
 ```
 
-Serverless browser checks, from `serverless/`:
+Browser checks of the exporter, from `browser/`:
 
 ```sh
 node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs    # README quick start, file and directory
-node scripts/verify_native_html_browser.mjs <built.html> ../node_modules/playwright/index.mjs - '<h1 text>' [method]
+node scripts/verify_export_browser.mjs <built.html> ../node_modules/playwright/index.mjs - '<h1 text>' [method]
 node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index.mjs   # linked core only
 ```
 
@@ -45,11 +45,11 @@ node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index
   or documents; no assistant `Co-Authored-By` trailers; no `Generated with …`
   lines.
 - Pair `docs/` and `docs_llm/` guides: namespace GN for the server, GS for
-  serverless, shared Document and Block IDs, lowercase anchors.
+  the browser exporter, shared Document and Block IDs, lowercase anchors.
   `scripts/check_docs.py` validates and builds both. Internal notes stay in
   `docs/internal/` and `docs_llm/internal/`, out of the published build.
 - The README quick starts are `server/test/fixtures/quickstart/` and
-  `serverless/examples/quickstart/`: keep the README, the tutorials and the
+  `browser/examples/quickstart/`: keep the README, the tutorials and the
   fixtures equal.
 
 ## Releases

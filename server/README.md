@@ -9,9 +9,9 @@ npm install @gramlot/gramlot @gramlot/gramlot-js-server
 ```
 
 ```js
-import {startNativeServer} from '@gramlot/gramlot-js-server/native';   // Bun: '@gramlot/gramlot-js-server/bun'
+import {startServer} from '@gramlot/gramlot-js-server/node';   // Bun: '@gramlot/gramlot-js-server/bun'
 
-const app = await startNativeServer({pages: '/path/to/pages', port: 8080});
+const app = await startServer({pages: '/path/to/pages', port: 8080});
 ```
 
 Quick start, guides and compatibility: the

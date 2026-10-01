@@ -1,11 +1,11 @@
 {
-  "name": "@gramlot/gramlot-serverless",
+  "name": "@gramlot/gramlot-browser",
   "version": "0.0.0-dev.1",
   "type": "module",
-  "description": "Serverless Gramlot integration: standalone Browser/Worker HTML exporter",
+  "description": "Gramlot exporter: pages as one HTML file or a static directory, run in a browser Web Worker",
   "license": "Apache-2.0",
   "bin": {
-    "gramlot-serverless": "./src/cli.js"
+    "gramlot-browser": "./src/cli.js"
   },
   "exports": {
     ".": "./src/build.js",

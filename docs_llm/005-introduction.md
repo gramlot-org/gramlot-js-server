@@ -11,7 +11,7 @@ state in the browser: [The Gramlot family](https://gramlot.readthedocs.io/en/lat
 
 Block ID: **GN-105-005**.
 
-Serves JavaScript Gramlot pages from Node.js 22 (`@gramlot/gramlot-js-server/native`,
+Serves JavaScript Gramlot pages from Node.js 22 (`@gramlot/gramlot-js-server/node`,
 `node:http`) or Bun (`@gramlot/gramlot-js-server/bun`, `Bun.serve`) through the core's
 `FileHost`. Adapter: routing, bounded payloads, response and error mapping,
 request identity, mount prefix, CSP header. Core Host: page lookup, bootstrap,
@@ -39,6 +39,6 @@ Block ID: **GN-105-010**.
 Block ID: **GN-105-015**.
 
 - Python pages: [gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn).
-- No server: [@gramlot/gramlot-serverless](105-introduction.md).
+- No server: [@gramlot/gramlot-browser](105-introduction.md).
 - Assets outside the pages folder: a front server ([Deployment](025-deployment.md)).
 - Sessions and logins: only `ownerForRequest` passes an identity.

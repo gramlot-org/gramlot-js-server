@@ -17,14 +17,14 @@ This repository hosts JavaScript Gramlot pages. It holds two packages:
 | Package | Directory | Use it when |
 | --- | --- | --- |
 | `@gramlot/gramlot-js-server` | [`server/`](server/) | you serve the pages from a Node.js 22 or Bun process |
-| `@gramlot/gramlot-serverless` | [`serverless/`](serverless/) | the pages open without a server: one HTML file or one static directory |
+| `@gramlot/gramlot-browser` | [`browser/`](browser/) | the pages open without a server: one HTML file or one static directory |
 
 `@gramlot/gramlot-js-server` connects a folder of Page modules to the core's
 `FileHost`, sends the bootstrap document, answers the main and remote Source
 requests and serves the page companions, with a mount prefix and a Content
 Security Policy of your choice.
 
-`@gramlot/gramlot-serverless` exports a page so that it runs in a Web Worker
+`@gramlot/gramlot-browser` exports a page so that it runs in a Web Worker
 inside the browser; the window renders it and keeps the fields bound to the
 data. The result opens from disk, goes by mail or sits on any static host.
 
@@ -74,9 +74,9 @@ export class Logic {
 
 ```js
 import {fileURLToPath} from 'node:url';
-import {startNativeServer} from '@gramlot/gramlot-js-server/native';
+import {startServer} from '@gramlot/gramlot-js-server/node';
 
-const app = await startNativeServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
+const app = await startServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
 console.log(app.url);
 ```
 
@@ -98,19 +98,19 @@ The same page, exported to one file. From a clone of this repository:
 git clone https://github.com/gramlot-org/gramlot-js-server.git
 cd gramlot-js-server
 npm install
-cd serverless
+cd browser
 node src/cli.js build examples/quickstart/page.js -o build/hello.html
 ```
 
-The page is [`serverless/examples/quickstart/page.js`](serverless/examples/quickstart/page.js);
+The page is [`browser/examples/quickstart/page.js`](browser/examples/quickstart/page.js);
 its formula names a method of the companion
-[`serverless/examples/quickstart/page_aux.js`](serverless/examples/quickstart/page_aux.js),
+[`browser/examples/quickstart/page_aux.js`](browser/examples/quickstart/page_aux.js),
 because the exported file runs under a strict Content Security Policy that
 allows no inline code.
 
 Open `build/hello.html` in the browser. The page behaves as above and makes no
-network request. This example is run by `serverless/tests/quickstart.test.js`
-and, in a real browser, by `serverless/scripts/verify_quickstart_browser.mjs`
+network request. This example is run by `browser/tests/quickstart.test.js`
+and, in a real browser, by `browser/scripts/verify_quickstart_browser.mjs`
 in CI.
 
 ## Next steps
@@ -124,7 +124,7 @@ in CI.
     [Deployment](https://gramlot-js-server.readthedocs.io/en/latest/025-deployment.html),
     [Reference](https://gramlot-js-server.readthedocs.io/en/latest/030-reference.html),
     [Troubleshooting](https://gramlot-js-server.readthedocs.io/en/latest/040-troubleshooting.html);
-  - serverless: [Introduction](https://gramlot-js-server.readthedocs.io/en/latest/105-introduction.html),
+  - browser: [Introduction](https://gramlot-js-server.readthedocs.io/en/latest/105-introduction.html),
     [Tutorial](https://gramlot-js-server.readthedocs.io/en/latest/110-tutorial.html),
     [Writing pages](https://gramlot-js-server.readthedocs.io/en/latest/115-writing-pages.html),
     [Configuration](https://gramlot-js-server.readthedocs.io/en/latest/120-configuration.html),
@@ -151,9 +151,9 @@ in CI.
 
 ```sh
 npm install
-npm run test:native -w server                                     # Node contract and quick-start tests
-(cd server && bun test test/native.test.mjs test/quickstart.test.mjs)   # the same on Bun
-npm test -w serverless                                            # exporter tests
+npm run test:server -w server                                     # Node contract and quick-start tests
+(cd server && bun test test/server.test.mjs test/quickstart.test.mjs)   # the same on Bun
+npm test -w browser                                            # exporter tests
 python scripts/check_docs.py                                      # paired guides and Sphinx build
 ```
 

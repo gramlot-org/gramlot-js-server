@@ -1,4 +1,4 @@
-"""Documentation of the server and serverless packages; builds independently of their tests."""
+"""Documentation of the server and browser packages; builds independently of their tests."""
 from pathlib import Path
 import json
 

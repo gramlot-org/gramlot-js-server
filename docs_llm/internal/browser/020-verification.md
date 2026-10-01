@@ -2,7 +2,7 @@
 
 Document ID: **GS-020**.
 
-[Paired view](../../../docs_llm/internal/serverless/020-verification.md).
+[Paired view](../../../docs/internal/browser/020-verification.md).
 
 <a id="gs-020-005"></a>
 
@@ -52,8 +52,8 @@ The 2026-09-21 verified graph used local archives: core0.0.0-dev.1, Builder JS0.
 Bag JS0.5.2 (gramlot-strict-source artifact) and TYTX0.15.0. The new exporter is
 0.0.0-dev.1. No manifest pin or lockfile was retained. Local installation is not
 proof of fresh upstream availability; no package was published. Current native
-0.1.0 delivery uses the locally prepared `@gramlot/native-html` 0.1.0 archive;
-see the core's [artifact handoff](https://github.com/gramlot-org/gramlot/blob/main/docs/internal/135-release-handoff.md).
+0.1.0 delivery uses the local `@gramlot/native-html` 0.1.0 archive; see the
+[artifact handoff](https://github.com/gramlot-org/gramlot/blob/main/docs/internal/135-release-handoff.md).
 Do not equate the historical PoC showcase or the old eight-profile matrix with
 verification of this exporter. Safari and Firefox remain unverified.
 

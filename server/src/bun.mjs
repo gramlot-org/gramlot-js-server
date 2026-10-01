@@ -1,9 +1,9 @@
 /** Reusable Bun bridge; no Python worker and no Node HTTP server. */
-import {createNativeDispatch} from './native-fetch.mjs';
+import {createDispatch} from './fetch.mjs';
 
-export async function startNativeServer({hostname = '127.0.0.1', port = 0, onError = console.error, ...options} = {}) {
+export async function startServer({hostname = '127.0.0.1', port = 0, onError = console.error, ...options} = {}) {
     if (!globalThis.Bun?.serve) throw new Error('The Bun host requires Bun');
-    const dispatch = await createNativeDispatch(options);
+    const dispatch = await createDispatch(options);
     const server = Bun.serve({hostname, port, fetch: request => dispatch.fetch(request),
         error(error) { onError(error); return new Response('Internal server error', {status: 500}); },
     });

@@ -120,9 +120,9 @@ Block ID: **GN-110-025**.
 
 ```js
 import {fileURLToPath} from 'node:url';
-import {startNativeServer} from '@gramlot/gramlot-js-server/native';
+import {startServer} from '@gramlot/gramlot-js-server/node';
 
-const app = await startNativeServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
+const app = await startServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
 console.log(app.url);
 ```
 

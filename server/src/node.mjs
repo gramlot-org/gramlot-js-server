@@ -1,10 +1,10 @@
 /** Reusable Node HTTP bridge for the current Gramlot Host protocol. */
 import {createServer} from 'node:http';
 import {Readable} from 'node:stream';
-import {createNativeDispatch} from './native-fetch.mjs';
+import {createDispatch} from './fetch.mjs';
 
-export async function startNativeServer({hostname = '127.0.0.1', port = 0, onError = console.error, ...options} = {}) {
-    const dispatch = await createNativeDispatch(options);
+export async function startServer({hostname = '127.0.0.1', port = 0, onError = console.error, ...options} = {}) {
+    const dispatch = await createDispatch(options);
     const server = createServer(async (incoming, outgoing) => {
         try {
             const init = {method: incoming.method, headers: incoming.headers};

@@ -3,7 +3,7 @@ import {copyFile, mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Host, Page, source} from '@gramlot/gramlot/server';
-const {startNativeServer} = await import(globalThis.Bun ? '@gramlot/gramlot-js-server/bun' : '@gramlot/gramlot-js-server/native');
+const {startServer} = await import(globalThis.Bun ? '@gramlot/gramlot-js-server/bun' : '@gramlot/gramlot-js-server/node');
 class HtmlPage extends Page {
  main(root) { root.h1('Hello World'); root.div(null, {id:'slot'}); }
  details(root) { root.span('Remote HTML'); }
@@ -41,10 +41,10 @@ async function front(backend) {
  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
  return server;
 }
-const app = await startNativeServer({host:new TestHost()});
+const app = await startServer({host:new TestHost()});
 const mounted = [];
 for (const policy of [STRICT_CSP, PERMISSIVE_CSP]) {
- const backend = await startNativeServer({pages, mountPath: MOUNT, contentSecurityPolicy: policy});
+ const backend = await startServer({pages, mountPath: MOUNT, contentSecurityPolicy: policy});
  mounted.push({backend, server: await front(backend.url)});
 }
 const [strict, permissive] = mounted.map(({server}) => `http://127.0.0.1:${server.address().port}${MOUNT}`);

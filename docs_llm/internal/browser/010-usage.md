@@ -2,7 +2,7 @@
 
 Document ID: **GS-010**.
 
-[Paired view](../../../docs/internal/serverless/010-usage.md).
+[Paired view](../../../docs/internal/browser/010-usage.md).
 
 <a id="gs-010-005"></a>
 

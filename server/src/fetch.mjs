@@ -1,4 +1,4 @@
-/** Native HTML host protocol, shared by Node and Bun socket bridges. */
+/** Gramlot host protocol over Request/Response, shared by the Node and Bun socket bridges. */
 import {readFile, realpath, stat} from 'node:fs/promises';
 import {isAbsolute, join, relative, sep} from 'node:path';
 import {FileHost, PageExpired, PageNotFound, SourceNotFound, HostCapacity} from '@gramlot/gramlot/server';
@@ -28,7 +28,7 @@ async function companionFile(pagesDir, path) {
  * companions and Page.css files placed there. contentSecurityPolicy is the application's
  * policy, sent on each HTML page with {nonce} replaced by the bootstrap nonce.
  */
-export async function createNativeDispatch({pages, host = null, ownerForRequest = async () => null,
+export async function createDispatch({pages, host = null, ownerForRequest = async () => null,
                                             mountPath = '', contentSecurityPolicy = null, ...options} = {}) {
     host ??= new FileHost(pages, options);
     const trimmed = mountPath.replace(/^\/+|\/+$/g, '');

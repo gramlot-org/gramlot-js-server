@@ -2,12 +2,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
-const {startNativeServer} = await import(globalThis.Bun ? '../src/native-bun.mjs' : '../src/native-node.mjs');
+const {startServer} = await import(globalThis.Bun ? '../src/bun.mjs' : '../src/node.mjs');
 
 const pages = fileURLToPath(new URL('./fixtures/quickstart/', import.meta.url));
 
 test('quick start: the Hello page opens, its Source binds the field and the formula, companions are served', async () => {
-    const app = await startNativeServer({pages});
+    const app = await startServer({pages});
     try {
         const opened = await fetch(app.url + '/');
         assert.equal(opened.status, 200);

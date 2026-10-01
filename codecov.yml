@@ -12,15 +12,15 @@ flags:
   server:
     paths:
       - "server/src/"
-  serverless:
+  browser:
     paths:
-      - "serverless/src/"
+      - "browser/src/"
 
 ignore:
   - "server/test/**"
-  - "serverless/tests/**"
-  - "serverless/examples/**"
-  - "serverless/scripts/**"
+  - "browser/tests/**"
+  - "browser/examples/**"
+  - "browser/scripts/**"
   - "docs/**"
   - "docs_llm/**"
 

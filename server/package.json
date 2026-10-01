@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node src/start.mjs",
     "test": "node --test test/*.test.mjs",
-    "test:native": "node --test test/native.test.mjs test/quickstart.test.mjs",
-    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/native.test.mjs test/quickstart.test.mjs"
+    "test:server": "node --test test/server.test.mjs test/quickstart.test.mjs",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -17,8 +17,8 @@
     "@gramlot/gramlot": ">=0.2.1"
   },
   "exports": {
-    "./native": "./src/native-node.mjs",
-    "./bun": "./src/native-bun.mjs"
+    "./node": "./src/node.mjs",
+    "./bun": "./src/bun.mjs"
   },
   "files": [
     "src",

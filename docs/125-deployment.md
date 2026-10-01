@@ -16,7 +16,7 @@ reference `assets/` through relative paths, and `mount` receives the directory
 itself as `assetRoot`, so the directory can be moved or renamed as a whole. Keep
 its contents together: the shared runtime, the workers and the listed assets.
 
-Both forms make no network request at start (`serverless/scripts/verify_quickstart_browser.mjs`
+Both forms make no network request at start (`browser/scripts/verify_quickstart_browser.mjs`
 blocks HTTP and HTTPS and passes). The file can be sent by mail or copied to a USB
 key; the recipient needs a browser, not Node.
 
@@ -65,7 +65,7 @@ Block ID: **GS-125-015**.
 
 Block ID: **GS-125-020**.
 
-1. `npm test` and `serverless/scripts/verify_quickstart_browser.mjs` pass with the core
+1. `npm test` and `browser/scripts/verify_quickstart_browser.mjs` pass with the core
    version you ship (`node -p "require('@gramlot/gramlot/package.json').version"`).
 2. Every `Page.css` URL of a directory export is root-relative and listed in
    `assets`; the single-file pages declare none.

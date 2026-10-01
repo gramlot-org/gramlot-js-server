@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 const [artifact, playwrightEntry, executablePath, expectedText, method = '', engineName = 'chromium'] = process.argv.slice(2);
-if (!expectedText) throw new Error('Usage: verify_native_html_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [SOURCE_METHOD] [ENGINE]');
+if (!expectedText) throw new Error('Usage: verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [SOURCE_METHOD] [ENGINE]');
 const engine = (await import(pathToFileURL(resolve(playwrightEntry))))[engineName];
 const browser = await engine.launch({headless: true, ...(executablePath === '-' ? {} : {executablePath})});
 try {

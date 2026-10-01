@@ -6,7 +6,7 @@ Follow ../gramlot/AGENTS.md and its constitution for framework matters.
 The repository is an npm workspace with two packages:
 
 - `server/`, `@gramlot/gramlot-js-server`: the Node.js and Bun host adapter;
-- `serverless/`, `@gramlot/gramlot-serverless`: the standalone Browser/Worker
+- `browser/`, `@gramlot/gramlot-browser`: the standalone Browser/Worker
   exporter.
 
 ## Rules common to both packages
@@ -20,8 +20,8 @@ The repository is an npm workspace with two packages:
   shared Document and Block IDs and lowercase anchors; retired blocks keep their
   anchor. Namespace **GN** for the server guides (files `005`–`040`, IDs
   GN-105 to GN-140; internal notes GN-005 and GN-010 in `docs/internal/`) and
-  **GS** for the serverless guides (files `105`–`140`, IDs GS-105 to GS-140;
-  internal notes GS-005 to GS-030 in `docs/internal/serverless/`). Internal
+  **GS** for the browser guides (files `105`–`140`, IDs GS-105 to GS-140;
+  internal notes GS-005 to GS-030 in `docs/internal/browser/`). Internal
   notes stay out of the published build. Document IDs are never reused: new
   guides take new numbers. Run `python scripts/check_docs.py` after changing
   documentation.
@@ -45,11 +45,11 @@ The repository is an npm workspace with two packages:
   database adapters.
 - The README quick start is the page in `server/test/fixtures/quickstart/`,
   executed by `server/test/quickstart.test.mjs`; change both together.
-- Before a commit: `npm run test:native -w server` and, from `server/`,
-  `bun test test/native.test.mjs test/quickstart.test.mjs`; for behavior
-  changes also the browser harness `server/test/native-browser.mjs`.
+- Before a commit: `npm run test:server -w server` and, from `server/`,
+  `bun test test/server.test.mjs test/quickstart.test.mjs`; for behavior
+  changes also the browser harness `server/test/browser.mjs`.
 
-## serverless/
+## browser/
 
 - It owns JS bundling, HTML and directory packaging, `WorkerHost`,
   `WorkerTransport` and the standalone startup. It does not own Gramlot Source,
@@ -62,11 +62,11 @@ The repository is an npm workspace with two packages:
 - The single-file profile applies the strict CSP (script hash, `blob:`, no
   `'unsafe-inline'`, no `'unsafe-eval'`); the directory profile writes no CSP.
   A `*_aux` file is a page companion for the window, never a page.
-- The README quick start is `serverless/examples/quickstart/`, run by
-  `serverless/tests/quickstart.test.js` and
-  `serverless/scripts/verify_quickstart_browser.mjs`: change them together.
-- Before a commit: `npm test -w serverless`; for behavior changes also the
-  browser checks in `serverless/scripts/`.
+- The README quick start is `browser/examples/quickstart/`, run by
+  `browser/tests/quickstart.test.js` and
+  `browser/scripts/verify_quickstart_browser.mjs`: change them together.
+- Before a commit: `npm test -w browser`; for behavior changes also the
+  browser checks in `browser/scripts/`.
 
 ## History
 
@@ -81,5 +81,7 @@ The Browser/Worker profile started in `gramlot-minimal` on 2026-09-24 (core
 constitution amendment 11.46 assigns the standalone Worker transport and
 startup to this side), then lived in the `gramlot-serverless` repository with
 the package `@gramlot/serverless`. On 2026-10-01 the owner merged it into this
-repository with its history; the package became `@gramlot/gramlot-serverless`.
+repository with its history; the package became `@gramlot/gramlot-browser`, in
+`browser/`, and the server entry points lost the `native` prefix of the 0.1.0
+profile (`/node`, `/bun`, `startServer`).
 Historical names are not compatibility aliases.

@@ -2,7 +2,7 @@ gramlot-js-server (concise)
 ===========================
 
 Concise view of the guides of the two packages: the Node.js and Bun host
-adapter and the standalone serverless exporter. The expanded view lives in the
+adapter and the exporter whose pages run in a browser Web Worker. The expanded view lives in the
 repository's docs directory.
 
 .. toctree::
@@ -19,7 +19,7 @@ repository's docs directory.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Serverless (Browser and Worker)
+   :caption: Browser (Web Worker, no server)
 
    105-introduction
    110-tutorial

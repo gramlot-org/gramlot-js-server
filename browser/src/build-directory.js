@@ -5,7 +5,7 @@ import {HtmlBuilder} from '@genrojs/builders';
 import {copyFile, mkdir, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
-const fromServerless = createRequire(import.meta.url);
+const fromBrowser = createRequire(import.meta.url);
 const standalone = fileURLToPath(new URL('./standalone.js', import.meta.url));
 import {randomUUID} from 'node:crypto';
 import {dirname, extname, isAbsolute, join, resolve} from 'node:path';
@@ -129,8 +129,8 @@ export async function buildDirectory({pages, output, assets = []}) {
         }
         core = resolved;
     }
-    if (core.entry !== await realpath(fromServerless.resolve('@gramlot/gramlot'))) {
-        throw new Error('Pages and Serverless must resolve the same Gramlot core installation');
+    if (core.entry !== await realpath(fromBrowser.resolve('@gramlot/gramlot'))) {
+        throw new Error('Pages and @gramlot/gramlot-browser must resolve the same Gramlot core installation');
     }
     await regularFile(join(dirname(core.runtime), 'runtime-notices.json'), 'Runtime notices');
     for (const asset of assets) await regularFile(asset.source, 'Asset source');

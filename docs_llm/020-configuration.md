@@ -2,7 +2,7 @@
 
 Document ID: **GN-120**. [Expanded version](../docs/020-configuration.md).
 
-Options of `startNativeServer`, same on Node and Bun.
+Options of `startServer`, same on Node and Bun.
 
 <a id="gn-120-005"></a>
 

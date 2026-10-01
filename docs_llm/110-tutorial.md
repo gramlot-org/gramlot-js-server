@@ -4,8 +4,8 @@ Document ID: **GS-110**.
 
 [Paired view](../docs/110-tutorial.md).
 
-Run by `serverless/tests/quickstart.test.js` and `serverless/scripts/verify_quickstart_browser.mjs`
-(headless Chromium); files in `serverless/examples/quickstart/`.
+Run by `browser/tests/quickstart.test.js` and `browser/scripts/verify_quickstart_browser.mjs`
+(headless Chromium); files in `browser/examples/quickstart/`.
 
 <a id="gs-110-005"></a>
 
@@ -15,11 +15,11 @@ Block ID: **GS-110-005**.
 
 ```sh
 git clone https://github.com/gramlot-org/gramlot-js-server.git
-cd gramlot-js-server/serverless
+cd gramlot-js-server/browser
 npm install
 ```
 
-`serverless/examples/quickstart/`: `page.js` (the Page), `page_aux.js` (companion),
+`browser/examples/quickstart/`: `page.js` (the Page), `page_aux.js` (companion),
 `styled.js` and `styled_aux.js` (the page with a stylesheet), `theme.css`,
 `export.mjs` (directory export).
 

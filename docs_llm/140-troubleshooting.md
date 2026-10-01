@@ -5,7 +5,7 @@ Document ID: **GS-140**.
 [Paired view](../docs/140-troubleshooting.md).
 
 Start errors: browser console (`mount` rejection logged, Worker disposed). Build
-errors: `gramlot-serverless: <message>`.
+errors: `gramlot-browser: <message>`.
 
 <a id="gs-140-005"></a>
 
