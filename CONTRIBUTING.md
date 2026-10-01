@@ -18,6 +18,7 @@ The link is not saved in `package.json`.
 ```sh
 npm test                                 # exporter tests
 npm run test:coverage                    # the same with lcov in coverage/
+node scripts/verify_quickstart_browser.mjs node_modules/playwright/index.mjs    # README quick start, file and directory
 node scripts/verify_native_html_browser.mjs <built.html> node_modules/playwright/index.mjs - '<h1 text>' [method]
 node scripts/verify_worker_sentinel_browser.mjs node_modules/playwright/index.mjs   # linked core only
 .venv/bin/python scripts/check_docs.py   # when documentation changes
@@ -34,6 +35,9 @@ node scripts/verify_worker_sentinel_browser.mjs node_modules/playwright/index.mj
   lines.
 - Pair `docs/` and `docs_llm/` guides: namespace GS, shared Document and Block
   IDs, lowercase anchors. `scripts/check_docs.py` validates and builds both.
+  Published guides: `docs/105-…` to `docs/140-…`. Internal notes (architecture,
+  core contract, verification records, showcase): `docs/internal/`, kept out of
+  the published build.
 
 ## Releases
 
