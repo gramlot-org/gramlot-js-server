@@ -10,8 +10,8 @@ Block ID: **GN-130-005**.
 
 | Specifier | Export | Runtime |
 | --- | --- | --- |
-| `gramlot-js-server/native` | `startNativeServer(options)` | Node.js 22 or later, `node:http` |
-| `gramlot-js-server/bun` | `startNativeServer(options)` | Bun, `Bun.serve`; throws `The Bun host requires Bun` elsewhere |
+| `@gramlot/gramlot-js-server/native` | `startNativeServer(options)` | Node.js 22 or later, `node:http` |
+| `@gramlot/gramlot-js-server/bun` | `startNativeServer(options)` | Bun, `Bun.serve`; throws `The Bun host requires Bun` elsewhere |
 
 `@gramlot/gramlot` is a peer dependency: the application and the adapter
 resolve the same copy of the core, or `instanceof Page` fails

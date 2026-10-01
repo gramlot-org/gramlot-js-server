@@ -8,8 +8,8 @@ Document ID: **GN-130**. [Expanded version](../docs/030-reference.md).
 
 Block ID: **GN-130-005**.
 
-`gramlot-js-server/native` → `startNativeServer` (Node 22+, `node:http`);
-`gramlot-js-server/bun` → `startNativeServer` (Bun; elsewhere throws `The Bun
+`@gramlot/gramlot-js-server/native` → `startNativeServer` (Node 22+, `node:http`);
+`@gramlot/gramlot-js-server/bun` → `startNativeServer` (Bun; elsewhere throws `The Bun
 host requires Bun`). `@gramlot/gramlot` is a peer: one copy for adapter and
 pages. `Page`, `source`: `@gramlot/gramlot/page`; `Host`, `FileHost`:
 `@gramlot/gramlot/server`.

@@ -8,8 +8,19 @@ coverage:
       default:
         informational: true
 
+flags:
+  server:
+    paths:
+      - "server/src/"
+  serverless:
+    paths:
+      - "serverless/src/"
+
 ignore:
-  - "test/**"
+  - "server/test/**"
+  - "serverless/tests/**"
+  - "serverless/examples/**"
+  - "serverless/scripts/**"
   - "docs/**"
   - "docs_llm/**"
 

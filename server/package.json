@@ -1,0 +1,29 @@
+{
+  "name": "@gramlot/gramlot-js-server",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Gramlot JavaScript server integration for Node.js and Bun",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node src/start.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:native": "node --test test/native.test.mjs test/quickstart.test.mjs",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/native.test.mjs test/quickstart.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "@gramlot/gramlot": ">=0.2.1"
+  },
+  "exports": {
+    "./native": "./src/native-node.mjs",
+    "./bun": "./src/native-bun.mjs"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ]
+}

@@ -72,9 +72,11 @@ extends `Page`.
 `@gramlot/gramlot`: one through the application's `node_modules`, another
 through the adapter's. `instanceof Page` fails across copies.
 
-**Fix.** Link one core checkout for both: in the application,
-`npm install --no-save ../gramlot/js ../gramlot-js-server`, so the application's
-link and the adapter's link resolve to the same real path.
+**Fix.** Install the core once, in the application:
+`npm install @gramlot/gramlot @gramlot/gramlot-js-server`. The core is a peer
+dependency of the adapter, so both resolve the application's copy. With a
+linked core checkout, link it once for both, so the two imports resolve to the
+same real path.
 
 <a id="gn-140-025"></a>
 

@@ -29,7 +29,7 @@ location /app/ {
 The trailing slash in `proxy_pass` makes nginx replace `/app/` with `/`. The
 browser requests `/app/`, `/app/assets/gramlot.js`, `/app/gramlot/main` and
 `/app/index.css`; the adapter receives `/`, `/assets/gramlot.js`, `/gramlot/main`
-and `/index.css`. The test `test/native-browser-host.mjs` of this repository runs
+and `/index.css`. The test `server/test/native-browser-host.mjs` of this repository runs
 the same pattern with a stripping front written in `node:http`.
 
 Without a front server, leave `mountPath` at its default and bind `hostname`
@@ -84,9 +84,9 @@ Block ID: **GN-125-015**.
 
 Block ID: **GN-125-020**.
 
-- [ ] Node.js 22 or later, or Bun, with the core checkout linked
-      (`npm install --no-save ../gramlot/js ../gramlot-js-server`).
-- [ ] The core's `js/dist/gramlot.js` built (`npm --prefix ../gramlot/js run build`).
+- [ ] Node.js 22 or later, or Bun, with the core and the adapter installed
+      (`npm install @gramlot/gramlot @gramlot/gramlot-js-server`); the core's
+      npm package ships the runtime `dist/gramlot.js`.
 - [ ] `pages` points to the deployed pages folder; nothing else lives there.
 - [ ] `mountPath` equals the prefix the front server strips.
 - [ ] `contentSecurityPolicy` set to the strict or the permissive profile.

@@ -4,7 +4,7 @@ Document ID: **GN-110**. [Concise mirror](../docs_llm/010-tutorial.md).
 
 This tutorial builds the page of the README quick start step by step. Every step
 was run with Node.js and verified in Chromium; the page is also executed by the
-test `test/quickstart.test.mjs` of this repository in CI.
+test `server/test/quickstart.test.mjs` of this repository in CI.
 
 <a id="gn-110-005"></a>
 
@@ -12,14 +12,12 @@ test `test/quickstart.test.mjs` of this repository in CI.
 
 Block ID: **GN-110-005**.
 
-Gramlot 0.2.0 is released, but the core's npm package `@gramlot/gramlot` is
-not published on any registry. The application links a core checkout and this
-adapter, both placed beside it:
+The application installs the core `@gramlot/gramlot` and this adapter from npm:
 
 ```sh
 mkdir hello && cd hello
 printf '{"name":"hello","private":true,"type":"module"}\n' > package.json
-npm install --no-save ../gramlot/js ../gramlot-js-server
+npm install @gramlot/gramlot @gramlot/gramlot-js-server
 mkdir pages
 ```
 
@@ -122,7 +120,7 @@ Block ID: **GN-110-025**.
 
 ```js
 import {fileURLToPath} from 'node:url';
-import {startNativeServer} from 'gramlot-js-server/native';
+import {startNativeServer} from '@gramlot/gramlot-js-server/native';
 
 const app = await startNativeServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
 console.log(app.url);
@@ -133,7 +131,7 @@ node serve.mjs
 ```
 
 The command prints `http://127.0.0.1:8080`. On Bun, import from
-`gramlot-js-server/bun` and run `bun serve.mjs`. The bootstrap document of `/`
+`@gramlot/gramlot-js-server/bun` and run `bun serve.mjs`. The bootstrap document of `/`
 lists the resources the adapter found beside the page:
 
 ```sh
