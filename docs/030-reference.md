@@ -10,8 +10,8 @@ Block ID: **GN-130-005**.
 
 | Specifier | Export | Runtime |
 | --- | --- | --- |
-| `gramlot-js-server/native` | `startNativeServer(options)` | Node.js 22 or later, `node:http` |
-| `gramlot-js-server/bun` | `startNativeServer(options)` | Bun, `Bun.serve`; throws `The Bun host requires Bun` elsewhere |
+| `@gramlot/gramlot-js-server/node` | `startServer(options)` | Node.js 22 or later, `node:http` |
+| `@gramlot/gramlot-js-server/bun` | `startServer(options)` | Bun, `Bun.serve`; throws `The Bun host requires Bun` elsewhere |
 
 `@gramlot/gramlot` is a peer dependency: the application and the adapter
 resolve the same copy of the core, or `instanceof Page` fails
@@ -21,12 +21,12 @@ resolve the same copy of the core, or `instanceof Page` fails
 
 <a id="gn-130-010"></a>
 
-## 010 · startNativeServer
+## 010 · startServer
 
 Block ID: **GN-130-010**.
 
 ```js
-const app = await startNativeServer(options);
+const app = await startServer(options);
 ```
 
 `options` is described in [Configuration](020-configuration.md). The promise

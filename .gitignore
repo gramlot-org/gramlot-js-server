@@ -1,6 +1,12 @@
 node_modules/
+package-lock.json
 *.log
 .DS_Store
 coverage/
+build/
+dist/
 docs/_build/
 .venv/
+__pycache__/
+*.py[cod]
+browser/tests/.build-*/

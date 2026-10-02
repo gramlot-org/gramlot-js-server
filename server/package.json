@@ -1,0 +1,33 @@
+{
+  "name": "@gramlot/gramlot-js-server",
+  "version": "0.2.1",
+  "description": "Node.js and Bun host adapter for Gramlot JavaScript pages",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gramlot-org/gramlot-js-server.git",
+    "directory": "server"
+  },
+  "homepage": "https://gramlot-js-server.readthedocs.io/",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/server.test.mjs test/quickstart.test.mjs",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "@gramlot/gramlot": ">=0.2.1"
+  },
+  "exports": {
+    "./node": "./src/node.mjs",
+    "./bun": "./src/bun.mjs"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ]
+}

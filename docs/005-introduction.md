@@ -14,8 +14,8 @@ Block ID: **GN-105-005**.
 
 gramlot-js-server serves JavaScript Gramlot pages from Node.js 22 or Bun. It
 connects a folder of trusted Page modules to the core's `FileHost` and exposes
-the pages over HTTP. `startNativeServer` from `gramlot-js-server/native` runs on
-`node:http`; the same function from `gramlot-js-server/bun` runs on `Bun.serve`.
+the pages over HTTP. `startServer` from `@gramlot/gramlot-js-server/node` runs on
+`node:http`; the same function from `@gramlot/gramlot-js-server/bun` runs on `Bun.serve`.
 
 The adapter owns the HTTP side: routing, bounded payload parsing, the response
 and error mapping, the request identity, the mount prefix and the Content
@@ -57,7 +57,7 @@ Block ID: **GN-105-015**.
 
 - Python pages: use [gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn).
 - Pages without a server, as one HTML file or a static folder:
-  use [gramlot-serverless](https://github.com/gramlot-org/gramlot-serverless).
+  use [@gramlot/gramlot-browser](105-introduction.md).
 - Application assets outside the pages folder (images, fonts, a shared theme):
   the adapter serves only the runtime and the page companions; a front server or
   the application serves the rest ([Deployment](025-deployment.md)).

@@ -8,8 +8,19 @@ coverage:
       default:
         informational: true
 
+flags:
+  server:
+    paths:
+      - "server/src/"
+  browser:
+    paths:
+      - "browser/src/"
+
 ignore:
-  - "test/**"
+  - "server/test/**"
+  - "browser/tests/**"
+  - "browser/examples/**"
+  - "browser/scripts/**"
   - "docs/**"
   - "docs_llm/**"
 

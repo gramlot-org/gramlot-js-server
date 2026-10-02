@@ -1,0 +1,50 @@
+{
+  "name": "@gramlot/gramlot-browser",
+  "version": "0.2.1",
+  "description": "Gramlot exporter: pages as one HTML file or a static directory, run in a browser Web Worker",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gramlot-org/gramlot-js-server.git",
+    "directory": "browser"
+  },
+  "homepage": "https://gramlot-js-server.readthedocs.io/",
+  "type": "module",
+  "bin": {
+    "gramlot-browser": "./src/cli.js"
+  },
+  "exports": {
+    ".": "./src/build.js",
+    "./directory": "./src/build-directory.js",
+    "./standalone": "./src/standalone.js",
+    "./worker-host": "./src/worker-host.js"
+  },
+  "files": [
+    "src/build.js",
+    "src/build-directory.js",
+    "src/bundles.js",
+    "src/cli.js",
+    "README.md",
+    "LICENSE",
+    "src/standalone.js",
+    "src/worker-host.js",
+    "src/worker-transport.js",
+    "src/runtime-notices.js",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout tests/*.test.js"
+  },
+  "dependencies": {
+    "@gramlot/gramlot": ">=0.2.1",
+    "@genrojs/builders": ">=0.4.1",
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "jsdom": "27.0.1"
+  }
+}

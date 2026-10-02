@@ -1,0 +1,116 @@
+name: Publish release
+
+# Run by hand on the version tag (Actions → Publish release → Run workflow → tag vX.Y.Z).
+# npm publishes @gramlot/gramlot-js-server and @gramlot/gramlot-browser with trusted
+# publishing from gramlot-org/gramlot-js-server, publish.yml, environment release.
+# The npm job skips a version that is already on the registry, so the first, manual
+# publication of a new package does not fail the run.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Require the version tag on main, matching versions and release notes
+        env:
+          RELEASE_REF: ${{ github.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor HEAD origin/main
+          version=$(node -p "require('./server/package.json').version")
+          test "$(node -p "require('./browser/package.json').version")" = "$version"
+          test "$RELEASE_REF" = "refs/tags/v$version"
+          test -f ".github/release-notes/v$version.md"
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "The GitHub release v$version already exists"; exit 1
+          fi
+
+  verify:
+    needs: validate
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/tests.yml
+
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pack both packages
+        run: |
+          mkdir -p dist
+          npm pack -w server -w browser --pack-destination dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - name: Create the GitHub release with the tarballs and their hashes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum * > SHA256SUMS)
+          gh release create "$RELEASE_TAG" dist/* --verify-tag \
+            --title "gramlot-js-server ${RELEASE_TAG#v}" \
+            --notes-file ".github/release-notes/${RELEASE_TAG}.md"
+
+  npm:
+    needs: github-release
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+      - name: npm 11.5.1 or later for trusted publishing
+        run: npm install -g npm@latest
+      - name: Publish the packed tarballs
+        run: |
+          set -euo pipefail
+          for tarball in dist/*.tgz; do
+            manifest=$(tar -xzOf "$tarball" package/package.json)
+            name=$(node -p "JSON.parse(process.argv[1]).name" "$manifest")
+            version=$(node -p "JSON.parse(process.argv[1]).version" "$manifest")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "$name@$version is already on npm"
+            else
+              npm publish "$tarball" --access public
+            fi
+          done

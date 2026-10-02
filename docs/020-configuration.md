@@ -2,7 +2,7 @@
 
 Document ID: **GN-120**. [Concise mirror](../docs_llm/020-configuration.md).
 
-Every option is a property of the object passed to `startNativeServer`. The
+Every option is a property of the object passed to `startServer`. The
 Node and the Bun entry points accept the same options.
 
 <a id="gn-120-005"></a>

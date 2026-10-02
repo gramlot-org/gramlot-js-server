@@ -3,7 +3,7 @@
 Document ID: **GN-110**. [Expanded version](../docs/010-tutorial.md).
 
 The README quick start step by step; run with Node.js, verified in Chromium,
-executed by `test/quickstart.test.mjs` in CI.
+executed by `server/test/quickstart.test.mjs` in CI.
 
 <a id="gn-110-005"></a>
 
@@ -11,12 +11,12 @@ executed by `test/quickstart.test.mjs` in CI.
 
 Block ID: **GN-110-005**.
 
-`@gramlot/gramlot` is unpublished: link the core checkout and the adapter.
+Install the core and the adapter from npm.
 
 ```sh
 mkdir hello && cd hello
 printf '{"name":"hello","private":true,"type":"module"}\n' > package.json
-npm install --no-save ../gramlot/js ../gramlot-js-server
+npm install @gramlot/gramlot @gramlot/gramlot-js-server
 mkdir pages
 ```
 
@@ -83,14 +83,14 @@ Block ID: **GN-110-025**.
 
 ```js
 import {fileURLToPath} from 'node:url';
-import {startNativeServer} from 'gramlot-js-server/native';
+import {startServer} from '@gramlot/gramlot-js-server/node';
 
-const app = await startNativeServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
+const app = await startServer({pages: fileURLToPath(new URL('./pages/', import.meta.url)), port: 8080});
 console.log(app.url);
 ```
 
 `node serve.mjs` prints `http://127.0.0.1:8080`; Bun: import from
-`gramlot-js-server/bun`, `bun serve.mjs`. `curl -s http://127.0.0.1:8080/` shows
+`@gramlot/gramlot-js-server/bun`, `bun serve.mjs`. `curl -s http://127.0.0.1:8080/` shows
 `"resources":{"css":["/index.css"],"js":[{"url":"/index_aux.js","group":null}]}`.
 
 <a id="gn-110-030"></a>

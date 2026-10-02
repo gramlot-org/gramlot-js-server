@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMESPACE = "GN"
+NAMESPACES = "GN|GS"  # GN: server guides, GS: browser guides
 
 
 def check_pairing():
@@ -14,7 +14,7 @@ def check_pairing():
              for view in ("docs", "docs_llm")]
     if not views[0] or views[0].keys() != views[1].keys():
         raise SystemExit("Numbered documentation guides must have matching paired paths.")
-    identity = re.compile(rf"(?:Document|Block) ID: \*\*({NAMESPACE}-[0-9]{{3}}(?:-[0-9]{{3}})?)\*\*")
+    identity = re.compile(rf"(?:Document|Block) ID: \*\*((?:{NAMESPACES})-[0-9]{{3}}(?:-[0-9]{{3}})?)\*\*")
     seen = set()
     for path in sorted(views[0]):
         signatures = []
@@ -22,14 +22,17 @@ def check_pairing():
             content = view[path].read_text()
             ids = identity.findall(content)
             anchors = re.findall(r'<a id="([^"]+)"></a>', content)
-            if not ids or anchors != [item.lower() for item in ids[1:]]:
+            # Retired blocks keep their anchor without a section (core policy GC-005):
+            # every Block ID needs its anchor, in order; extra anchors are retired ones.
+            expected = [item.lower() for item in ids[1:]]
+            if not ids or [anchor for anchor in anchors if anchor in expected] != expected:
                 raise SystemExit(f"Missing or inconsistent documentation identities: {path}")
-            if len(re.findall(r"^## ", content, re.M)) != len(anchors):
+            if len(re.findall(r"^## ", content, re.M)) != len(expected):
                 raise SystemExit(f"Each level-two section needs an identity: {path}")
-            signatures.append(ids)
+            signatures.append((ids, anchors))
         if signatures[0] != signatures[1]:
             raise SystemExit(f"Paired identities differ: {path}")
-        for item in signatures[0]:
+        for item in signatures[0][0]:
             if item in seen:
                 raise SystemExit(f"Duplicate documentation identity: {item}")
             seen.add(item)

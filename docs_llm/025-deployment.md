@@ -20,7 +20,7 @@ location /app/ {
 
 Browser: `/app/`, `/app/assets/gramlot.js`, `/app/gramlot/main`, `/app/index.css`;
 adapter: `/`, `/assets/gramlot.js`, `/gramlot/main`, `/index.css`.
-`test/native-browser-host.mjs` runs the pattern with a `node:http` front.
+`server/test/browser-host.mjs` runs the pattern with a `node:http` front.
 No front: default `mountPath`, bind `hostname`.
 
 <a id="gn-125-010"></a>

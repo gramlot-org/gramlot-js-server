@@ -1,26 +1,80 @@
 name: tests
 
-# The core is published as @gramlot/gramlot from 0.2.1. This job links the core's
-# main checkout and is informational (continue-on-error) until a published-core
-# job installs it from npm.
+# Both packages of the workspace: server/ (Node.js and Bun host adapter) and
+# browser/ (exporter whose pages run in a browser Web Worker).
 
 on:
   push:
     branches: [main, develop]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
 jobs:
-  core-main:
-    name: core main (informational)
+  published-core:
+    # Required: both packages against the Gramlot core released on npm.
     runs-on: ubuntu-latest
-    continue-on-error: true
     permissions:
       contents: read
       id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install the workspace with the released core
+        run: npm install --no-fund --no-audit
+      - name: Show the core version
+        run: node -p "require('./node_modules/@gramlot/gramlot/package.json').version"
+      - name: Server, Node contract tests with coverage
+        run: npm run test:coverage -w server
+      - name: Server, Bun contract tests
+        working-directory: server
+        run: bun test test/server.test.mjs test/quickstart.test.mjs
+      - name: Browser, tests with coverage
+        run: npm run test:coverage -w browser
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --no-fund --no-audit playwright
+          npx playwright install --with-deps chromium
+      - name: Browser, check of exported files in Chromium
+        working-directory: browser
+        run: |
+          mkdir -p build
+          node src/cli.js build examples/hello-world/page.js -o build/hello-world.html
+          node src/cli.js build examples/source-live/page.js -o build/source-live.html
+          node scripts/verify_export_browser.mjs build/hello-world.html ../node_modules/playwright/index.mjs - 'Hello World'
+          node scripts/verify_export_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
+          node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs
+      - name: Upload server coverage
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          files: server/coverage/lcov.info
+          flags: server
+          disable_search: true
+          fail_ci_if_error: false
+      - name: Upload browser coverage
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          files: browser/coverage/lcov.info
+          flags: browser
+          disable_search: true
+          fail_ci_if_error: false
+
+  core-main:
+    # Informational: both packages against the main branch of gramlot-org/gramlot.
+    runs-on: ubuntu-latest
+    continue-on-error: true
     defaults:
       run:
         working-directory: gramlot-js-server
@@ -46,20 +100,29 @@ jobs:
         run: |
           npm --prefix js install --ignore-scripts --package-lock=false
           npm --prefix js run build
-      - name: Link the core as @gramlot/gramlot
-        run: npm install --no-save ../gramlot/js
-      - name: Node contract tests with coverage
-        run: npm run test:coverage
-      - name: Bun contract tests
-        run: bun test test/native.test.mjs test/quickstart.test.mjs
-      - name: Upload coverage
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
-        with:
-          use_oidc: true
-          files: gramlot-js-server/coverage/lcov.info
-          disable_search: true
-          fail_ci_if_error: false
+      - name: Install the workspace and link the core
+        run: |
+          npm install --no-fund --no-audit
+          npm install --no-save --no-fund --no-audit @gramlot/gramlot@file:../gramlot/js
+      - name: Server, Node contract tests
+        run: npm test -w server
+      - name: Server, Bun contract tests
+        working-directory: gramlot-js-server/server
+        run: bun test test/server.test.mjs test/quickstart.test.mjs
+      - name: Browser, tests
+        run: npm test -w browser
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --no-fund --no-audit playwright
+          npx playwright install --with-deps chromium
+      - name: Browser, checks in Chromium, including the sentinel fixture of the core checkout
+        working-directory: gramlot-js-server/browser
+        run: |
+          mkdir -p build
+          node src/cli.js build examples/source-live/page.js -o build/source-live.html
+          node scripts/verify_export_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
+          node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index.mjs
+          node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs
 
   documentation:
     runs-on: ubuntu-latest
@@ -67,6 +130,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: python -m pip install -r requirements-docs.txt
       - run: python scripts/check_docs.py
