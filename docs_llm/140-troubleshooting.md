@@ -14,7 +14,7 @@ errors: `gramlot-browser: <message>`.
 Block ID: **GS-140-005**.
 
 - `Page modules must export a subclass of Page`: no `Page` export, or a second core
-  copy (page imports `@genro/gramlot` or `@gramlot/native-html`, or two
+  copy (page imports `@genro/gramlot` or the former core name `@gramlot/native-html`, or two
   installations linked) → import `@gramlot/gramlot/page`, one installation.
 - `Standalone module not provided: /<name>_aux.js`: custom `mount` without
   `modules` → pass the companion URL.

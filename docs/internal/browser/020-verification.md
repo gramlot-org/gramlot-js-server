@@ -1,5 +1,7 @@
 # 020 · Verification
 
+> **Naming (2026-10-02):** in the dated text of this document, "native" as the label of a release, profile, milestone, adapter, module, API or pages names the scope of the 0.1.0 milestone (no web components, no recipes). That label has no technical meaning; current documents do not use it ([GC-005 §030](https://github.com/gramlot-org/gramlot/blob/main/docs/005-documentation-policy.md#gc-005-030)). "native" for browser controls, DOM events, HTML attributes, DOM operations, Bag events or platform APIs keeps its technical meaning. Dated text is not rewritten.
+
 Document ID: **GS-020**.
 
 [Paired view](../../../docs_llm/internal/browser/020-verification.md).
@@ -16,7 +18,7 @@ inputs, CLI use and preservation of existing output on failure.
 bundle), the esbuild metafile of the WorkerHost bundle (no `binding/inline.js`), the
 CSP hash of the final script bytes, and the `PageBootstrap` subclass that releases
 the Worker without a close beacon.
-`scripts/verify_native_html_browser.mjs` opens an actual exported artifact from file,
+`scripts/verify_export_browser.mjs` opens an actual exported artifact from file,
 blocks HTTP(S), and checks main, Source mutations, optional remote Source and dispose.
 `scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE]` builds the core page
 `avvio` (`js/tests/fixtures/logic/avvio.js` and `avvio_aux.js` of the linked core
@@ -28,8 +30,8 @@ part of the published package, so this check needs a linked core checkout.
 The workflow `.github/workflows/tests.yml` runs on push to `main` and `develop`, on
 pull requests and manually. The required job `published core` installs the core
 from the registry, runs `npm test` with coverage (`coverage/lcov.info`, uploaded to
-Codecov) and the `verify_native_html_browser.mjs` check in headless Chromium for
-`examples/hello-world` and `examples/source-live`. The informational job `core main`
+Codecov), the `verify_export_browser.mjs` check in headless Chromium for
+`examples/hello-world` and `examples/source-live`, and `verify_quickstart_browser.mjs`. The informational job `core main`
 checks out `gramlot-org/gramlot` at `main` beside the repository, links it with
 `npm install --no-save`, and runs the same tests, the sentinel check and the
 source-live browser check. The `documentation` job runs `scripts/check_docs.py`,

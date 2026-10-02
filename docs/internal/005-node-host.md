@@ -4,9 +4,11 @@ orphan: true
 
 # 005 · Node hosting experiment
 
+> **Naming (2026-10-02):** in the dated text of this document, "native" as the label of a release, profile, milestone, adapter, module, API or pages names the scope of the 0.1.0 milestone (no web components, no recipes). That label has no technical meaning; current documents do not use it ([GC-005 §030](https://github.com/gramlot-org/gramlot/blob/main/docs/005-documentation-policy.md#gc-005-030)). "native" for browser controls, DOM events, HTML attributes, DOM operations, Bag events or platform APIs keeps its technical meaning. Dated text is not rewritten.
+
 This guide records the earlier sibling-PoC server and its `npm start` command.
 It is historical evidence, outside native 0.1.0 compatibility. The current
-Node/Bun API and launchers are in [GN-010](010-native-html.md).
+Node/Bun API and launchers are in [GN-010](010-hosts.md).
 
 Document ID: **GN-005**. [Concise mirror](../../docs_llm/internal/005-node-host.md).
 

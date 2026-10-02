@@ -70,12 +70,14 @@ The repository is an npm workspace with two packages:
 
 ## History
 
+> **Naming (2026-10-02):** in the dated text of this document, "native" as the label of a release, profile, milestone, adapter, module, API or pages names the scope of the 0.1.0 milestone (no web components, no recipes). That label has no technical meaning; current documents do not use it ([GC-005 §030](https://github.com/gramlot-org/gramlot/blob/main/docs/005-documentation-policy.md#gc-005-030)). "native" for browser controls, DOM events, HTML attributes, DOM operations, Bag events or platform APIs keeps its technical meaning. Dated text is not rewritten.
+
 The owner approved JavaScript page authoring for the local PoC on 2026-09-16,
 authorized the public `gramlot-js-server` repository on 2026-09-17 and accepted
 the clean-core native 0.1.0 profile on 2026-09-24. GN-005
 (`docs/internal/005-node-host.md`) records the earlier sibling-PoC server, whose
 code was removed on 2026-10-01 and remains in the history before that date;
-GN-010 (`docs/internal/010-native-html.md`) records the native profile and its
+GN-010 (`docs/internal/010-hosts.md`) records the native profile and its
 verification. Neither overrides the native Host/Page contract.
 
 The Browser/Worker profile started in `gramlot-minimal` on 2026-09-24 (core

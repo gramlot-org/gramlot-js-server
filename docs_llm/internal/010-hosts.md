@@ -2,9 +2,9 @@
 orphan: true
 ---
 
-# 010 · Native HTML hosts
+# 010 · Node and Bun hosts
 
-Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract; the adapter itself is not a published package.
+Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract, published on npm as `@gramlot/gramlot-js-server`.
 
 <a id="gn-010-005"></a>
 
@@ -12,8 +12,8 @@ Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract; th
 
 Block ID: **GN-010-005**.
 
-The current clean-core profile is exported as `gramlot-js-server/native` (Node) and
-`gramlot-js-server/bun` (Bun). Each exports `startNativeServer({pages, hostname, port})`.
+`@gramlot/gramlot-js-server` exports `/node` (Node) and `/bun` (Bun), declared in
+`server/package.json`. Each exports `startServer({pages, hostname, port})`.
 `pages` is the installed application's trusted JS pages directory; `port: 0` selects
 an available port. The result exposes `url`, `host`, `server` and asynchronous
 `close()`, which closes sockets and clears page registrations.
@@ -33,13 +33,13 @@ implements both resolve methods.
   (companions and `Page.css` files there); any other file or escaping path 404, other
   methods 405. `Page.css` URLs outside the folder are application assets.
 
-`@gramlot/gramlot` is a peer dependency (same instance as the pages, or
-`instanceof Page` fails). Before core publication, link it without a path in
+`@gramlot/gramlot` (>=0.2.1) is a peer dependency (same instance as the pages, or
+`instanceof Page` fails). Against an unreleased core, link it without a path in
 `package.json`: `npm install --no-save ../gramlot/js`; repeat after a plain `npm install`.
 
 Both bridges use `@gramlot/gramlot/server` and serve the packaged
 `@gramlot/gramlot/runtime` asset. Node translates HTTP streams to Fetch requests;
-Bun uses native Fetch requests. Shared `native-fetch.mjs` owns HTTP routing,
+Bun uses native Fetch requests. Shared `server/src/fetch.mjs` owns HTTP routing,
 bounded payload parsing, response/error mapping and request identity extraction.
 Neutral Host owns page execution, page registrations, ownership checks and TTL.
 JSON `POST /gramlot/close` passes adapter-derived owner identity to
@@ -50,8 +50,7 @@ callback supplies identity without adding HTTP methods to Host; the default anon
 No database or Python worker is loaded. Unexpected errors produce HTTP 500 and
 are delivered to the configurable `onError` callback.
 
-The previous PoC server remains a separate historical entry point. Its sibling-PoC
-runtime and tests do not establish compatibility for this native profile.
+The earlier sibling-PoC server was removed on 2026-10-01 (GN-005).
 
 <a id="gn-010-010"></a>
 
@@ -59,13 +58,14 @@ runtime and tests do not establish compatibility for this native profile.
 
 Block ID: **GN-010-010**.
 
-Run `npm run test:native` for the real Node listener contract and
-`bun test test/native.test.mjs` for Bun. The browser harness accepts an installed
-Playwright module and Chromium executable:
+Node contract: `npm test -w server` (`server/test/server.test.mjs`,
+`quickstart.test.mjs`); Bun, in `server/`: `bun test test/server.test.mjs
+test/quickstart.test.mjs`. Browser harness `server/test/browser.mjs` (starts
+`browser-host.mjs`), run in `server/` with Playwright and Chromium:
 
 ```sh
-node test/native-browser.mjs node /path/to/playwright/index.mjs /path/to/chromium
-node test/native-browser.mjs bun /path/to/playwright/index.mjs /path/to/chromium
+node test/browser.mjs node /path/to/playwright/index.mjs /path/to/chromium
+node test/browser.mjs bun /path/to/playwright/index.mjs /path/to/chromium
 ```
 
 The browser check covers initial main, typed Source insert/delete/update, a remote
@@ -76,12 +76,10 @@ with the core's error naming the node. Framework fixtures may manipulate Source;
 application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
-Gramlot 0.2.0 is released (PyPI, JSR, GitHub `v0.2.0`); the npm name
-`@gramlot/gramlot` is unpublished, so the adapter links a core checkout
-(`npm install --no-save ../gramlot/js`). CI (`.github/workflows/tests.yml`) runs
-the Node and Bun contract tests only against the core's `main`, informational;
-the published-core job waits for the package name decision. No adapter release
-or deployment is part of this profile.
+Core `@gramlot/gramlot` 0.2.1 on npm and JSR; this adapter `@gramlot/gramlot-js-server`
+0.2.1 on npm. CI (`.github/workflows/tests.yml`) runs the Node and Bun contract tests
+in the required job `published core` (registry core) and the informational job
+`core main` (core `main` checkout).
 
 
 <a id="gn-010-015"></a>
