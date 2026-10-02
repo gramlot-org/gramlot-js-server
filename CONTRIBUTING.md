@@ -18,13 +18,13 @@ The link is not saved in `package.json`.
 ```sh
 npm test -w server                       # Node contract and quick-start tests
 (cd server && bun test test/server.test.mjs test/quickstart.test.mjs)   # the same on Bun
-npm test -w browser                      # exporter tests
+npm test -w serverless                   # exporter tests
 npm run test:coverage -w server          # lcov in server/coverage/
-npm run test:coverage -w browser         # lcov in browser/coverage/
+npm run test:coverage -w serverless      # lcov in serverless/coverage/
 .venv/bin/python scripts/check_docs.py   # when documentation changes
 ```
 
-Browser checks of the exporter, from `browser/`:
+Browser checks of the exporter, from `serverless/`:
 
 ```sh
 node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs    # README quick start, file and directory
@@ -42,11 +42,11 @@ node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index
   or documents; no assistant `Co-Authored-By` trailers; no `Generated with …`
   lines.
 - Pair `docs/` and `docs_llm/` guides: namespace GN for the server, GS for
-  the browser exporter, shared Document and Block IDs, lowercase anchors.
+  the serverless exporter, shared Document and Block IDs, lowercase anchors.
   `scripts/check_docs.py` validates and builds both. Internal notes stay in
   `docs/internal/` and `docs_llm/internal/`, out of the published build.
 - The README quick starts are `server/test/fixtures/quickstart/` and
-  `browser/examples/quickstart/`: keep the README, the tutorials and the
+  `serverless/examples/quickstart/`: keep the README, the tutorials and the
   fixtures equal.
 
 ## Releases

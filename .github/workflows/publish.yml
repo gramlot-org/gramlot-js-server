@@ -1,7 +1,7 @@
 name: Publish release
 
 # Run by hand on the version tag (Actions → Publish release → Run workflow → tag vX.Y.Z).
-# npm publishes @gramlot/gramlot-js-server and @gramlot/gramlot-browser with trusted
+# npm publishes @gramlot/gramlot-js-server and @gramlot/gramlot-serverless with trusted
 # publishing from gramlot-org/gramlot-js-server, publish.yml, environment release.
 # The npm job skips a version that is already on the registry, so the first, manual
 # publication of a new package does not fail the run.
@@ -30,7 +30,7 @@ jobs:
           set -euo pipefail
           git merge-base --is-ancestor HEAD origin/main
           version=$(node -p "require('./server/package.json').version")
-          test "$(node -p "require('./browser/package.json').version")" = "$version"
+          test "$(node -p "require('./serverless/package.json').version")" = "$version"
           test "$RELEASE_REF" = "refs/tags/v$version"
           test -f ".github/release-notes/v$version.md"
           if gh release view "v$version" >/dev/null 2>&1; then
@@ -55,7 +55,7 @@ jobs:
       - name: Pack both packages
         run: |
           mkdir -p dist
-          npm pack -w server -w browser --pack-destination dist
+          npm pack -w server -w serverless --pack-destination dist
       - uses: actions/upload-artifact@v4
         with:
           name: distributions

@@ -10,10 +10,10 @@ Document ID: **GS-130**.
 
 Block ID: **GS-130-005**.
 
-`@gramlot/gramlot-browser` (`browser/package.json`), Node ≥ 22:
-`@gramlot/gramlot-browser` → `build`; `/directory` → `buildDirectory`; `/standalone` →
+`@gramlot/gramlot-serverless` (`serverless/package.json`), Node ≥ 22:
+`@gramlot/gramlot-serverless` → `build`; `/directory` → `buildDirectory`; `/standalone` →
 `mount` (window); `/worker-host` → `WorkerHost` (Worker). Command
-`gramlot-browser build PAGE.js -o OUTPUT.html` (`node browser/src/cli.js`). Dependencies
+`gramlot-serverless build PAGE.js -o OUTPUT.html` (`node serverless/src/cli.js`). Dependencies
 `@gramlot/gramlot >=0.2.1`, `@genrojs/builders >=0.4.1`, `esbuild`.
 
 <a id="gs-130-010"></a>
@@ -27,7 +27,7 @@ strict policy ([GS-120-015](120-configuration.md)); `TypeError`s,
 esbuild errors, `HtmlBuilder changed the runtime script: its CSP hash would not
 match`. `buildDirectory({pages, output, assets}) → {output, routes}`: validates,
 stages, renames; `TypeError`s, `Output directory already exists`, the two "same
-Gramlot core installation" errors, esbuild errors. `browser/src/bundles.js` is internal.
+Gramlot core installation" errors, esbuild errors. `serverless/src/bundles.js` is internal.
 
 <a id="gs-130-015"></a>
 

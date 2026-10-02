@@ -13,7 +13,7 @@ Block ID: **GS-125-005**.
 Single file: double-click or `file://`. Directory: `index.html`, routes at
 `<route>/index.html`; relative paths to `assets/`, `assetRoot` = the directory;
 move it as a whole. No network request at start
-(`browser/scripts/verify_quickstart_browser.mjs` blocks HTTP(S)). Recipients need a
+(`serverless/scripts/verify_quickstart_browser.mjs` blocks HTTP(S)). Recipients need a
 browser, not Node.
 
 <a id="gs-125-010"></a>

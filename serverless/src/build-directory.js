@@ -130,7 +130,7 @@ export async function buildDirectory({pages, output, assets = []}) {
         core = resolved;
     }
     if (core.entry !== await realpath(fromBrowser.resolve('@gramlot/gramlot'))) {
-        throw new Error('Pages and @gramlot/gramlot-browser must resolve the same Gramlot core installation');
+        throw new Error('Pages and @gramlot/gramlot-serverless must resolve the same Gramlot core installation');
     }
     await regularFile(join(dirname(core.runtime), 'runtime-notices.json'), 'Runtime notices');
     for (const asset of assets) await regularFile(asset.source, 'Asset source');

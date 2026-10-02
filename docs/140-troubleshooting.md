@@ -6,7 +6,7 @@ Document ID: **GS-140**.
 
 Start errors appear in the browser console: the exported document logs the
 rejection of `mount`, then disposes the Worker. Build errors are printed by the
-command as `gramlot-browser: <message>`.
+command as `gramlot-serverless: <message>`.
 
 <a id="gs-140-005"></a>
 
@@ -69,5 +69,5 @@ Block ID: **GS-140-020**.
 | `Output must be an HTML file` | `-o` without `.html`/`.htm` | Name the output `.html` |
 | esbuild `Could not resolve "node:fs"` (or another Node module) | The page or an import needs Node | Keep page imports browser-compatible; the previous output is untouched |
 | `Output directory already exists: <path>` | `buildDirectory` never replaces a directory | Remove or rename it first |
-| `All Pages must resolve the same Gramlot core installation`, `Pages and @gramlot/gramlot-browser must resolve the same Gramlot core installation` | Pages in different folders resolve different `node_modules`, or the core is linked twice | One `node_modules` with one `@gramlot/gramlot` for the pages and the exporter |
+| `All Pages must resolve the same Gramlot core installation`, `Pages and @gramlot/gramlot-serverless must resolve the same Gramlot core installation` | Pages in different folders resolve different `node_modules`, or the core is linked twice | One `node_modules` with one `@gramlot/gramlot` for the pages and the exporter |
 | `Invalid asset target`, `Asset target conflicts with generated output` | A target with `/` first, `.`/`..`, forbidden characters, or under `assets/workers/` or over a generated file | Use a relative target such as `themes/base/theme.css` |

@@ -14,7 +14,7 @@ Gramlot describes a web interface in Python or JavaScript and keeps it bound to 
 application state in the browser. [The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html)
 explains the core concepts (Page, Source, Data, logic, Host) and lists the repositories.
 
-`@gramlot/gramlot-browser` takes one JavaScript Gramlot page and produces something that
+`@gramlot/gramlot-serverless` takes one JavaScript Gramlot page and produces something that
 opens without a server:
 
 - **one HTML file** (`build`): the page, the Gramlot runtime and a Web Worker in a

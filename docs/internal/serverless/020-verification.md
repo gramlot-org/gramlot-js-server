@@ -4,7 +4,7 @@
 
 Document ID: **GS-020**.
 
-[Paired view](../../../docs_llm/internal/browser/020-verification.md).
+[Paired view](../../../docs_llm/internal/serverless/020-verification.md).
 
 <a id="gs-020-005"></a>
 

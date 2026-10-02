@@ -57,7 +57,7 @@ Block ID: **GN-105-015**.
 
 - Python pages: use [gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn).
 - Pages without a server, as one HTML file or a static folder:
-  use [@gramlot/gramlot-browser](105-introduction.md).
+  use [@gramlot/gramlot-serverless](105-introduction.md).
 - Application assets outside the pages folder (images, fonts, a shared theme):
   the adapter serves only the runtime and the page companions; a front server or
   the application serves the rest ([Deployment](025-deployment.md)).

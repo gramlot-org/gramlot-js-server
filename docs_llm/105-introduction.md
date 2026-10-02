@@ -12,7 +12,7 @@ Block ID: **GS-105-005**.
 
 Gramlot describes a web interface in Python or JavaScript and keeps it bound to the
 application state in the browser; see [The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html).
-`@gramlot/gramlot-browser` exports one JavaScript page to one HTML file (`build`), or
+`@gramlot/gramlot-serverless` exports one JavaScript page to one HTML file (`build`), or
 several pages to one static directory (`buildDirectory`), opened without a server.
 The Page runs in a Web Worker; the window renders and binds. No HTTP, no database,
 no Python. Python pages and served JavaScript pages belong to the other adapters.

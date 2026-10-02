@@ -10,18 +10,18 @@ Document ID: **GS-130**.
 
 Block ID: **GS-130-005**.
 
-`@gramlot/gramlot-browser` (`browser/package.json`) declares four entries, Node 22
+`@gramlot/gramlot-serverless` (`serverless/package.json`) declares four entries, Node 22
 or later:
 
 | Import | Export | Where it runs |
 | --- | --- | --- |
-| `@gramlot/gramlot-browser` | `build({page, output})` | Node, at build time |
-| `@gramlot/gramlot-browser/directory` | `buildDirectory({pages, output, assets})` | Node, at build time |
-| `@gramlot/gramlot-browser/standalone` | `mount(options)` | Browser window |
-| `@gramlot/gramlot-browser/worker-host` | `WorkerHost` | Web Worker |
+| `@gramlot/gramlot-serverless` | `build({page, output})` | Node, at build time |
+| `@gramlot/gramlot-serverless/directory` | `buildDirectory({pages, output, assets})` | Node, at build time |
+| `@gramlot/gramlot-serverless/standalone` | `mount(options)` | Browser window |
+| `@gramlot/gramlot-serverless/worker-host` | `WorkerHost` | Web Worker |
 
-Command: `gramlot-browser build PAGE.js -o OUTPUT.html` (`bin` of the package;
-from the checkout, `node browser/src/cli.js`). Dependencies: `@gramlot/gramlot >=0.2.1`,
+Command: `gramlot-serverless build PAGE.js -o OUTPUT.html` (`bin` of the package;
+from the checkout, `node serverless/src/cli.js`). Dependencies: `@gramlot/gramlot >=0.2.1`,
 `@genrojs/builders >=0.4.1`, `esbuild`.
 
 <a id="gs-130-010"></a>
@@ -40,7 +40,7 @@ Block ID: **GS-130-010**.
   Validates everything before writing, stages the directory and renames it.
   Errors: `TypeError` for the shapes and patterns, `Output directory already
   exists`, the two "same Gramlot core installation" errors, esbuild errors.
-- `browser/src/bundles.js` holds the shared pieces (`checkPage`, `companion`,
+- `serverless/src/bundles.js` holds the shared pieces (`checkPage`, `companion`,
   `workerBundle`, `companionBundle`). They are not package entries.
 
 <a id="gs-130-015"></a>
@@ -55,11 +55,11 @@ Block ID: **GS-130-015**.
 - `Gramlot` instance (core): `state` (`'started'` once the page runs), `source`,
   `data`, `remoteSource(node, method, params)`, `dispose()`. In the export,
   `transport` is the `WorkerTransport` and `dispose()` terminates the Worker.
-- `WorkerTransport` (`browser/src/worker-transport.js`): `open(signal)`,
+- `WorkerTransport` (`serverless/src/worker-transport.js`): `open(signal)`,
   `main(pageId, signal)`, `source(pageId, method, params, signal)`,
   `dispose(error)`; `pending` (outstanding requests), `closed`. A Worker `error`
   or `messageerror` event disposes it and rejects every pending request.
-- `WorkerHost` (`browser/src/worker-host.js`): extends the core `Host`; operations
+- `WorkerHost` (`serverless/src/worker-host.js`): extends the core `Host`; operations
   `open`, `main`, `source` over `postMessage`; an unknown operation answers
   `Unknown Worker operation: <name>`. Errors cross the channel as
   `{name, message}`.
@@ -90,7 +90,7 @@ Block ID: **GS-130-025**.
 | Script | Checks |
 | --- | --- |
 | `npm test` | 20 tests: exporter output and failure handling, directory export, bundles, Worker host and transport, `mount`, the quick start with typing (jsdom) |
-| `browser/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |
-| `browser/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |
-| `browser/scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The core fixture `avvio` under the strict policy: named logic in the window only, a tampered copy blocked (needs a linked core checkout) |
+| `serverless/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |
+| `serverless/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |
+| `serverless/scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The core fixture `avvio` under the strict policy: named logic in the window only, a tampered copy blocked (needs a linked core checkout) |
 | `scripts/check_docs.py` | Paired guides and Sphinx build of both views |

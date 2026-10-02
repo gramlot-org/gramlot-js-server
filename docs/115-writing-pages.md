@@ -41,7 +41,7 @@ called as `method(kwargs)` and returns the value; a controller method as
 `method(node, kwargs)`.
 
 - The exporter bundles the companion as one ES module for the window. The Worker
-  bundle never contains it (`browser/tests/bundles.test.js` checks the esbuild metafile).
+  bundle never contains it (`serverless/tests/bundles.test.js` checks the esbuild metafile).
 - The Worker returns only the URL that names the companion (`/<name>_aux.js`).
   The window replaces it with a Blob URL and `PageBootstrap` imports it before the
   page starts. A failing import stops the start and releases the Worker.

@@ -7,7 +7,7 @@ gramlot-poc with APIs the 0.2.0 core removed, and no test ran them. They remain 
 the history up to commit `9cbbd11` (`serverless/showcase.zip`,
 `serverless/examples/showcase/`). This note records them; it is not a guide.
 
-[Paired view](../../../docs/internal/browser/030-showcase.md).
+[Paired view](../../../docs/internal/serverless/030-showcase.md).
 
 <a id="gs-030-005"></a>
 

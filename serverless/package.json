@@ -1,17 +1,17 @@
 {
-  "name": "@gramlot/gramlot-browser",
+  "name": "@gramlot/gramlot-serverless",
   "version": "0.2.1",
-  "description": "Gramlot exporter: pages as one HTML file or a static directory, run in a browser Web Worker",
+  "description": "No server: pages open from one HTML file or a static directory; the page logic runs in a Web Worker of the browser.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gramlot-org/gramlot-js-server.git",
-    "directory": "browser"
+    "directory": "serverless"
   },
   "homepage": "https://gramlot-js-server.readthedocs.io/",
   "type": "module",
   "bin": {
-    "gramlot-browser": "./src/cli.js"
+    "gramlot-serverless": "./src/cli.js"
   },
   "exports": {
     ".": "./src/build.js",

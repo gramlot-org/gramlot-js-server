@@ -1,7 +1,7 @@
 name: tests
 
 # Both packages of the workspace: server/ (Node.js and Bun host adapter) and
-# browser/ (exporter whose pages run in a browser Web Worker).
+# serverless/ (exporter whose pages run in a browser Web Worker).
 
 on:
   push:
@@ -37,14 +37,14 @@ jobs:
       - name: Server, Bun contract tests
         working-directory: server
         run: bun test test/server.test.mjs test/quickstart.test.mjs
-      - name: Browser, tests with coverage
-        run: npm run test:coverage -w browser
+      - name: Serverless, tests with coverage
+        run: npm run test:coverage -w serverless
       - name: Install Playwright Chromium
         run: |
           npm install --no-save --no-fund --no-audit playwright
           npx playwright install --with-deps chromium
-      - name: Browser, check of exported files in Chromium
-        working-directory: browser
+      - name: Serverless, check of exported files in Chromium
+        working-directory: serverless
         run: |
           mkdir -p build
           node src/cli.js build examples/hello-world/page.js -o build/hello-world.html
@@ -61,13 +61,13 @@ jobs:
           flags: server
           disable_search: true
           fail_ci_if_error: false
-      - name: Upload browser coverage
+      - name: Upload serverless coverage
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
           use_oidc: true
-          files: browser/coverage/lcov.info
-          flags: browser
+          files: serverless/coverage/lcov.info
+          flags: serverless
           disable_search: true
           fail_ci_if_error: false
 
@@ -109,14 +109,14 @@ jobs:
       - name: Server, Bun contract tests
         working-directory: gramlot-js-server/server
         run: bun test test/server.test.mjs test/quickstart.test.mjs
-      - name: Browser, tests
-        run: npm test -w browser
+      - name: Serverless, tests
+        run: npm test -w serverless
       - name: Install Playwright Chromium
         run: |
           npm install --no-save --no-fund --no-audit playwright
           npx playwright install --with-deps chromium
-      - name: Browser, checks in Chromium, including the sentinel fixture of the core checkout
-        working-directory: gramlot-js-server/browser
+      - name: Serverless, checks in Chromium, including the sentinel fixture of the core checkout
+        working-directory: gramlot-js-server/serverless
         run: |
           mkdir -p build
           node src/cli.js build examples/source-live/page.js -o build/source-live.html

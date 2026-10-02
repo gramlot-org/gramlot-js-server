@@ -14,7 +14,7 @@ the Content Security Policy of the exported file.
 
 Block ID: **GS-120-005**.
 
-`build({page, output})` from `@gramlot/gramlot-browser` (`browser/src/build.js`):
+`build({page, output})` from `@gramlot/gramlot-serverless` (`serverless/src/build.js`):
 
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
@@ -25,10 +25,10 @@ It returns `{output, bytes, sha256}`: the absolute path, the size and the SHA-25
 of the file. The document title is the page file name until the page starts, then
 `Page.title`.
 
-The command `gramlot-browser build PAGE.js -o OUTPUT.html` (`browser/src/cli.js`) calls
+The command `gramlot-serverless build PAGE.js -o OUTPUT.html` (`serverless/src/cli.js`) calls
 `build` with the two paths and prints `Built <output>: <bytes> bytes, sha256 <hash>`.
 `-h` prints the usage. Any other form, or an error, prints
-`gramlot-browser: <message>` and exits with status 1.
+`gramlot-serverless: <message>` and exits with status 1.
 
 <a id="gs-120-010"></a>
 
@@ -36,8 +36,8 @@ The command `gramlot-browser build PAGE.js -o OUTPUT.html` (`browser/src/cli.js`
 
 Block ID: **GS-120-010**.
 
-`buildDirectory({pages, output, assets})` from `@gramlot/gramlot-browser/directory`
-(`browser/src/build-directory.js`):
+`buildDirectory({pages, output, assets})` from `@gramlot/gramlot-serverless/directory`
+(`serverless/src/build-directory.js`):
 
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
@@ -47,7 +47,7 @@ Block ID: **GS-120-010**.
 
 Every page, and the exporter itself, must resolve the same installation of
 `@gramlot/gramlot`; otherwise `All Pages must resolve the same Gramlot core
-installation` or `Pages and @gramlot/gramlot-browser must resolve the same Gramlot core
+installation` or `Pages and @gramlot/gramlot-serverless must resolve the same Gramlot core
 installation`. It returns `{output, routes}`.
 
 Generated files: `index.html`, `<route>/index.html` for the other routes,
@@ -73,7 +73,7 @@ connect-src 'none'; base-uri 'none'; form-action 'none'
 
 - The runtime script is allowed by the SHA-256 of its final bytes. A copy of the
   file with one byte changed inside the script does not start
-  (`browser/scripts/verify_worker_sentinel_browser.mjs` checks it).
+  (`serverless/scripts/verify_worker_sentinel_browser.mjs` checks it).
 - `blob:` covers the Worker and the companion module.
 - No `'unsafe-inline'` and no `'unsafe-eval'` for scripts: only named logic runs.
   Inline code fails with the core `EvalError` described in
@@ -91,7 +91,7 @@ policy is not an option of `build`.
 
 Block ID: **GS-120-020**.
 
-`mount(options)` from `@gramlot/gramlot-browser/standalone` (`browser/src/standalone.js`) is
+`mount(options)` from `@gramlot/gramlot-serverless/standalone` (`serverless/src/standalone.js`) is
 called by the exported documents. It is public for custom shells:
 
 | Option | Type | Default | Effect |
@@ -116,7 +116,7 @@ rejecting.
 Block ID: **GS-120-025**.
 
 `new WorkerHost(PageClass, {aux, ...hostOptions})` from
-`@gramlot/gramlot-browser/worker-host` runs inside the Worker. The exporter writes the
+`@gramlot/gramlot-serverless/worker-host` runs inside the Worker. The exporter writes the
 Worker entry itself (`new WorkerHost(Page, {aux})`), so these options are relevant
 to custom Worker bundles only:
 

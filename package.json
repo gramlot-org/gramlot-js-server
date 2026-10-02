@@ -4,7 +4,7 @@
   "type": "module",
   "workspaces": [
     "server",
-    "browser"
+    "serverless"
   ],
   "engines": {
     "node": ">=22"

@@ -4,9 +4,9 @@ Document ID: **GS-110**.
 
 [Paired view](../docs_llm/110-tutorial.md).
 
-Every step below is run by `browser/tests/quickstart.test.js` and by
-`browser/scripts/verify_quickstart_browser.mjs` in headless Chromium; the files are in
-`browser/examples/quickstart/`.
+Every step below is run by `serverless/tests/quickstart.test.js` and by
+`serverless/scripts/verify_quickstart_browser.mjs` in headless Chromium; the files are in
+`serverless/examples/quickstart/`.
 
 <a id="gs-110-005"></a>
 
@@ -23,7 +23,7 @@ npm install
 ```
 
 A page is one JavaScript module with its companion beside it. The tutorial uses
-`browser/examples/quickstart/`:
+`serverless/examples/quickstart/`:
 
 ```text
 examples/quickstart/
@@ -97,7 +97,7 @@ node src/cli.js build examples/quickstart/page.js -o build/hello.html
 Output of the run:
 
 ```text
-Built /…/gramlot-js-server/browser/build/hello.html: 2113423 bytes, sha256 72fb5c76…
+Built /…/gramlot-js-server/serverless/build/hello.html: 2113423 bytes, sha256 72fb5c76…
 ```
 
 Open `build/hello.html` in the browser (double-click, or `file://…/build/hello.html`).
@@ -153,7 +153,7 @@ node examples/quickstart/export.mjs build/site
 Output of the run, and the directory it writes:
 
 ```text
-Exported index to /…/gramlot-js-server/browser/build/site
+Exported index to /…/gramlot-js-server/serverless/build/site
 build/site/
 ├── index.html
 ├── theme.css

@@ -15,7 +15,7 @@ if (!playwrightEntry) throw new Error('Usage: verify_worker_sentinel_browser.mjs
 const core = await realpath(fileURLToPath(new URL('../../node_modules/@gramlot/gramlot', import.meta.url)));
 const page = join(core, 'tests/fixtures/logic/avvio.js');
 const engine = (await import(pathToFileURL(resolve(playwrightEntry))))[engineName];
-const folder = await mkdtemp(join(tmpdir(), 'gramlot-browser-sentinel-'));
+const folder = await mkdtemp(join(tmpdir(), 'gramlot-serverless-sentinel-'));
 let browser;
 try {
     const artifact = join(folder, 'avvio.html');

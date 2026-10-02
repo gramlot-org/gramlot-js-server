@@ -13,13 +13,13 @@ the options of `build`, `buildDirectory` and `mount`, and the policy of the file
 
 Block ID: **GS-120-005**.
 
-`build({page, output})` (`@gramlot/gramlot-browser`): `page` `.js`/`.mjs` path
+`build({page, output})` (`@gramlot/gramlot-serverless`): `page` `.js`/`.mjs` path
 (`Standalone pages must be JavaScript (.js or .mjs)`; `*_aux` refused); `output`
 `.html`/`.htm` (`Output must be an HTML file`), parents created, temporary file
 renamed, so a failed build keeps the existing output. Returns `{output, bytes,
 sha256}`. Title: the file name until start, then `Page.title`. Command
-`gramlot-browser build PAGE.js -o OUTPUT.html` prints `Built <output>: <bytes>
-bytes, sha256 <hash>`; `-h` usage; errors `gramlot-browser: <message>`, exit 1.
+`gramlot-serverless build PAGE.js -o OUTPUT.html` prints `Built <output>: <bytes>
+bytes, sha256 <hash>`; `-h` usage; errors `gramlot-serverless: <message>`, exit 1.
 
 <a id="gs-120-010"></a>
 
@@ -27,7 +27,7 @@ bytes, sha256 <hash>`; `-h` usage; errors `gramlot-browser: <message>`, exit 1.
 
 Block ID: **GS-120-010**.
 
-`buildDirectory({pages, output, assets = []})` (`@gramlot/gramlot-browser/directory`):
+`buildDirectory({pages, output, assets = []})` (`@gramlot/gramlot-serverless/directory`):
 `pages` route → absolute `.js`/`.mjs`, `index` required, routes
 `^[a-z][a-z0-9_-]*$`; `output` must not exist (`Output directory already exists`),
 staged then renamed; `assets` `{source: absolute file, target: relative path
@@ -51,7 +51,7 @@ connect-src 'none'; base-uri 'none'; form-action 'none'
 ```
 
 Script allowed by the hash of its final bytes (a changed byte blocks the start;
-checked by `browser/scripts/verify_worker_sentinel_browser.mjs`); `blob:` for Worker and
+checked by `serverless/scripts/verify_worker_sentinel_browser.mjs`); `blob:` for Worker and
 companion; no `'unsafe-inline'`/`'unsafe-eval'`: named logic only
 ([Troubleshooting](140-troubleshooting.md)); inline styles only;
 `data:`/`blob:` images; no connections. Only profile; no permissive profile; not an
@@ -63,7 +63,7 @@ option of `build`.
 
 Block ID: **GS-120-020**.
 
-`mount(options)` (`@gramlot/gramlot-browser/standalone`): `workerUrl` (required);
+`mount(options)` (`@gramlot/gramlot-serverless/standalone`): `workerUrl` (required);
 `modules` `{}` (companion URL → import URL; missing: `Standalone module not
 provided: <url>`); `element` `null`; `rootId` `'gramlot-root'`; `document`
 `globalThis.document`; `signal` (abort disposes the Worker, rejects with the
@@ -79,7 +79,7 @@ disposes Worker and half-created instance.
 Block ID: **GS-120-025**.
 
 `new WorkerHost(PageClass, {aux = null, pageTtl = 1800, maxPages = 1000, …})`
-(`@gramlot/gramlot-browser/worker-host`), in the Worker. The exporter writes
+(`@gramlot/gramlot-serverless/worker-host`), in the Worker. The exporter writes
 `new WorkerHost(Page, {aux})` itself; options matter for custom Worker bundles.
 Other core Host options are server URLs, no effect in a Worker. One page (`/`);
 `resolveResources` returns `Page.css` as written and the companion URL.
