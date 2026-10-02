@@ -111,6 +111,6 @@ jobs:
             if npm view "$name@$version" version >/dev/null 2>&1; then
               echo "$name@$version is already on npm"
             else
-              npm publish "$tarball" --access public
+              npm publish "./$tarball" --access public
             fi
           done
