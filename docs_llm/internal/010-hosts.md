@@ -76,8 +76,8 @@ with the core's error naming the node. Framework fixtures may manipulate Source;
 application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
-Core `@gramlot/gramlot` 0.2.1 on npm and JSR; this adapter `@gramlot/gramlot-js-server`
-0.2.2 on npm. CI (`.github/workflows/tests.yml`) runs the Node and Bun contract tests
+Core `@gramlot/gramlot` 0.2.3 on npm and JSR; this adapter `@gramlot/gramlot-js-server`
+0.2.3 on npm. CI (`.github/workflows/tests.yml`) runs the Node and Bun contract tests
 in the required job `published core` (registry core) and the informational job
 `core main` (core `main` checkout).
 
