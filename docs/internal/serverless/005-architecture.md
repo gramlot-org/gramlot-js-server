@@ -56,14 +56,13 @@ Block ID: **GS-005-020**.
 
 Node-specific imports fail browser bundling.
 The single-file profile requires self-contained styling; its CSP blocks external CSS.
-It applies the strict CSP profile: `script-src` allows the runtime script by the
-SHA-256 hash of its final bytes and `blob:` for the Worker and the companion, without
-`'unsafe-inline'` and `'unsafe-eval'`. Only named logic runs. The core reports
-inline code blocked by the CSP with its own error; this repository does not test
-inline code under the CSP. The exporter offers no permissive profile. The directory profile
+Its CSP: `script-src` allows the runtime script by the SHA-256 hash of its final
+bytes, `'unsafe-eval'` and `blob:` for the Worker and the companion, without
+`'unsafe-inline'`; `connect-src *`. Named logic and the inline code of the received
+Source run (core amendment 11.53); `serverless/scripts/verify_inline_browser.mjs`
+checks inline code of main and of a remote Source in Chromium. The directory profile
 writes no CSP (core amendment 11.40).
-The directory profile supports declared Page.css with explicitly exported assets. CSP blocks network connections; it is not a static proof
-that application code never attempts a request. The exporter has no custom runtime,
+The directory profile supports declared Page.css with explicitly exported assets. CSP leaves network connections open. The exporter has no custom runtime,
 manual application DOM construction, eval bootstrap or fallback compiler.
 
 Runtime license notices are embedded as inert JSON metadata in the HTML head,

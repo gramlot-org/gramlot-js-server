@@ -64,5 +64,7 @@ Block ID: **GS-130-025**.
 `npm test` (20 tests, quick start with typing in jsdom);
 `verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` (file and
 directory export in a real browser); `verify_export_browser.mjs HTML PLAYWRIGHT
-EXECUTABLE TEXT [METHOD] [ENGINE]`; `verify_worker_sentinel_browser.mjs PLAYWRIGHT
+EXECUTABLE TEXT [METHOD] [ENGINE]`; `verify_inline_browser.mjs HTML PLAYWRIGHT
+[EXECUTABLE] [ENGINE]` (inline code of main and a remote Source, no CSP violation);
+`verify_worker_sentinel_browser.mjs PLAYWRIGHT
 [ENGINE] [EXECUTABLE]` (linked core checkout); `scripts/check_docs.py`.

@@ -25,23 +25,25 @@ Block ID: **GS-140-005**.
 
 <a id="gs-140-010"></a>
 
-## 010 · Inline code blocked by the Content Security Policy
+## 010 · Inline code refused
 
 Block ID: **GS-140-010**.
 
-```text
-EvalError: dataFormula 'dataFormula_0' 'formula': inline code blocked by the
-Content Security Policy of the page (no 'unsafe-eval'); move the code to named
-logic (a method of the page companion _aux.js) or serve the page with the
-permissive CSP profile, which allows 'unsafe-eval'
-```
+The single file runs the inline code (`formula`, `script`, `==`, `action`,
+`connect_on<event>`, `_if`/`_else`) of the Source its Worker builds. The core
+refuses these cases, naming the node and the attribute:
 
-The page uses an inline declaration (`formula`, `script`, `==`, `action`,
-`connect_on<event>`, `_if`/`_else`) and the single-file export has no permissive
-profile. Move the code to a method of `<name>_aux.js` and name it with `func`.
-The error names the node and the attribute; nothing is written to the Data, and
-the Worker is disposed. The directory export carries no policy of its own: it
-does not block inline code by itself.
+| Message | Cause | Fix |
+| --- | --- | --- |
+| `inline code runs only as received with the Source (main or a remote Source); a text written later is not run: use named logic` | Page code changed a code attribute after the start, or inserted a node with inline code in the live Source | Write the code in `main` or in a Source method, or move it to a method of `<name>_aux.js` named with `func` |
+| `'<attribute>' is inline code and cannot be the pointer '<pointer>'; inline code is never read from Data` | A code attribute holds `^path` or `=path` | Pass the data as a parameter (`a='^.a'`) and write the code as text |
+| `'<attribute>' has the form of a native event handler, run by the browser outside Gramlot; write connect_<attribute> for an event, or rename the attribute` | An attribute such as `onclick` | Use `connect_onclick` |
+| `'<attribute>' holds a javascript: URL, run by the browser as code; write connect_onclick or the action of a button instead` | `href`, `src`, `formaction` or `xlink:href` starts with `javascript:` | Use `connect_onclick` or a button `action` |
+
+A file built with gramlot-js-server 0.2.2 has no `'unsafe-eval'`: its inline code
+fails with `EvalError: … inline code blocked by the Content Security Policy of the
+page (no 'unsafe-eval') …`. Rebuild it with 0.2.3. The directory export carries no
+policy of its own.
 
 <a id="gs-140-015"></a>
 

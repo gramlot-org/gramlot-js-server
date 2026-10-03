@@ -23,7 +23,7 @@ browser, not Node.
 Block ID: **GS-125-010**.
 
 Any static server. Single file as `text/html`; the policy is in the document, no
-header needed; `connect-src 'none'` holds over `https://` too. Directory as is,
+header needed; connections open (`connect-src *`). Directory as is,
 under any prefix, with `text/html`, `text/javascript` (`assets/`) and `text/css`;
 no rewrites; the documents carry no policy, the server may set one: the
 documents load scripts from `assets/` and start a Blob Worker and a Blob module,
@@ -38,7 +38,9 @@ build; `assets/standalone.js` changes with the core version.
 Block ID: **GS-125-015**.
 
 Nothing dynamic: only imported code, companions, listed assets. The companion is
-public: no server-only logic in an export. No inline code in the single file. The
+public: no server-only logic in an export. The single file runs the inline code of its
+Source; the core runs no code written later, refuses inline code read from Data,
+`on<event>` attributes and `javascript:` URLs. The
 Worker talks to no server. Build pages from trusted folders only: imports are
 bundled as they are.
 

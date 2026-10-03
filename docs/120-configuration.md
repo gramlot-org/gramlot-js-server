@@ -66,24 +66,27 @@ Block ID: **GS-120-015**.
 `build` writes one `<meta http-equiv="Content-Security-Policy">`:
 
 ```text
-default-src 'none'; script-src 'sha256-<hash of the runtime script>' blob:;
+default-src 'none'; script-src 'sha256-<hash of the runtime script>' 'unsafe-eval' blob:;
 worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:;
-connect-src 'none'; base-uri 'none'; form-action 'none'
+connect-src *; base-uri 'none'; form-action 'none'
 ```
 
 - The runtime script is allowed by the SHA-256 of its final bytes. A copy of the
   file with one byte changed inside the script does not start
   (`serverless/scripts/verify_worker_sentinel_browser.mjs` checks it).
 - `blob:` covers the Worker and the companion module.
-- No `'unsafe-inline'` and no `'unsafe-eval'` for scripts: only named logic runs.
-  Inline code fails with the core `EvalError` described in
-  [Troubleshooting](140-troubleshooting.md).
+- No `'unsafe-inline'`. `'unsafe-eval'` lets the page compile the inline code
+  (`formula`, `script`, `==`, `action`, `connect_on<event>`, `_if`/`_else`) of the
+  Source it receives from its Worker: named logic and inline code run. The core
+  runs only the inline code received with the Source; code written later in the
+  page is refused ([Troubleshooting](140-troubleshooting.md)).
 - Styles: inline `style` attributes only. Images: `data:` and `blob:` URLs only.
-  No `fetch`, `XMLHttpRequest` or WebSocket from the document (`connect-src 'none'`).
+- Connections are open (`connect-src *`): `fetch`, `XMLHttpRequest` and WebSocket
+  work from the document, until a page can declare its own policy.
 
-This is the only profile of the file. The permissive profile of the server
-adapters (`'unsafe-eval'`, inline code allowed) does not exist here, and the
-policy is not an option of `build`.
+This is the only profile of the file, from gramlot-js-server 0.2.3 (0.2.2 wrote no
+`'unsafe-eval'` and `connect-src 'none'`). The policy is not an option of
+`build`.
 
 <a id="gs-120-020"></a>
 
