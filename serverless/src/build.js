@@ -13,11 +13,13 @@ const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 const options = {bundle: true, platform: 'browser', format: 'iife', write: false, legalComments: 'inline'};
 const sha256 = text => createHash('sha256').update(text);
 
-/** Strict profile: the runtime script is allowed by the hash of its final bytes, no
- * 'unsafe-inline' and no 'unsafe-eval'; only named logic runs. */
+/** Profile of the single file: the runtime script is allowed by the hash of its final bytes, no
+ * 'unsafe-inline'; 'unsafe-eval' lets the page compile the inline code of the Source it receives from
+ * its Worker, the only inline code the core runs. Named logic runs as well. Connections stay open
+ * (`connect-src *`) until the page can declare its own CSP. */
 function policy(script) {
-    return `default-src 'none'; script-src 'sha256-${sha256(script).digest('base64')}' blob:; worker-src blob:; ` +
-        "style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'";
+    return `default-src 'none'; script-src 'sha256-${sha256(script).digest('base64')}' 'unsafe-eval' blob:; worker-src blob:; ` +
+        "style-src 'unsafe-inline'; img-src data: blob:; connect-src *; base-uri 'none'; form-action 'none'";
 }
 
 /** Bundle one JS Page without executing it. Runtime behavior belongs to Gramlot. */

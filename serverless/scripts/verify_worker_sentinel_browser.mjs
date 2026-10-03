@@ -1,4 +1,4 @@
-/** Real browser: the core page avvio built as one standalone file under the strict CSP.
+/** Real browser: the core page avvio built as one standalone file under its CSP.
  * Its companion avvio_aux.js counts every call on globalThis.gramlotSentinel: the
  * window runs the _init formula, the Worker never runs the companion. */
 import assert from 'node:assert/strict';
@@ -57,7 +57,7 @@ try {
     assert.deepEqual(await blocked.evaluate(() => globalThis.violations), ['script-src-elem inline']);
     assert.equal(blocked.workers().length, 0);
     assert.deepEqual(external, []);
-    console.log(`${engineName} ${browser.version()} PASS: avvio under the strict CSP (script hash, no 'unsafe-eval'), ` +
+    console.log(`${engineName} ${browser.version()} PASS: avvio under the CSP of the single file (script hash, no 'unsafe-inline'), ` +
         `named logic in the window (sentinel ${window}), Worker sentinel 0, altered script blocked, no HTTP(S).`);
 } finally {
     await browser?.close();
