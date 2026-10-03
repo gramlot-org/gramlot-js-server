@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdir, mkdtemp, rm, symlink, writeFile} from 'node:fs/promises';
+import {mkdir, mkdtemp, readFile, rm, symlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Host, Page, source} from '@gramlot/gramlot/server';
@@ -153,7 +153,8 @@ test('companions and Page.css files below the pages folder; every other file 404
     const app = await startServer({pages, mountPath: '/app'});
     try {
         for (const [path, type, body] of [['/themes/theme.css', 'text/css', 'body { margin: 0; }'],
-            ['/index.css', 'text/css', 'h1 { color: red; }'], ['/index_aux.js', 'text/javascript', 'export class Logic {}']]) {
+            ['/index.css', 'text/css', 'h1 { color: red; }'], ['/index_aux.js', 'text/javascript', 'export class Logic {}'],
+            ['/index.js', 'text/javascript', await readFile(join(pages, 'index.js'), 'utf8')]]) {
             const response = await fetch(app.url + path);
             assert.equal(response.status, 200);
             assert.ok(response.headers.get('content-type').startsWith(type));
@@ -162,11 +163,29 @@ test('companions and Page.css files below the pages folder; every other file 404
             assert.equal(head.status, 200);
             assert.equal(await head.text(), '');
         }
-        for (const path of ['/index.js', '/index.md', '/missing.css', '/escape.css', '/assets/app.css',
+        for (const path of ['/index.mjs', '/index.md', '/missing.js', '/missing.css', '/escape.css', '/assets/app.css',
             '/%2e%2e/outside.css', '/themes/%2e%2e/%2e%2e/outside.css', '/x%00.css', '/app/index.css']) {
             assert.equal((await fetch(app.url + path)).status, 404, path);
         }
         assert.equal((await fetch(app.url + '/index.css', {method: 'POST'})).status, 405);
         assert.equal((await fetch(app.url + '/%E0.css')).status, 400);
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
+});
+
+test('a page module that exports Logic is the page logic and is served as JavaScript', async () => {
+    const folder = await mkdtemp(join(tmpdir(), 'gramlot-js-server-'));
+    const module = `import {Page as BasePage} from ${JSON.stringify(PAGE_MODULE)};
+export class Page extends BasePage { main(root) { root.h1('One module'); } }
+export class Logic { greeting(kwargs) { return 'Hello, ' + kwargs.name; } }
+`;
+    await writeFile(join(folder, 'single.js'), module);
+    const app = await startServer({pages: folder});
+    try {
+        const {argument} = bootstrap(await (await fetch(app.url + '/single')).text());
+        assert.deepEqual(argument.resources, {css: [], js: [{url: '/single.js', group: null}]});
+        const response = await fetch(app.url + '/single.js');
+        assert.equal(response.status, 200);
+        assert.ok(response.headers.get('content-type').startsWith('text/javascript'));
+        assert.equal(await response.text(), module);
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });

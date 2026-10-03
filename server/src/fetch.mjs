@@ -3,7 +3,7 @@ import {readFile, realpath, stat} from 'node:fs/promises';
 import {isAbsolute, join, relative, sep} from 'node:path';
 import {FileHost, PageExpired, PageNotFound, SourceNotFound, HostCapacity} from '@gramlot/gramlot/server';
 
-const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '_aux.js': 'text/javascript; charset=utf-8'};
+const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8'};
 
 const inside = (filename, folder) => {
     const rel = relative(folder, filename);
@@ -24,8 +24,8 @@ async function companionFile(pagesDir, path) {
 
 /** mountPath is passed to openPage as the mount prefix of browser URLs; request paths
  * arrive without it, at the root or behind a server that strips the mount. GET and HEAD
- * serve a .css or _aux.js file whose real path is below host.pagesDir: the FileHost
- * companions and Page.css files placed there. contentSecurityPolicy is the application's
+ * serve a .css or .js file whose real path is below host.pagesDir: the page modules,
+ * whose Logic reaches the browser, the FileHost companions and Page.css files placed there. contentSecurityPolicy is the application's
  * policy, sent on each HTML page with {nonce} replaced by the bootstrap nonce.
  */
 export async function createDispatch({pages, host = null, ownerForRequest = async () => null,

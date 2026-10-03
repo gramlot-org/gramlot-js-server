@@ -32,6 +32,6 @@ test('quick start: the Hello page opens, its Source binds the field and the form
         assert.equal(logic.status, 200);
         assert.match(await logic.text(), /greeting\(kwargs\)/);
         assert.equal((await fetch(app.url + '/index.css')).status, 200);
-        assert.equal((await fetch(app.url + '/index.js')).status, 404);
+        assert.equal((await fetch(app.url + '/index.js')).status, 200);
     } finally { await app.close(); }
 });
