@@ -1,8 +1,8 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
-import {checkPage, companion, companionBundle, workerBundle} from './bundles.js';
+import {checkPage, inlineStylesheets, loadPage, logicBundle, logicModule, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
-import {writeFile, mkdir, rename, rm} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, rename, rm} from 'node:fs/promises';
 import {dirname, resolve, extname, basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
@@ -22,19 +22,23 @@ function policy(script) {
         "style-src 'unsafe-inline'; img-src data: blob:; connect-src *; base-uri 'none'; form-action 'none'";
 }
 
-/** Bundle one JS Page without executing it. Runtime behavior belongs to Gramlot. */
+/** Bundle one JS Page into one HTML file. The page module is imported, as FileHost does, to
+ * read Page.css; main runs only in the browser. Runtime behavior belongs to Gramlot. */
 export async function build({page, output}) {
     const input = resolve(page);
     const destination = resolve(output);
     if (!['.js', '.mjs'].includes(extname(input))) throw new TypeError('Standalone pages must be JavaScript (.js or .mjs)');
     if (!['.html', '.htm'].includes(extname(destination))) throw new TypeError('Output must be an HTML file');
     checkPage(input);
-    const aux = await companion(input);
-    const worker = (await workerBundle(input, aux, options)).text;
-    const modules = aux ? {[aux.url]: await companionBundle(aux, options)} : {};
-    const runtime = (await bundle({...options, stdin: {
+    const module = await loadPage(input);
+    const logic = await logicModule(input, module);
+    const styles = await Promise.all((await inlineStylesheets(input, module.Page)).map(file => readFile(file, 'utf8')));
+    const worker = (await workerBundle(input, options, {logic: logic?.url ?? null, inlineCss: true})).text;
+    const modules = logic ? {[logic.url]: await logicBundle(logic, options)} : {};
+    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
+export {Page, source} from './src/standalone.js';
 const blob = text => URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
 const workerUrl = blob(${JSON.stringify(worker)});
 const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));
@@ -52,6 +56,8 @@ mount({workerUrl, modules}).then(app => { globalThis.gramlot=app; })
     head.meta({name: 'viewport', content: 'width=device-width,initial-scale=1'});
     head.meta({'http-equiv': 'Content-Security-Policy', content: policy(script)});
     head.title(basename(input, extname(input)));
+    // Page.css and foo.css, in load order; the policy allows inline styles only.
+    for (const text of styles) head.style(text.replace(/<\/style/gi, '<\\/style'));
     const body = html.body();
     body.div({id: 'gramlot-root'});
     // Preserve attribution as inert metadata, without adding application UI.

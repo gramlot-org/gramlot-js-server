@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp, writeFile, readFile, rm, stat} from 'node:fs/promises';
+import {mkdir, mkdtemp, writeFile, readFile, rm, stat} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {buildDirectory} from '../src/build-directory.js';
+import {buildDirectory, folderPages} from '../src/build-directory.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -12,8 +14,9 @@ async function fixture(t) {
     t.after(() => rm(folder, {recursive: true, force: true}));
     const page = join(folder, 'page.js');
     await writeFile(page, `import {Page as BasePage} from '@gramlot/gramlot/page';
-throw new Error('Page code must run only inside the Worker');
-export class Page extends BasePage { main(root) { root.h1('Directory page'); } }`);
+export class Page extends BasePage {
+    main(root) { if (typeof WorkerGlobalScope === 'undefined') throw new Error('main runs only in the Worker'); root.h1('Directory page'); }
+}`);
     return {folder, page, output: join(folder, 'dist')};
 }
 
@@ -56,7 +59,8 @@ test('rejects invalid routes, asset traversal and collisions before creating out
     await assert.rejects(buildDirectory({pages: {index: page, '../escape': page}, output}), /Invalid route/);
     await assert.rejects(buildDirectory({pages: {e01: page}, output}), /index route/);
     await assert.rejects(buildDirectory({pages: {index: 'page.js'}, output}), /absolute/);
-    for (const target of ['../outside.css', '/absolute.css', 'assets/standalone.js', 'assets/workers/e01.js']) {
+    for (const target of ['../outside.css', '/absolute.css', 'assets/standalone.js', 'assets/workers/e01.js',
+        'assets/styles/index.css']) {
         await assert.rejects(buildDirectory({pages: {index: page, e01: page}, output,
             assets: [{source: asset, target}]}), /Invalid asset target|conflicts/);
     }
@@ -83,4 +87,52 @@ test('a companion beside the page reaches the window bootstrap; a *_aux page is 
     assert.match(bootstrap, /gramlotSentinel/);
     await assert.rejects(buildDirectory({pages: {index: join(root, 'tests/fixtures/companion/page_aux.js')},
         output: join(folder, 'aux')}), /page companion, not a page/);
+});
+
+test('the page module logic, foo.css and a core theme reach the directory', async t => {
+    const {output} = await fixture(t);
+    await buildDirectory({pages: {index: join(root, 'tests/fixtures/page-module/page.js')}, output});
+    const bootstrap = await readFile(join(output, 'assets/workers/index.js'), 'utf8');
+    assert.ok(bootstrap.includes('"/page.js":'));
+    assert.match(bootstrap, /gramlotModuleSentinel/);
+    assert.ok(bootstrap.includes('\\"stylesheet\\": \\"/assets/styles/index.css\\"'));
+    assert.equal(await readFile(join(output, 'assets/styles/index.css'), 'utf8'), '#pronto { font-weight: 700; }\n');
+    const theme = createRequire(import.meta.url).resolve('@gramlot/gramlot/themes/gramlot-base/theme.css');
+    assert.equal(await readFile(join(output, 'themes/gramlot-base/theme.css'), 'utf8'), await readFile(theme, 'utf8'));
+    // local.css is not an asset of this call: buildDirectory copies only the listed assets.
+    await assert.rejects(stat(join(output, 'local.css')), {code: 'ENOENT'});
+});
+
+test('a folder: first-level modules are pages, other files are assets, a bad name or a module without Page fails', async t => {
+    const {folder} = await fixture(t);
+    const site = join(folder, 'site');
+    await mkdir(join(site, 'lib'), {recursive: true});
+    await mkdir(join(site, 'img'), {recursive: true});
+    const page = text => `import {Page as BasePage} from '@gramlot/gramlot/page';
+import {label} from './lib/label.js';
+export class Page extends BasePage { main(root) { root.h1(label(${JSON.stringify(text)})); } }`;
+    await writeFile(join(site, 'index.js'), page('Home'));
+    await writeFile(join(site, 'about.js'), page('About'));
+    await writeFile(join(site, 'about.css'), 'h1 { color: navy; }');
+    await writeFile(join(site, 'lib', 'label.js'), 'export const label = text => text.toUpperCase();');
+    await writeFile(join(site, 'img', 'logo.svg'), '<svg/>');
+    await writeFile(join(site, '.DS_Store'), 'x');
+    const {pages, assets} = await folderPages(site);
+    assert.deepEqual(pages, {about: join(site, 'about.js'), index: join(site, 'index.js')});
+    assert.deepEqual(assets.map(({target}) => target).sort(), ['about.css', 'img/logo.svg']);
+    const output = join(folder, 'dist');
+    const stdout = execFileSync(process.execPath, [join(root, 'src/cli.js'), 'build', site, '-o', output], {encoding: 'utf8'});
+    assert.match(stdout, /Built .*dist: 2 pages \(about, index\)/);
+    assert.match(await readFile(join(output, 'assets/workers/about.js'), 'utf8'), /toUpperCase/);
+    assert.equal(await readFile(join(output, 'assets/styles/about.css'), 'utf8'), 'h1 { color: navy; }');
+    assert.equal(await readFile(join(output, 'img/logo.svg'), 'utf8'), '<svg/>');
+    await assert.rejects(stat(join(output, '.DS_Store')), {code: 'ENOENT'});
+    await assert.rejects(stat(join(output, 'lib/label.js')), {code: 'ENOENT'});
+
+    await writeFile(join(site, 'helper.js'), 'export const value = 1;');
+    assert.throws(() => execFileSync(process.execPath, [join(root, 'src/cli.js'), 'build', site, '-o', join(folder, 'dist2')],
+        {stdio: 'pipe'}), error => /The module exports no class Page: .*helper\.js/.test(error.stderr));
+    await rm(join(site, 'helper.js'));
+    await writeFile(join(site, 'Chi siamo.js'), page('x'));
+    await assert.rejects(folderPages(site), /Page file Chi siamo\.js: a page name starts with a lowercase letter/);
 });

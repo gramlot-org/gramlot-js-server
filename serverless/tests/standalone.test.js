@@ -166,21 +166,21 @@ test('PageBootstrap writes Page.css links and receives the Worker transport in i
     assert.equal(endpoints[0].terminated(), true);
 });
 
-test('the window imports the companion named by the Worker and registers its Logic', async t => {
-    const endpoints = workers(t, Formula, {aux: '/page_aux.js'});
+test('the window imports the logic module named by the Worker and registers its Logic', async t => {
+    const endpoints = workers(t, Formula, {logic: '/page_aux.js'});
     const doc = document();
     const app = await mount({workerUrl: 'page-worker.js', document: doc, modules: {
         '/page_aux.js': module('export class Logic { prepara(kwargs) { return `${kwargs.base}: window`; } }'),
     }});
     assert.equal(doc.title, 'Companion');
     assert.equal(doc.querySelector('#pronto').textContent, 'ok: window');
-    assert.equal(endpoints[0].host.aux, '/page_aux.js');
+    assert.equal(endpoints[0].host.logic, '/page_aux.js');
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
 });
 
-test('a missing or failing companion stops startup and releases the Worker', async t => {
-    const endpoints = workers(t, Formula, {aux: '/page_aux.js'});
+test('a missing or failing logic module stops startup and releases the Worker', async t => {
+    const endpoints = workers(t, Formula, {logic: '/page_aux.js'});
     await assert.rejects(mount({workerUrl: 'page-worker.js', document: document()}),
         {name: 'TypeError', message: 'Standalone module not provided: /page_aux.js'});
     assert.equal(endpoints[0].terminated(), true);
@@ -212,4 +212,15 @@ test('explicit assetRoot resolves declared root CSS inside a local export direct
     await assert.rejects(mount({workerUrl: 'page-worker.js', document: document(),
         assetRoot: 'file:///export/site/'}), /root-relative without traversal/);
     assert.equal(escaping[0].terminated(), true);
+});
+
+test('the Worker returns Page.css then the same-name stylesheet, and no CSS with inlineCss', async () => {
+    class Styled extends Hello { static css = ['/theme.css']; }
+    const linked = channel(Styled, {stylesheet: '/assets/styles/index.css', logic: '/index.js'});
+    assert.deepEqual((await linked.transport.open()).resources,
+        {css: ['/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}]});
+    linked.transport.dispose();
+    const inline = channel(Styled, {stylesheet: '/assets/styles/index.css', inlineCss: true});
+    assert.deepEqual((await inline.transport.open()).resources, {css: [], js: []});
+    inline.transport.dispose();
 });

@@ -1,14 +1,14 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
-import {checkPage, companion, companionBundle, workerBundle} from './bundles.js';
+import {checkPage, loadPage, logicBundle, logicModule, pageStylesheet, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
-import {copyFile, mkdir, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
+import {copyFile, mkdir, readdir, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const fromBrowser = createRequire(import.meta.url);
 const standalone = fileURLToPath(new URL('./standalone.js', import.meta.url));
 import {randomUUID} from 'node:crypto';
-import {dirname, extname, isAbsolute, join, resolve} from 'node:path';
+import {basename, dirname, extname, isAbsolute, join, relative, resolve, sep} from 'node:path';
 
 const workerOptions = {
     bundle: true, platform: 'browser', format: 'iife', target: 'es2022',
@@ -61,7 +61,7 @@ function validate({pages, output, assets}) {
             throw new TypeError('Each asset needs an absolute source and a relative target');
         }
         const target = checkTarget(asset.target);
-        if (target === 'assets/workers' || target.startsWith('assets/workers/') ||
+        if (['assets/workers', 'assets/styles'].some(folder => target === folder || target.startsWith(`${folder}/`)) ||
             generated.some(path => conflicts(target, path)) || copied.some(path => conflicts(target, path))) {
             throw new TypeError(`Asset target conflicts with generated output: ${target}`);
         }
@@ -111,14 +111,46 @@ function bootstrapFor(worker, modules, route) {
 })();`;
 }
 
-/** Export a set of JS Pages that open directly from the resulting directory. */
+/** The pages and assets of a folder: each .js or .mjs file at the first level is a page, its
+ * name the route (index.js is the index route); a *_aux file is a companion. Modules imported
+ * by the pages live in subfolders. Every other file, except names starting with a dot, is an
+ * asset copied to the same relative path. */
+export async function folderPages(folder) {
+    const root = resolve(folder);
+    const pages = {}, assets = [];
+    for (const entry of await readdir(root, {recursive: true, withFileTypes: true})) {
+        const file = join(entry.parentPath, entry.name);
+        const target = relative(root, file).split(sep).join('/');
+        if (!entry.isFile() || target.split('/').some(part => part.startsWith('.'))) continue;
+        const script = ['.js', '.mjs'].includes(extname(entry.name));
+        if (script && entry.parentPath === root && !basename(entry.name, extname(entry.name)).endsWith('_aux')) {
+            const route = basename(entry.name, extname(entry.name));
+            if (!routePattern.test(route)) {
+                throw new TypeError(`Page file ${entry.name}: a page name starts with a lowercase letter, ` +
+                    'followed by lowercase letters, digits, _ or -');
+            }
+            if (Object.hasOwn(pages, route)) throw new TypeError(`Two page files for the route ${route}`);
+            pages[route] = file;
+        } else if (!script) {
+            assets.push({source: file, target});
+        }
+    }
+    return {pages, assets};
+}
+
+/** Export a set of JS Pages that open directly from the resulting directory. The same-name
+ * stylesheet foo.css of a page is written to assets/styles/<route>.css; a Page.css URL under
+ * /themes/ is copied from the @gramlot/gramlot package unless an asset already has its path. */
 export async function buildDirectory({pages, output, assets = []}) {
     const {entries, destination} = validate({pages, output, assets});
     if (!(await missing(destination))) throw new Error(`Output directory already exists: ${destination}`);
 
     let core;
+    const loaded = {};
     for (const [route, page] of entries) {
         await regularFile(page, `Page for ${route}`);
+        const module = await loadPage(page);
+        loaded[route] = {module, logic: await logicModule(page, module), stylesheet: await pageStylesheet(page)};
         const fromPage = createRequire(page);
         const resolved = {
             entry: await realpath(fromPage.resolve('@gramlot/gramlot')),
@@ -133,7 +165,16 @@ export async function buildDirectory({pages, output, assets = []}) {
         throw new Error('Pages and @gramlot/gramlot-serverless must resolve the same Gramlot core installation');
     }
     await regularFile(join(dirname(core.runtime), 'runtime-notices.json'), 'Runtime notices');
-    for (const asset of assets) await regularFile(asset.source, 'Asset source');
+    const copies = [...assets];
+    for (const [, {module}] of Object.entries(loaded)) {
+        for (const url of module.Page.css ?? []) {
+            const target = url.slice(1);
+            if (!url.startsWith('/themes/') || copies.some(asset => asset.target === target)) continue;
+            checkTarget(target);
+            copies.push({source: fromBrowser.resolve(`@gramlot/gramlot${url}`), target});
+        }
+    }
+    for (const asset of copies) await regularFile(asset.source, 'Asset source');
 
     await mkdir(dirname(destination), {recursive: true});
     const stage = `${destination}.${randomUUID()}.tmp`;
@@ -145,15 +186,20 @@ export async function buildDirectory({pages, output, assets = []}) {
         await writeFile(join(stage, 'assets/runtime-notices.json'),
             JSON.stringify(await runtimeNotices(core.runtime), null, 2) + '\n');
         for (const [route, page] of entries) {
-            const aux = await companion(page);
-            const worker = (await workerBundle(page, aux, workerOptions)).text;
-            const modules = aux ? {[aux.url]: await companionBundle(aux, workerOptions)} : {};
+            const {logic, stylesheet} = loaded[route];
+            if (stylesheet) {
+                await mkdir(join(stage, 'assets/styles'), {recursive: true});
+                await copyFile(stylesheet, join(stage, 'assets/styles', `${route}.css`));
+            }
+            const worker = (await workerBundle(page, workerOptions, {logic: logic?.url ?? null,
+                stylesheet: stylesheet ? `/assets/styles/${route}.css` : null})).text;
+            const modules = logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {};
             await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});
             await writeFile(htmlPath, documentFor(route));
         }
-        for (const {source, target} of assets) {
+        for (const {source, target} of copies) {
             const path = join(stage, target);
             await mkdir(dirname(path), {recursive: true});
             await copyFile(source, path);

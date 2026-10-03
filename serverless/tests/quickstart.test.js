@@ -32,7 +32,7 @@ test('the quick start greets Ada and follows the field while typing', async t =>
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'Worker');
     t.after(() => { if (previous) Object.defineProperty(globalThis, 'Worker', previous); else delete globalThis.Worker; });
     globalThis.Worker = function () {
-        const endpoint = channel(Page, {aux: '/page_aux.js'});
+        const endpoint = channel(Page, {logic: '/page_aux.js'});
         endpoints.push(endpoint);
         return endpoint.worker;
     };
