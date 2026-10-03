@@ -92,5 +92,6 @@ Block ID: **GS-130-025**.
 | `npm test` | 20 tests: exporter output and failure handling, directory export, bundles, Worker host and transport, `mount`, the quick start with typing (jsdom) |
 | `serverless/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |
 | `serverless/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |
-| `serverless/scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The core fixture `avvio` under the strict policy: named logic in the window only, a tampered copy blocked (needs a linked core checkout) |
+| `serverless/scripts/verify_inline_browser.mjs HTML PLAYWRIGHT [EXECUTABLE] [ENGINE]` | An exported file with inline code (`examples/inline-code`): formula, controller, `==`, `_if`/`_else`, `action`, `connect_onclick` and a remote Source, no CSP violation, no HTTP(S) |
+| `serverless/scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The core fixture `avvio` under the policy of the single file: named logic in the window only, a tampered copy blocked (needs a linked core checkout) |
 | `scripts/check_docs.py` | Paired guides and Sphinx build of both views |

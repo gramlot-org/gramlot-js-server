@@ -30,8 +30,8 @@ Any static web server or object store serves the export: there is nothing to run
 on the server side.
 
 - Single file: serve it as `text/html`. Its Content Security Policy is in the
-  document, so no header is required. Served from `https://`, the policy still
-  forbids connections from the document (`connect-src 'none'`).
+  document, so no header is required. The policy leaves connections open
+  (`connect-src *`).
 - Directory: serve the directory as is, under any path prefix, with `text/html`
   for the documents, `text/javascript` for `assets/`, and `text/css` for the
   stylesheets you listed. No rewrite rule is needed. The documents carry no policy:
@@ -53,8 +53,9 @@ Block ID: **GS-125-015**.
   points outside the export is not resolved by anything.
 - The companion runs in the browser and is readable by anyone who has the file.
   Server-only logic (queries, keys, data access) has no place in an export.
-- The single file accepts no inline code: a page that relies on inline formulas or
-  handlers fails at start instead of running unreviewed code.
+- The single file runs the inline code of its Source, built from your pages. The
+  core runs no code written later in the page, refuses inline code read from Data,
+  and refuses `on<event>` attributes and `javascript:` URLs.
 - The Worker has no server to talk to; `remoteSource` stays inside the browser.
 - Build only pages from folders you trust: `build` and `buildDirectory` bundle
   the page's imports as they are.

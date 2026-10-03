@@ -89,8 +89,8 @@ and fails under the strict one with the core's error naming the node. Framework 
 application pages only declare their elements. Hello World launchers live in
 `gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
 
-The core `@gramlot/gramlot` 0.2.1 is published on npm and JSR; this adapter is
-published on npm as `@gramlot/gramlot-js-server` 0.2.2. The CI workflow
+The core `@gramlot/gramlot` 0.2.3 is published on npm and JSR; this adapter is
+published on npm as `@gramlot/gramlot-js-server` 0.2.3. The CI workflow
 `.github/workflows/tests.yml` runs the Node and Bun contract tests in the required job
 `published core`, against the core from the registry, and in the informational job
 `core main`, against the core's `main` checkout.

@@ -49,8 +49,10 @@ jobs:
           mkdir -p build
           node src/cli.js build examples/hello-world/page.js -o build/hello-world.html
           node src/cli.js build examples/source-live/page.js -o build/source-live.html
+          node src/cli.js build examples/inline-code/page.js -o build/inline-code.html
           node scripts/verify_export_browser.mjs build/hello-world.html ../node_modules/playwright/index.mjs - 'Hello World'
           node scripts/verify_export_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
+          node scripts/verify_inline_browser.mjs build/inline-code.html ../node_modules/playwright/index.mjs
           node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs
       - name: Upload server coverage
         if: ${{ !cancelled() }}
@@ -120,7 +122,9 @@ jobs:
         run: |
           mkdir -p build
           node src/cli.js build examples/source-live/page.js -o build/source-live.html
+          node src/cli.js build examples/inline-code/page.js -o build/inline-code.html
           node scripts/verify_export_browser.mjs build/source-live.html ../node_modules/playwright/index.mjs - 'Hello Worker' details
+          node scripts/verify_inline_browser.mjs build/inline-code.html ../node_modules/playwright/index.mjs
           node scripts/verify_worker_sentinel_browser.mjs ../node_modules/playwright/index.mjs
           node scripts/verify_quickstart_browser.mjs ../node_modules/playwright/index.mjs
 

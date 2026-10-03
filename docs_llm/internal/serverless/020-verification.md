@@ -22,19 +22,23 @@ the Worker without a close beacon.
 blocks HTTP(S), and checks main, Source mutations, optional remote Source and dispose.
 `scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE]` builds the core page
 `avvio` (`js/tests/fixtures/logic/avvio.js` and `avvio_aux.js` of the linked core
-checkout) as one file and opens it under the strict CSP. The `_init` formula runs the
+checkout) as one file and opens it under its CSP. The `_init` formula runs the
 named logic in the window; `globalThis.gramlotSentinel` stays 0 in the Worker. A copy
 with one byte added to the runtime script is blocked by the CSP. The fixture is not
 part of the published package, so this check needs a linked core checkout.
+`scripts/verify_inline_browser.mjs` opens the export of `examples/inline-code` and
+checks its inline code (formula, controller, `==`, `_if`/`_else`, `action`,
+`connect_onclick`) and the formula of a remote Source, with no CSP violation.
 
 The workflow `.github/workflows/tests.yml` runs on push to `main` and `develop`, on
 pull requests and manually. The required job `published core` installs the core
 from the registry, runs `npm test` with coverage (`coverage/lcov.info`, uploaded to
 Codecov), the `verify_export_browser.mjs` check in headless Chromium for
-`examples/hello-world` and `examples/source-live`, and `verify_quickstart_browser.mjs`. The informational job `core main`
+`examples/hello-world` and `examples/source-live`, `verify_inline_browser.mjs` for
+`examples/inline-code`, and `verify_quickstart_browser.mjs`. The informational job `core main`
 checks out `gramlot-org/gramlot` at `main` beside the repository, links it with
 `npm install --no-save`, and runs the same tests, the sentinel check and the
-source-live browser check. The `documentation` job runs `scripts/check_docs.py`,
+source-live and inline-code browser checks. The `documentation` job runs `scripts/check_docs.py`,
 which validates the paired guides and builds both views with Sphinx.
 
 <a id="gs-020-010"></a>

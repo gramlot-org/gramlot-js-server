@@ -29,17 +29,20 @@ Block ID: **GS-140-005**.
 
 <a id="gs-140-010"></a>
 
-## 010 · Inline code blocked by the Content Security Policy
+## 010 · Inline code refused
 
 Block ID: **GS-140-010**.
 
-`EvalError: dataFormula 'dataFormula_0' 'formula': inline code blocked by the
-Content Security Policy of the page (no 'unsafe-eval'); move the code to named
-logic (a method of the page companion _aux.js) or serve the page with the
-permissive CSP profile, which allows 'unsafe-eval'`. The single file has no
-permissive profile: move `formula`, `script`, `==`, `action`, `connect_on<event>`,
-`_if`/`_else` code to a companion method named with `func`. Nothing is written;
-the Worker is disposed. The directory export sets no policy of its own.
+The single file runs the inline code of the Source its Worker builds. The core refuses,
+naming node and attribute: `inline code runs only as received with the Source (main or a
+remote Source); a text written later is not run: use named logic` (code attribute
+changed or node inserted after the start: write it in `main`/a Source method or use
+`func`); `'<attribute>' is inline code and cannot be the pointer '<pointer>'; inline code
+is never read from Data` (pass data as parameters); `… has the form of a native event
+handler …` (use `connect_onclick`); `… holds a javascript: URL …` in `href`, `src`,
+`formaction`, `xlink:href` (use `connect_onclick` or a button `action`). A file built
+with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
+'unsafe-eval') …`: rebuild with 0.2.3. The directory export sets no policy of its own.
 
 <a id="gs-140-015"></a>
 

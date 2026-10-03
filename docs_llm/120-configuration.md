@@ -45,17 +45,19 @@ directory; no Content Security Policy in the documents.
 Block ID: **GS-120-015**.
 
 ```text
-default-src 'none'; script-src 'sha256-<hash of the runtime script>' blob:;
+default-src 'none'; script-src 'sha256-<hash of the runtime script>' 'unsafe-eval' blob:;
 worker-src blob:; style-src 'unsafe-inline'; img-src data: blob:;
-connect-src 'none'; base-uri 'none'; form-action 'none'
+connect-src *; base-uri 'none'; form-action 'none'
 ```
 
 Script allowed by the hash of its final bytes (a changed byte blocks the start;
 checked by `serverless/scripts/verify_worker_sentinel_browser.mjs`); `blob:` for Worker and
-companion; no `'unsafe-inline'`/`'unsafe-eval'`: named logic only
-([Troubleshooting](140-troubleshooting.md)); inline styles only;
-`data:`/`blob:` images; no connections. Only profile; no permissive profile; not an
-option of `build`.
+companion; no `'unsafe-inline'`; `'unsafe-eval'` compiles the inline code of the Source
+received from the Worker: named logic and inline code run; code written later is refused
+([Troubleshooting](140-troubleshooting.md)); inline styles only; `data:`/`blob:` images;
+connections open (`connect-src *`) until a page can declare its own policy. Only
+profile, from 0.2.3 (0.2.2: no `'unsafe-eval'`, `connect-src 'none'`); not an option of
+`build`.
 
 <a id="gs-120-020"></a>
 
