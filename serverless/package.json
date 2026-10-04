@@ -24,6 +24,7 @@
     "src/build-directory.js",
     "src/bundles.js",
     "src/cli.js",
+    "src/gallery.js",
     "README.md",
     "LICENSE",
     "src/standalone.js",
@@ -41,10 +42,19 @@
     "@genrojs/builders": ">=0.4.1",
     "esbuild": "0.28.2"
   },
+  "peerDependencies": {
+    "@gramlot/gramlot-examples": ">=0.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@gramlot/gramlot-examples": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
+    "@gramlot/gramlot-examples": "0.2.4",
     "jsdom": "27.0.1"
   }
 }
