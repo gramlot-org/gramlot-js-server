@@ -27,7 +27,8 @@ async function companionFile(pagesDir, path) {
  * without its final slash. GET and HEAD serve a .css or .js file whose real path is below
  * host.pagesDir: the page modules, whose Logic reaches the browser, the FileHost companions
  * and Page.css files placed there. assets maps a URL path (without the prefix) to
- * {file, type}: application files served by GET and HEAD. contentSecurityPolicy is the
+ * {file, type}: application files served by GET and HEAD. A GET of <path>/index.html opens
+ * the page <path>, and /index.html the index, as a static host does. contentSecurityPolicy is the
  * application's policy, sent on each HTML page with {nonce} replaced by the bootstrap nonce.
  */
 export async function createDispatch({pages, host = null, ownerForRequest = async () => null,
@@ -108,6 +109,8 @@ export async function createDispatch({pages, host = null, ownerForRequest = asyn
             let path;
             try { path = decodeURIComponent(pathname); }
             catch { return reply('Invalid path', 400); }
+            // As on a static host, <path>/index.html is the page <path> and /index.html the index.
+            if (path.endsWith('/index.html')) path = path.slice(0, -'index.html'.length);
             const {html, nonce} = await host.openPage(path, {owner, prefix});
             const headers = contentSecurityPolicy === null ? {}
                 : {'Content-Security-Policy': contentSecurityPolicy.replaceAll('{nonce}', nonce)};

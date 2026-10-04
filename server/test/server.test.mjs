@@ -214,3 +214,23 @@ test('assets: application files by GET and HEAD under the prefix; a malformed en
     } finally { await app.close(); await rm(folder, {recursive: true}); }
     await assert.rejects(startServer({pages, assets: {'img/logo.svg': {file: logo, type: 'image/svg+xml'}}}), /root-relative/);
 });
+
+test('<path>/index.html opens the page <path> and /index.html the index, as on a static host', async () => {
+    const folder = await mkdtemp(join(tmpdir(), 'gramlot-js-server-'));
+    for (const [file, title] of [['index.js', 'Home'], ['about.js', 'About']]) {
+        await writeFile(join(folder, file), `import {Page as BasePage} from ${JSON.stringify(PAGE_MODULE)};
+export class Page extends BasePage { static title = ${JSON.stringify(title)}; main(root) { root.h1(${JSON.stringify(title)}); } }
+`);
+    }
+    const app = await startServer({pages: folder, mountPath: '/site'});
+    const title = async path => (await (await fetch(app.url + path)).text()).match(/<title>(.*?)<\/title>/)?.[1];
+    try {
+        for (const [path, expected] of [['/site/', 'Home'], ['/site/index.html', 'Home'], ['/site/about', 'About'],
+            ['/site/about/index.html', 'About'], ['/site/about/', 'About']]) {
+            assert.equal(await title(path), expected, path);
+        }
+        for (const path of ['/site/missing/index.html', '/site/about/index.htm', '/site/about.html']) {
+            assert.equal((await fetch(app.url + path)).status, 404, path);
+        }
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
+});
