@@ -26,29 +26,35 @@ try {
         if (contents.constructor !== app.source.constructor) throw Error('main lost its typed Source');
         const heading = contents.getNodes()[0];
         heading.setValue('Updated');
-        const update = document.querySelector('h1').textContent;
+        heading.setAttr({title: 'Live attribute'});
+        const update = [document.querySelector('h1').textContent, document.querySelector('h1').title];
         app.builder.wrapSource(contents).strong('Inserted');
         const inserted = contents.getNodes().at(-1);
         const insert = document.querySelector('#gramlot-root strong').textContent;
         contents.popNode(inserted.label);
         const deleted = !document.querySelector('#gramlot-root strong');
-        let remote = null;
+        let remote = null, cleared = null;
         if (method) {
             const target = contents.getNodes().find(node => node.attr.id === 'details');
             await app.remoteSource(target, method, {text:'From Worker'});
             remote = document.querySelector('#details').textContent;
+            target.value.clear();
+            cleared = document.querySelector('#details').textContent;
         }
         const transport = app.transport;
         app.dispose();
-        return {update, insert, deleted, remote, closed:transport.closed,
+        let rejected = false;
+        try { await transport.main(app.pageId); } catch { rejected = true; }
+        return {update, insert, deleted, remote, cleared, state:app.state, rejected, closed:transport.closed,
             pending:transport.pending.size, remaining:app.renderer.records.size,
             children:document.querySelector('#gramlot-root').childNodes.length};
     }, method);
-    assert.deepEqual(result, {update:'Updated', insert:'Inserted', deleted:true,
-        remote:method ? 'From Worker' : null, closed:true, pending:0, remaining:0, children:0});
+    assert.deepEqual(result, {update:['Updated', 'Live attribute'], insert:'Inserted', deleted:true,
+        remote:method ? 'From Worker' : null, cleared:method ? '' : null, state:'disposed', rejected:true,
+        closed:true, pending:0, remaining:0, children:0});
     await new Promise(resolve => setTimeout(resolve, 100));
     assert.equal(closedWorkers, 1);
     assert.deepEqual(external, []);
     assert.deepEqual(errors, []);
-    console.log(`${engineName} ${browser.version()} PASS: exported file, main, Source live, ${method ? 'remote Source, ' : ''}Worker termination, no HTTP(S) or browser errors.`);
+    console.log(`${engineName} ${browser.version()} PASS: exported file, main, Source live (text, attribute, insert, delete), ${method ? 'remote Source, clear, ' : ''}dispose (state, transport rejects), Worker termination, no HTTP(S) or browser errors.`);
 } finally { await browser.close(); }
