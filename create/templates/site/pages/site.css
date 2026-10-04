@@ -1,0 +1,4 @@
+body { max-inline-size: 48rem; margin-inline: auto; padding: 1.5rem; }
+.menu { display: flex; gap: 1rem; margin-block-end: 1.5rem; }
+.menu a[aria-current="page"] { font-weight: 700; text-decoration: none; }
+#buttons { display: flex; flex-wrap: wrap; gap: .5rem; margin-block-start: 1rem; }
