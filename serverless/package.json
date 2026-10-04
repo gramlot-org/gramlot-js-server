@@ -31,7 +31,8 @@
     "src/worker-host.js",
     "src/worker-transport.js",
     "src/runtime-notices.js",
-    "NOTICE"
+    "NOTICE",
+    "gallery"
   ],
   "scripts": {
     "test": "node --test tests/*.test.js",

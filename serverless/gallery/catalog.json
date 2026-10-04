@@ -1,0 +1,25 @@
+{
+  "environment": "serverless",
+  "families": [
+    {
+      "key": "serverless_pages",
+      "title": "No server",
+      "examples": [
+        {
+          "key": "serverless-01",
+          "title": "Quick start",
+          "folder": "01_quick_start",
+          "description": "The page of the README quick start, exported by @gramlot/gramlot-serverless.",
+          "explanation": "One module: Page builds the page in a Web Worker of the browser, Logic holds the greeting, which runs in the window."
+        },
+        {
+          "key": "serverless-02",
+          "title": "Registration form",
+          "folder": "02_registration",
+          "description": "The page of npm create gramlot page: a form whose data leave the browser through gramlot.inout.",
+          "explanation": "The data stay in the browser of whoever fills in the form. The buttons prepare an email, save a file that Reload reads back with the exact types, or download JSON."
+        }
+      ]
+    }
+  ]
+}

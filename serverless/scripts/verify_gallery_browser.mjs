@@ -7,7 +7,8 @@
  */
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {mkdtemp, readFile, rm} from 'node:fs/promises';
+import {readFileSync} from 'node:fs';
+import {mkdtemp, rm} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
@@ -16,7 +17,8 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const [playwrightEntry, engineName = 'chromium'] = process.argv.slice(2);
 if (!playwrightEntry) throw new Error('Usage: verify_gallery_browser.mjs PLAYWRIGHT_ENTRY [ENGINE]');
 const catalog = createRequire(import.meta.url).resolve('@gramlot/gramlot-examples/catalog.json');
-const keys = JSON.parse(await readFile(catalog, 'utf8')).families.flatMap(family => family.examples.map(({key}) => key));
+const keys = [catalog, fileURLToPath(new URL('../gallery/catalog.json', import.meta.url))]
+    .flatMap(file => JSON.parse(readFileSync(file, 'utf8')).families.flatMap(family => family.examples.map(({key}) => key)));
 
 // One behaviour per page with named logic, from scripts/verify_pages_browser.mjs of gramlot-examples.
 const LOGIC = {

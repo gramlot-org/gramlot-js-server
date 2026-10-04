@@ -19,7 +19,9 @@ if (!['node', 'bun'].includes(runtime) || !playwrightEntry) {
 }
 const MOUNT = '/js';
 const catalog = createRequire(import.meta.url).resolve('@gramlot/gramlot-examples/catalog.json');
-const keys = JSON.parse(readFileSync(catalog, 'utf8')).families.flatMap(family => family.examples.map(({key}) => key));
+const runtimeCatalog = fileURLToPath(new URL(`../gallery/${runtime}/catalog.json`, import.meta.url));
+const keys = [catalog, runtimeCatalog].flatMap(file => JSON.parse(readFileSync(file, 'utf8')).families
+    .flatMap(family => family.examples.map(({key}) => key)));
 
 // One behaviour per page with named logic, from scripts/verify_pages_browser.mjs of gramlot-examples.
 const LOGIC = {

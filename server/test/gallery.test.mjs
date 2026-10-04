@@ -33,6 +33,8 @@ test('the gallery stages one route per example under the mount prefix', async ()
             assert.equal((await get(path)).status, 200, path);
         }
         for (const path of ['/', '/e01', '/gallery/gallery.css']) assert.equal((await get(path)).status, 404, path);
+        // The catalogue of this package for the runtime: the README quick start.
+        assert.match(await (await get(`/js/${runtime}-01`)).text(), /<title>Hello<\/title>/);
     } finally { await app.close(); }
     assert.equal(existsSync(app.pages), false, 'close removes the staged pages');
 });
@@ -63,5 +65,14 @@ test('the command runs the gallery on the other runtime when asked', async () =>
     } finally {
         child.kill('SIGTERM');
         await new Promise(done => child.exitCode !== null ? done() : child.once('exit', done));
+    }
+});
+
+test('the quick-start page of the runtime catalogues is the README quick start', async () => {
+    const {readFile} = await import('node:fs/promises');
+    const quickstart = await readFile(new URL('./fixtures/quickstart/index.js', import.meta.url), 'utf8');
+    for (const name of ['node', 'bun']) {
+        assert.equal(await readFile(new URL(`../gallery/${name}/pages/${name}_pages/01_quick_start.js`, import.meta.url), 'utf8'),
+            quickstart, name);
     }
 });

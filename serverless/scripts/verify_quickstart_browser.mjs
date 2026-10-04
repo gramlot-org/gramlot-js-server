@@ -1,5 +1,5 @@
 /** Real browser: the quick-start page as one exported file and as a directory export.
- * Typing in the field changes the greeting through the companion's named method. */
+ * Typing in the field changes the greeting through a method of the page module's Logic. */
 import assert from 'node:assert/strict';
 import {mkdtemp, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
