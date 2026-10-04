@@ -9,7 +9,7 @@ The repository is an npm workspace with three packages:
   the command `gramlot <runtime> gallery`;
 - `serverless/`, `@gramlot/gramlot-serverless`: the standalone Browser/Worker
   exporter and the command `gramlot-serverless build|gallery`;
-- `create/`, `create-gramlot`: `npm create gramlot page|site <folder>`.
+- `create/`, `@gramlot/create`: `npm create @gramlot page|site <folder>`.
 
 ## Rules common to the packages
 

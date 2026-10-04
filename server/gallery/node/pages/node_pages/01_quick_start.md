@@ -18,5 +18,5 @@ console.log(app.url);
 node serve.mjs
 ```
 
-`npm create gramlot site my-site` writes a project with `pages/`, `serve.mjs` and the
+`npm create @gramlot site my-site` writes a project with `pages/`, `serve.mjs` and the
 scripts `npm start` (Node.js) and `npm run start:bun` (Bun).

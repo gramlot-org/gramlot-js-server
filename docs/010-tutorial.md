@@ -5,8 +5,8 @@ Document ID: **GN-110**. [Concise mirror](../docs_llm/010-tutorial.md).
 This tutorial builds the page of the README quick start step by step. Every step
 was run with Node.js and verified in Chromium; the page is also executed by the
 test `server/test/quickstart.test.mjs` of this repository in CI.
-`npm create gramlot site my-site` writes a project with the same layout and the
-scripts `npm start` and `npm run start:bun` ([create-gramlot](https://www.npmjs.com/package/create-gramlot)).
+`npm create @gramlot site my-site` writes a project with the same layout and the
+scripts `npm start` and `npm run start:bun` ([@gramlot/create](https://www.npmjs.com/package/@gramlot/create)).
 
 <a id="gn-110-005"></a>
 

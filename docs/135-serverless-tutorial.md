@@ -7,8 +7,8 @@ Document ID: **GS-135**.
 This tutorial follows Mario, who runs the registrations of a small club. Mario
 wants a registration form that opens without a server: a file he can send by
 mail, put on a USB stick or upload to the club's web site. Later he wants a
-small site of a few pages. The tutorial uses `npm create gramlot` (package
-`create-gramlot`) and the packages `@gramlot/gramlot-serverless` and
+small site of a few pages. The tutorial uses `npm create @gramlot` (package
+`@gramlot/create`) and the packages `@gramlot/gramlot-serverless` and
 `@gramlot/gramlot-js-server` 0.2.4 or later. The commands and their outputs were
 run on 2026-10-04; `create/test/create.test.js` runs both projects in CI.
 
@@ -32,7 +32,7 @@ Mario writes the pages in JavaScript. Each page is one module with two classes:
 Block ID: **GS-135-010**.
 
 ```sh
-npm create gramlot page iscrizione
+npm create @gramlot page iscrizione
 cd iscrizione
 npm install
 ```
@@ -162,7 +162,7 @@ in a method of `Logic`, where `this.page.inout` is the same object.
 Block ID: **GS-135-030**.
 
 ```sh
-npm create gramlot site club
+npm create @gramlot site club
 cd club
 npm install
 npm run build

@@ -19,7 +19,7 @@ The link is not saved in `package.json`.
 npm test -w server                       # Node contract, quick-start and gallery tests
 (cd server && bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs)   # the same on Bun
 npm test -w serverless                   # exporter and static gallery tests
-npm test -w create                       # create-gramlot: both templates built and started
+npm test -w create                       # @gramlot/create: both templates built and started
 npm run test:coverage -w server          # lcov in server/coverage/
 npm run test:coverage -w serverless      # lcov in serverless/coverage/
 .venv/bin/python scripts/check_docs.py   # when documentation changes
@@ -52,7 +52,7 @@ node test/verify_gallery_browser.mjs node ../node_modules/playwright/index.mjs  
   or documents; no assistant `Co-Authored-By` trailers; no `Generated with …`
   lines.
 - Pair `docs/` and `docs_llm/` guides: namespace GN for the server, GS for
-  the serverless exporter and `create-gramlot`, shared Document and Block IDs, lowercase anchors.
+  the serverless exporter and `@gramlot/create`, shared Document and Block IDs, lowercase anchors.
   `scripts/check_docs.py` validates and builds both. Internal notes stay in
   `docs/internal/` and `docs_llm/internal/`, out of the published build.
 - The README quick starts are `server/test/fixtures/quickstart/` and

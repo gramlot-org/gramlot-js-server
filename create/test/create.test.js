@@ -1,4 +1,4 @@
-/** create-gramlot: the two templates, the question, the errors; each project built and started
+/** @gramlot/create: the two templates, the question, the errors; each project built and started
  * with the packages of this workspace (the project folder sits inside it). */
 import test from 'node:test';
 import assert from 'node:assert/strict';

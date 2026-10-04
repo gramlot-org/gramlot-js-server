@@ -1,6 +1,6 @@
 # Registration form
 
-The page written by `npm create gramlot page my-form`. The summary is a method of
+The page written by `npm create @gramlot page my-form`. The summary is a method of
 `Logic`; the buttons call `gramlot.inout`:
 
 - **Send by email** prepares an email with the data in the mail program of the user;

@@ -1,11 +1,11 @@
-# create-gramlot
+# @gramlot/create
 
 Creates a new [Gramlot](https://gramlot.readthedocs.io/) project with JavaScript pages.
 
 ```sh
-npm create gramlot page my-form    # index.js: one page, built to index.html
-npm create gramlot site my-site    # pages/: a site, built to dist/
-npm create gramlot my-project      # asks: page or site?
+npm create @gramlot page my-form    # index.js: one page, built to index.html
+npm create @gramlot site my-site    # pages/: a site, built to dist/
+npm create @gramlot my-project      # asks: page or site?
 ```
 
 The folder must be new or empty. The command writes the files and installs nothing;

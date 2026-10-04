@@ -7,7 +7,7 @@ Document ID: **GS-110**.
 Every step below is run by `serverless/tests/quickstart.test.js` and by
 `serverless/scripts/verify_quickstart_browser.mjs` in headless Chromium; the files are in
 `serverless/examples/quickstart/`. For a new project of your own, start from
-[No server: a tutorial](135-serverless-tutorial.md) and `npm create gramlot`.
+[No server: a tutorial](135-serverless-tutorial.md) and `npm create @gramlot`.
 
 <a id="gs-110-005"></a>
 
@@ -175,7 +175,7 @@ it wrote; any other existing path is refused. For a folder of pages, the command
 Block ID: **GS-110-030**.
 
 - [No server: a tutorial](135-serverless-tutorial.md): a project of your own with
-  `npm create gramlot`, a form, a site, and how the data leave the browser.
+  `npm create @gramlot`, a form, a site, and how the data leave the browser.
 - [Writing pages for this host](115-writing-pages.md): layout, logic,
   `Page.css`, Source methods, what the bundle accepts.
 - [Configuration](120-configuration.md): every option of `build`, `buildDirectory`
