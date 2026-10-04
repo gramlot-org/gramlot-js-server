@@ -84,7 +84,7 @@ Block ID: **GS-130-030**.
 
 `gramlot-serverless gallery OUTPUT [--catalog CATALOG.json PAGES]...`: the
 gramlot-examples gallery as a directory from disk; `index.html` + `<key>/index.html`;
-common families + `serverless-01` (quick start), `serverless-02` (`npm create gramlot
+common families + `serverless-01` (quick start), `serverless-02` (`npm create @gramlot
 page`) + each `--catalog`. Prints `Built <output>: the gallery and <n> examples; open
 index.html`. Rules of `buildDirectory` (a previous gallery is replaced); about 30 MB
 for 36 routes (one Worker each). Missing examples package → `The gallery needs

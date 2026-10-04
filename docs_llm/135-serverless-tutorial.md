@@ -5,7 +5,7 @@ Document ID: **GS-135**.
 [Paired view](../docs/135-serverless-tutorial.md).
 
 Mario's club registration form without a server, then a small site. Uses
-`npm create gramlot` (`create-gramlot`) and the 0.2.4 packages; run on 2026-10-04,
+`npm create @gramlot` (`@gramlot/create`) and the 0.2.4 packages; run on 2026-10-04,
 both projects in CI (`create/test/create.test.js`).
 
 <a id="gs-135-005"></a>
@@ -23,7 +23,7 @@ Node.js 22+ with npm to build; a browser to open. Each page: one module, `Page`
 
 Block ID: **GS-135-010**.
 
-`npm create gramlot page iscrizione && cd iscrizione && npm install` (no word → asks
+`npm create @gramlot page iscrizione && cd iscrizione && npm install` (no word → asks
 `page or site?`). Files: `index.js` (Page, Logic), `index.css`, `serve.mjs`,
 `package.json`, `README.md`, `.gitignore`. The form writes `modulo.name`,
 `modulo.email` (`value: '^.name'`, `live: true`); `dataFormula` computes
@@ -74,7 +74,7 @@ file) or from `Logic` (`this.page.inout`):
 
 Block ID: **GS-135-030**.
 
-`npm create gramlot site club && cd club && npm install && npm run build` →
+`npm create @gramlot site club && cd club && npm install && npm run build` →
 `Built /…/club/dist: 2 pages (index, registration)`. `pages/index.js` (menu),
 `pages/registration.js` (the form, at `registration/`), `pages/site.css` (`Page.css`
 `/site.css`); shared modules in subfolders. `dist/`: `index.html`,

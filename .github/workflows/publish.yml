@@ -1,7 +1,7 @@
 name: Publish release
 
 # Run by hand on the version tag (Actions → Publish release → Run workflow → tag vX.Y.Z).
-# npm publishes @gramlot/gramlot-js-server, @gramlot/gramlot-serverless and create-gramlot
+# npm publishes @gramlot/gramlot-js-server, @gramlot/gramlot-serverless and @gramlot/create
 # with trusted publishing from gramlot-org/gramlot-js-server, publish.yml, environment release.
 # The npm job skips a version that is already on the registry, so the first, manual
 # publication of a new package does not fail the run.

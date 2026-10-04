@@ -12,7 +12,7 @@ npx gramlot-serverless build pages -o dist             # a folder of pages, a di
 
 `npx gramlot-serverless gallery gallery` writes the gallery of
 `@gramlot/gramlot-examples` (an optional peer dependency) as a directory. A new
-project: `npm create gramlot page my-form`.
+project: `npm create @gramlot page my-form`.
 
 Quick start, guides and compatibility: the
 [repository README](https://github.com/gramlot-org/gramlot-js-server#readme) and the

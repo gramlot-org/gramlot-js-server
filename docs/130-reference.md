@@ -123,7 +123,7 @@ writes the gallery of `@gramlot/gramlot-examples` as a directory that opens from
 disk: `OUTPUT/index.html` is the gallery page, each example is the route
 `<key>/` (`OUTPUT/c03/index.html`). It holds every common family (`e01`–`e13`,
 `b01`–`b11`, `c01`–`c09`), the family of this package (`serverless-01`, the quick
-start; `serverless-02`, the page of `npm create gramlot page`) and the families of
+start; `serverless-02`, the page of `npm create @gramlot page`) and the families of
 each `--catalog`. The command prints `Built <output>: the gallery and <n> examples;
 open index.html`.
 

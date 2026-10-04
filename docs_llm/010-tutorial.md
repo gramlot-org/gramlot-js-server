@@ -3,7 +3,7 @@
 Document ID: **GN-110**. [Expanded version](../docs/010-tutorial.md).
 
 The README quick start step by step; run with Node.js, verified in Chromium,
-executed by `server/test/quickstart.test.mjs` in CI. `npm create gramlot site
+executed by `server/test/quickstart.test.mjs` in CI. `npm create @gramlot site
 my-site` writes the same layout with `npm start` and `npm run start:bun`.
 
 <a id="gn-110-005"></a>

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-/** npm create gramlot page|site <folder>: a new project from the template page or site. */
+/** npm create @gramlot page|site <folder>: a new project from the template page or site. */
 import {cp, mkdir, readdir, readFile, stat, writeFile} from 'node:fs/promises';
 import {createInterface} from 'node:readline/promises';
 import {basename, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const usage = `Usage:
-  npm create gramlot page <folder>    index.js: one page, built to index.html
-  npm create gramlot site <folder>    pages/: a site, built to dist/
-  npm create gramlot <folder>         asks: page or site?`;
+  npm create @gramlot page <folder>    index.js: one page, built to index.html
+  npm create @gramlot site <folder>    pages/: a site, built to dist/
+  npm create @gramlot <folder>         asks: page or site?`;
 const own = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
 /** The package.json of the new project; the build script depends on the template. */
