@@ -107,13 +107,14 @@ export class Page extends BasePage {
     return {folder, pages};
 }
 
-test('mount prefix: bootstrap URLs carry it once; requests arrive without it', async () => {
+test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 404, the bare prefix redirects', async () => {
     const {folder, pages} = await pagesFolder();
     const app = await startServer({pages, mountPath: '/app/'});
     try {
-        const html = await (await fetch(app.url + '/')).text();
+        const html = await (await fetch(app.url + '/app/')).text();
         const {runtime, argument} = bootstrap(html);
         assert.equal(runtime, '/app/assets/gramlot.js');
+        assert.equal((await fetch(app.url + runtime)).status, 200);
         assert.deepEqual(argument.config, {pageId: argument.config.pageId, mainUrl: '/app/gramlot/main',
             sourceUrl: '/app/gramlot/source', closeUrl: '/app/gramlot/close', rootId: 'gramlot-root'});
         assert.deepEqual(argument.resources, {
@@ -122,9 +123,15 @@ test('mount prefix: bootstrap URLs carry it once; requests arrive without it', a
         });
         assert.ok(!html.includes('<link'));
         assert.ok(!html.includes('/app/app/'));
-        const main = await fetch(app.url + '/gramlot/main', {method: 'POST',
+        const main = await fetch(app.url + argument.config.mainUrl, {method: 'POST',
             headers: {'content-type': 'application/json'}, body: JSON.stringify({pageId: argument.config.pageId})});
         assert.match(await main.text(), /Hello/);
+        for (const path of ['/', '/assets/gramlot.js', '/gramlot/main', '/index.css', '/application/', '/appx']) {
+            assert.equal((await fetch(app.url + path)).status, 404, path);
+        }
+        const bare = await fetch(app.url + '/app?x=1', {redirect: 'manual'});
+        assert.equal(bare.status, 301);
+        assert.equal(bare.headers.get('location'), '/app/?x=1');
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
 
@@ -155,20 +162,21 @@ test('companions and Page.css files below the pages folder; every other file 404
         for (const [path, type, body] of [['/themes/theme.css', 'text/css', 'body { margin: 0; }'],
             ['/index.css', 'text/css', 'h1 { color: red; }'], ['/index_aux.js', 'text/javascript', 'export class Logic {}'],
             ['/index.js', 'text/javascript', await readFile(join(pages, 'index.js'), 'utf8')]]) {
-            const response = await fetch(app.url + path);
+            const response = await fetch(app.url + '/app' + path);
             assert.equal(response.status, 200);
             assert.ok(response.headers.get('content-type').startsWith(type));
             assert.equal(await response.text(), body);
-            const head = await fetch(app.url + path, {method: 'HEAD'});
+            const head = await fetch(app.url + '/app' + path, {method: 'HEAD'});
             assert.equal(head.status, 200);
             assert.equal(await head.text(), '');
         }
         for (const path of ['/index.mjs', '/index.md', '/missing.js', '/missing.css', '/escape.css', '/assets/app.css',
             '/%2e%2e/outside.css', '/themes/%2e%2e/%2e%2e/outside.css', '/x%00.css', '/app/index.css']) {
-            assert.equal((await fetch(app.url + path)).status, 404, path);
+            assert.equal((await fetch(app.url + '/app' + path)).status, 404, path);
         }
-        assert.equal((await fetch(app.url + '/index.css', {method: 'POST'})).status, 405);
-        assert.equal((await fetch(app.url + '/%E0.css')).status, 400);
+        assert.equal((await fetch(app.url + '/index.css')).status, 404);
+        assert.equal((await fetch(app.url + '/app/index.css', {method: 'POST'})).status, 405);
+        assert.equal((await fetch(app.url + '/app/%E0.css')).status, 400);
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
 
@@ -188,4 +196,21 @@ export class Logic { greeting(kwargs) { return 'Hello, ' + kwargs.name; } }
         assert.ok(response.headers.get('content-type').startsWith('text/javascript'));
         assert.equal(await response.text(), module);
     } finally { await app.close(); await rm(folder, {recursive: true}); }
+});
+
+test('assets: application files by GET and HEAD under the prefix; a malformed entry is refused', async () => {
+    const {folder, pages} = await pagesFolder();
+    const logo = join(folder, 'logo.svg');
+    await writeFile(logo, '<svg/>');
+    const app = await startServer({pages, mountPath: '/app', assets: {'/img/logo.svg': {file: logo, type: 'image/svg+xml'}}});
+    try {
+        const response = await fetch(app.url + '/app/img/logo.svg');
+        assert.equal(response.status, 200);
+        assert.equal(response.headers.get('content-type'), 'image/svg+xml');
+        assert.equal(await response.text(), '<svg/>');
+        assert.equal(await (await fetch(app.url + '/app/img/logo.svg', {method: 'HEAD'})).text(), '');
+        assert.equal((await fetch(app.url + '/app/img/logo.svg', {method: 'POST'})).status, 405);
+        assert.equal((await fetch(app.url + '/img/logo.svg')).status, 404);
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
+    await assert.rejects(startServer({pages, assets: {'img/logo.svg': {file: logo, type: 'image/svg+xml'}}}), /root-relative/);
 });

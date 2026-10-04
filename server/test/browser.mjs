@@ -38,14 +38,14 @@ try {
  }
  assert.equal(closed,true,'pagehide beacon closes the server page');
  assert.deepEqual(errors,[]);
- // Mount prefix /app behind a stripping front; the application CSP in both profiles.
+ // Mount prefix /app served by the adapter; the page module's Logic; the application CSP in both profiles.
  const open=async address=>{const response=await page.goto(address);await page.waitForFunction(()=>['started','failed'].includes(window.gramlot?.state));return response;};
  for(const base of [strict,permissive]){
   const response=await open(base+'/avvio');
   assert.match(response.headers()['content-security-policy'],/script-src 'nonce-[\w-]+'/);
   assert.deepEqual(await page.evaluate(()=>({state:window.gramlot.state,pronto:document.getElementById('pronto').textContent,
-   sentinel:globalThis.gramlotSentinel,aux:performance.getEntriesByType('resource').some(e=>new URL(e.name).pathname==='/app/avvio_aux.js')})),
-   {state:'started',pronto:'ok: init',sentinel:1,aux:true});
+   sentinel:globalThis.gramlotSentinel,logic:performance.getEntriesByType('resource').some(e=>new URL(e.name).pathname==='/app/avvio.js')})),
+   {state:'started',pronto:'ok: init',sentinel:1,logic:true});
  }
  assert.deepEqual(errors,[]);
  await open(permissive+'/inline');
