@@ -2,7 +2,7 @@ name: tests
 
 # The three packages of the workspace: server/ (Node.js and Bun host adapter),
 # serverless/ (exporter whose pages run in a browser Web Worker) and create/
-# (npm create gramlot).
+# (npm create @gramlot).
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
         run: bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs
       - name: Serverless, tests with coverage
         run: npm run test:coverage -w serverless
-      - name: create-gramlot, both templates built and started
+      - name: "@gramlot/create, both templates built and started"
         run: npm test -w create
       - name: Install Playwright Chromium
         run: |
@@ -67,7 +67,7 @@ jobs:
           node test/browser.mjs bun ../node_modules/playwright/index.mjs "$chromium"
           node test/verify_gallery_browser.mjs node ../node_modules/playwright/index.mjs
           node test/verify_gallery_browser.mjs bun ../node_modules/playwright/index.mjs
-      - name: create-gramlot, templates in Chromium (from disk and from npm start)
+      - name: "@gramlot/create, templates in Chromium (from disk and from npm start)"
         working-directory: create
         run: node test/verify_templates_browser.mjs ../node_modules/playwright/index.mjs
       - name: Upload server coverage
@@ -129,7 +129,7 @@ jobs:
         run: bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs
       - name: Serverless, tests
         run: npm test -w serverless
-      - name: create-gramlot, tests
+      - name: "@gramlot/create, tests"
         run: npm test -w create
       - name: Install Playwright Chromium
         run: |

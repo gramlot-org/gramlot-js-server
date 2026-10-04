@@ -16,7 +16,7 @@ This repository runs JavaScript Gramlot pages. It holds three npm packages:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
-| `create-gramlot` | [`create/`](create/) | you start a new project: `npm create gramlot page|site <folder>` |
+| `@gramlot/create` | [`create/`](create/) | you start a new project: `npm create @gramlot page|site <folder>` |
 | `@gramlot/gramlot-serverless` | [`serverless/`](serverless/) | the pages open without a server: one HTML file or one static directory |
 | `@gramlot/gramlot-js-server` | [`server/`](server/) | you serve the pages from a Node.js 22 or Bun process |
 
@@ -31,8 +31,8 @@ the server, `main` runs on the server. Pages in Python are served by
 Node.js 22 or later:
 
 ```sh
-npm create gramlot page my-form    # index.js: one page, built to one file
-npm create gramlot site my-site    # pages/: a site, built to a folder
+npm create @gramlot page my-form    # index.js: one page, built to one file
+npm create @gramlot site my-site    # pages/: a site, built to a folder
 ```
 
 Without the word `page` or `site` the command asks. Then:

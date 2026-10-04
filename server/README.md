@@ -23,7 +23,7 @@ npm install @gramlot/gramlot-examples
 npx gramlot node gallery      # or: npx gramlot bun gallery
 ```
 
-A new project: `npm create gramlot site my-site`. Quick start, guides and
+A new project: `npm create @gramlot site my-site`. Quick start, guides and
 compatibility: the [repository README](https://github.com/gramlot-org/gramlot-js-server#readme)
 and the [documentation](https://gramlot-js-server.readthedocs.io/en/latest/).
 Licensed under the Apache License, Version 2.0.

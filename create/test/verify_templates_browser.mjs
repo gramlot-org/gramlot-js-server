@@ -1,5 +1,5 @@
 /**
- * The two templates of create-gramlot in a real browser:
+ * The two templates of @gramlot/create in a real browser:
  * `node test/verify_templates_browser.mjs PLAYWRIGHT_ENTRY [ENGINE] [RUNTIME]`.
  * Each project is created inside the workspace, built with `npm run build` and opened from
  * disk and from `npm start` (RUNTIME node or bun, default node). The form computes its summary
@@ -124,7 +124,7 @@ try {
         assert.deepEqual(errors, [], base);
         await page.close();
     }
-    console.log(`${engineName} ${browser.version()} PASS create-gramlot templates (${runtime} for npm start): ` +
+    console.log(`${engineName} ${browser.version()} PASS @gramlot/create templates (${runtime} for npm start): ` +
         'page from disk and from the server, site from dist/ and from the server, summary by Logic, theme, ' +
         'menu links, sendMail, save and restore, download');
 } finally {

@@ -15,7 +15,7 @@ application state in the browser; see [The Gramlot family](https://gramlot.readt
 `gramlot-serverless build page.js -o page.html` exports one page to one HTML file
 (stylesheets inside, CSP of the file); `gramlot-serverless build pages -o dist`
 exports a folder of pages to one static directory. `gramlot-serverless gallery`
-writes the gramlot-examples gallery; `npm create gramlot page|site` writes a
+writes the gramlot-examples gallery; `npm create @gramlot page|site` writes a
 project ([No server: a tutorial](135-serverless-tutorial.md)). The Page runs in a
 Web Worker; the window renders and binds. No HTTP, no database, no Python.
 

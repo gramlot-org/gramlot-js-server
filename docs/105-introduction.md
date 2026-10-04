@@ -25,7 +25,7 @@ that opens without a server. One command, `gramlot-serverless build`, does both:
   folder, opened from `index.html`.
 
 `gramlot-serverless gallery <folder>` writes the gallery of
-`@gramlot/gramlot-examples` the same way. `npm create gramlot page|site` writes a
+`@gramlot/gramlot-examples` the same way. `npm create @gramlot page|site` writes a
 new project with the build ready ([No server: a tutorial](135-serverless-tutorial.md)).
 
 The Page runs in a dedicated Web Worker; the window renders its Source and keeps
