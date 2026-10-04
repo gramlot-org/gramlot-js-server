@@ -23,6 +23,7 @@ repository's docs directory.
 
    105-introduction
    110-tutorial
+   135-serverless-tutorial
    115-writing-pages
    120-configuration
    125-deployment

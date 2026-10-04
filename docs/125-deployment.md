@@ -14,7 +14,8 @@ The single file opens with a double-click or a `file://` URL. The directory expo
 opens from `index.html`, and each route from `<route>/index.html`; the documents
 reference `assets/` through relative paths, and `mount` receives the directory
 itself as `assetRoot`, so the directory can be moved or renamed as a whole. Keep
-its contents together: the shared runtime, the workers and the listed assets.
+its contents together: the shared runtime, the workers, the stylesheets and the
+copied files.
 
 Both forms make no network request at start (`serverless/scripts/verify_quickstart_browser.mjs`
 blocks HTTP and HTTPS and passes). The file can be sent by mail or copied to a USB
@@ -34,7 +35,7 @@ on the server side.
   (`connect-src *`).
 - Directory: serve the directory as is, under any path prefix, with `text/html`
   for the documents, `text/javascript` for `assets/`, and `text/css` for the
-  stylesheets you listed. No rewrite rule is needed. The documents carry no policy:
+  stylesheets. No rewrite rule is needed. The documents carry no policy:
   the server may set a `Content-Security-Policy` header. The documents load their
   scripts from `assets/` and start a Blob Worker and a Blob module, so such a
   header must allow `'self'` and `blob:` for scripts and workers. A server header
@@ -49,10 +50,15 @@ on the server side.
 Block ID: **GS-125-015**.
 
 - Nothing is served dynamically: the export contains only what the pages import,
-  the companions and the assets listed in `buildDirectory`. A `Page.css` URL that
-  points outside the export is not resolved by anything.
-- The companion runs in the browser and is readable by anyone who has the file.
+  the page logic, the stylesheets and the copied files (every file of the folder
+  for `build pages`, the listed `assets` for `buildDirectory`). A `Page.css` URL
+  that points outside the export is not resolved by anything.
+- The page logic runs in the browser and is readable by anyone who has the file.
   Server-only logic (queries, keys, data access) has no place in an export.
+- The data typed into a page stay in the browser of whoever uses it. They leave
+  it only through `gramlot.inout` (an email the user sends, a file the user
+  saves, an HTTP `POST` to an address of the page) or code of the page
+  ([No server: a tutorial](135-serverless-tutorial.md)).
 - The single file runs the inline code of its Source, built from your pages. The
   core runs no code written later in the page, refuses inline code read from Data,
   and refuses `on<event>` attributes and `javascript:` URLs.
@@ -68,10 +74,9 @@ Block ID: **GS-125-020**.
 
 1. `npm test` and `serverless/scripts/verify_quickstart_browser.mjs` pass with the core
    version you ship (`node -p "require('@gramlot/gramlot/package.json').version"`).
-2. Every `Page.css` URL of a directory export is root-relative and listed in
-   `assets`; the single-file pages declare none.
-3. All logic is named: no `formula`, `script`, `==`, `action` or
-   `connect_on<event>` strings in the pages.
+2. Every `Page.css` URL is root-relative (`/site.css`) or a core theme
+   (`/themes/…`), and its file is in the folder of the pages.
+3. The page logic is in `Logic`, or in short inline code; no server-only import.
 4. The export opens from `file://` with no console error before it is uploaded.
 5. The runtime notices (`gramlot-runtime-notices` or `assets/runtime-notices.json`)
    travel with the export: they carry the licenses of the bundled software.

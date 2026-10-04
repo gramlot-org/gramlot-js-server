@@ -8,10 +8,11 @@ Document ID: **GN-140**. [Expanded version](../docs/040-troubleshooting.md).
 
 Block ID: **GN-140-005**.
 
-`/index.css` or `/index_aux.js` 404: the file is a symlink or path leaving the
-pages folder, does not share the page's name, or the request still carries the
-mount prefix. Place it beside the page by name; strip `mountPath` on the front.
-Only `.css` and `_aux.js` are served.
+`/index.css` or `/index.js` 404: the file is a symlink or path leaving the pages
+folder, does not share the page's name, or the request path lacks the mount
+prefix (a 0.2.3 front that removes it). Place it beside the page by name; forward
+the path unchanged (`proxy_pass` without URI). Only `.css` and `.js` below the
+pages folder are served.
 
 <a id="gn-140-010"></a>
 
@@ -58,3 +59,7 @@ Block ID: **GN-140-025**.
 - `requires need a Host with a resource system`: drop `js_requires`/`css_requires`.
 - 413: `params` above 4096 bytes.
 - A changed page not visible: restart the server.
+- `Two logic modules for one page`: `Logic` in the module and in `_aux.js`; keep one.
+- Browser cannot resolve an import of the page module: a server-only import; move
+  it out or use `_aux.js`.
+- `The gallery needs @gramlot/gramlot-examples`: install it.

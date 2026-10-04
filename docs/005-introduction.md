@@ -16,6 +16,9 @@ gramlot-js-server serves JavaScript Gramlot pages from Node.js 22 or Bun. It
 connects a folder of trusted Page modules to the core's `FileHost` and exposes
 the pages over HTTP. `startServer` from `@gramlot/gramlot-js-server/node` runs on
 `node:http`; the same function from `@gramlot/gramlot-js-server/bun` runs on `Bun.serve`.
+The package also installs the command `gramlot`: `gramlot node gallery` and
+`gramlot bun gallery` serve the gallery of `@gramlot/gramlot-examples`
+([Reference](030-reference.md)).
 
 The adapter owns the HTTP side: routing, bounded payload parsing, the response
 and error mapping, the request identity, the mount prefix and the Content
@@ -34,10 +37,13 @@ Block ID: **GN-105-010**.
    `orders.js` in the pages folder and registers a page instance with a TTL.
 2. **Bootstrap document.** The answer is a small HTML document: a root `div`, a
    module script with a nonce, the page's resources (the `Page.css` URLs, the
-   page stylesheet, the companion module) and the URLs of the three endpoints.
+   page stylesheet, the page logic module) and the URLs of the three endpoints.
+   The page logic module is the page module itself when it exports `Logic`.
    When a Content Security Policy is configured, the header carries the nonce.
 3. **Runtime.** The script imports the Gramlot runtime from `/assets/gramlot.js`,
-   served by the adapter from the linked core.
+   served by the adapter from the installed core. An import map of the bootstrap
+   resolves `@gramlot/gramlot/page`, imported by the page module, to the same
+   runtime.
 4. **Main.** The runtime posts the page ID to `/gramlot/main`. The Host creates the
    Page instance, runs `main(root)` and answers with the Source as TYTX JSON.
 5. **Source to browser.** The runtime renders the DOM from the Source, installs the
@@ -55,11 +61,12 @@ Block ID: **GN-105-010**.
 
 Block ID: **GN-105-015**.
 
-- Python pages: use [gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn).
+- Python pages: use [gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server).
 - Pages without a server, as one HTML file or a static folder:
   use [@gramlot/gramlot-serverless](105-introduction.md).
-- Application assets outside the pages folder (images, fonts, a shared theme):
-  the adapter serves only the runtime and the page companions; a front server or
-  the application serves the rest ([Deployment](025-deployment.md)).
+- Every file of the application: the adapter serves the runtime, the files of the
+  core themes under `/themes/`, the `.css` and `.js` files below the pages folder and the
+  files listed in `assets` ([Configuration](020-configuration.md)); a front server
+  serves the rest ([Deployment](025-deployment.md)).
 - Authentication: the adapter passes a request identity to the Host through
   `ownerForRequest`; it does not implement sessions or logins.

@@ -5,6 +5,8 @@ Document ID: **GN-110**. [Concise mirror](../docs_llm/010-tutorial.md).
 This tutorial builds the page of the README quick start step by step. Every step
 was run with Node.js and verified in Chromium; the page is also executed by the
 test `server/test/quickstart.test.mjs` of this repository in CI.
+`npm create gramlot site my-site` writes a project with the same layout and the
+scripts `npm start` and `npm run start:bun` ([create-gramlot](https://www.npmjs.com/package/create-gramlot)).
 
 <a id="gn-110-005"></a>
 
@@ -22,19 +24,19 @@ mkdir pages
 ```
 
 The result is this layout. `pages/` holds the trusted Page modules and their
-companions; nothing else in the application is reachable from the browser.
+stylesheets; of the application, only its `.js` and `.css` files are reachable
+from the browser.
 
 ```text
 hello/
   package.json
   serve.mjs
   pages/
-    index.js        the page served at /
-    index_aux.js    its named logic
+    index.js        the page served at /, with its Logic
     index.css       its stylesheet
   node_modules/
-    @gramlot/gramlot -> ../gramlot/js
-    gramlot-js-server    -> ../gramlot-js-server
+    @gramlot/gramlot
+    @gramlot/gramlot-js-server
 ```
 
 <a id="gn-110-010"></a>
@@ -43,8 +45,9 @@ hello/
 
 Block ID: **GN-110-010**.
 
-`pages/index.js` exports a class `Page`. `main(root)` builds the interface by
-calling element methods on `root`. Attributes go in one object, after the text.
+`pages/index.js` exports a class `Page` and a class `Logic`. `main(root)` builds
+the interface by calling element methods on `root`. Attributes go in one object,
+after the text.
 
 ```js
 import {Page as BasePage} from '@gramlot/gramlot/page';
@@ -61,6 +64,10 @@ export class Page extends BasePage {
         pane.dataSetter({destination_path: '.name', value: 'Ada'});
     }
 }
+
+export class Logic {
+    greeting(kwargs) { return 'Hello, ' + kwargs.name; }
+}
 ```
 
 - `datapath: 'person'` makes every relative path of the branch start at `person`.
@@ -76,23 +83,20 @@ in the core documentation explains every declaration.
 
 <a id="gn-110-015"></a>
 
-## 015 · The companion with one named method
+## 015 · The Logic of the page
 
 Block ID: **GN-110-015**.
 
-`pages/index_aux.js` is the companion of `index.js`: a module exporting a class
-`Logic`. Its methods are the named logic of the page; `func: 'greeting'` in the
-page names the method below. A formula method receives the resolved parameters
-and returns the value.
+The methods of `Logic` are the named logic of the page; `func: 'greeting'` names
+the method `greeting`. A formula method receives the resolved parameters and
+returns the value. `main` runs on the server; `Logic` runs in the browser.
 
-```js
-export class Logic {
-    greeting(kwargs) { return 'Hello, ' + kwargs.name; }
-}
-```
-
-The companion runs in the browser, so it is public. Server-only code belongs in
-modules the companion does not import.
+The browser imports the page module for its `Logic`, so the module is public and
+every import of it resolves in the browser: `@gramlot/gramlot/page` resolves to the
+runtime through the import map of the bootstrap. Server-only code belongs in
+modules the page module does not import. A separate `index_aux.js` exporting
+`Logic` is still admitted, for a page with server-only imports; a page module
+that exports `Logic` and an `index_aux.js` beside it are an error.
 
 <a id="gn-110-020"></a>
 
@@ -106,9 +110,10 @@ Block ID: **GN-110-020**.
 body { font-family: sans-serif; margin: 2rem; }
 ```
 
-A stylesheet shared by several pages is declared in `static css = ['/themes/base.css']`
-and placed below the pages folder, or served by the application from elsewhere
-([Writing pages for this host](015-writing-pages.md)).
+A stylesheet shared by several pages is declared in `static css = ['/site.css']`
+and placed below the pages folder. The core theme is declared as
+`static css = ['/themes/gramlot-base/theme.css']`: the adapter serves it from the
+installed core ([Writing pages for this host](015-writing-pages.md)).
 
 <a id="gn-110-025"></a>
 
@@ -139,7 +144,7 @@ curl -s http://127.0.0.1:8080/
 ```
 
 ```text
-"resources":{"css":["/index.css"],"js":[{"url":"/index_aux.js","group":null}]}
+"resources":{"css":["/index.css"],"js":[{"url":"/index.js","group":null}]}
 ```
 
 <a id="gn-110-030"></a>
@@ -154,5 +159,6 @@ field with `Ada` and the text `Hello, Ada`; the body uses the sans-serif font of
 every keystroke. The field writes `person.name`; the formula recomputes
 `person.greeting`; the paragraph follows it. No application code touches the DOM.
 
-Verified on 2026-10-01 with Playwright Chromium 153: field `Ada`, text `Hello, Ada`,
-after `fill('#name', 'Grace')` the text `Hello, Grace`, no console errors.
+Verified on 2026-10-04 with Playwright Chromium 153, on Node and on Bun: field
+`Ada`, text `Hello, Ada`, after `fill('#name', 'Grace')` the text `Hello, Grace`,
+no console errors.

@@ -10,3 +10,5 @@ docs/_build/
 __pycache__/
 *.py[cod]
 serverless/tests/.build-*/
+server/test/.browser-*/
+create/test/.project-*/

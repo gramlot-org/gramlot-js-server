@@ -1,6 +1,9 @@
 import {PageBootstrap} from '@gramlot/gramlot';
 import {WorkerTransport} from './worker-transport.js';
 
+// A logic module imports @gramlot/gramlot/page from the core of the window (GramlotStandalone).
+export {Page, source} from '@gramlot/gramlot';
+
 function exportRoot(assetRoot) {
     if (assetRoot === null) return null;
     if (typeof assetRoot !== 'string' || !assetRoot.endsWith('/')) {
@@ -34,7 +37,7 @@ class WorkerBootstrap extends PageBootstrap {
 
 /** Start one JS Page in a dedicated bundled Worker through PageBootstrap.
  * modules maps each JS resource URL returned by the Worker to the URL the window
- * imports; companion modules never pass through the Worker. */
+ * imports; logic modules never pass through the Worker. */
 export async function mount({workerUrl, modules = {}, element = null, rootId = 'gramlot-root',
                              document = globalThis.document, signal, assetRoot = null} = {}) {
     if (!workerUrl) throw new TypeError('Standalone mount requires a Worker URL');

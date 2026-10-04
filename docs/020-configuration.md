@@ -17,7 +17,8 @@ Block ID: **GN-120-005**.
 | `host` | Host | `null` | A custom Host implementing `resolvePage` and `resolveResources`; `pages` is then ignored |
 | `hostname` | string | `'127.0.0.1'` | Listening address |
 | `port` | number | `0` | Listening port; `0` selects a free port, reported in `app.url` |
-| `mountPath` | string | `''` | Mount prefix added once to the root-relative bootstrap URLs |
+| `mountPath` | string | `''` | Mount prefix: added once to the root-relative bootstrap URLs and carried by every request path |
+| `assets` | object | `{}` | Application files: URL path (without the prefix) → `{file, type}`, served by `GET` and `HEAD` |
 | `contentSecurityPolicy` | string or null | `null` | Policy sent on HTML pages, `{nonce}` replaced by the bootstrap nonce |
 | `ownerForRequest` | `async (request) => owner` | returns `null` | Identity of the request, compared on main, source and close |
 | `onError` | `(error) => void` | `console.error` | Receives unexpected errors; the response is 500 |
@@ -44,10 +45,12 @@ Block ID: **GN-120-010**.
 `/app/gramlot/close` and `/app/index.css`; a relative or absolute `Page.css`
 URL stays as written. The prefix is added once: `/app/app/…` never appears.
 
-Request paths arrive **without** the prefix. The adapter listens at the root and
-expects a front server that strips the mount before forwarding, as the
-[Deployment](025-deployment.md) guide shows. `GET /app/index.css` on the
-adapter itself answers 404.
+Request paths carry the prefix: `GET /app/orders` opens the page `orders`. The
+adapter removes the prefix before serving runtime, themes, assets, companions,
+endpoints and pages; a path outside the prefix answers 404, and the prefix
+without its final slash (`/app`) answers 301 to `/app/`. A front server forwards
+the path unchanged ([Deployment](025-deployment.md)). Until 0.2.3 request paths
+arrived without the prefix and the front server removed it.
 
 <a id="gn-120-015"></a>
 
@@ -70,8 +73,8 @@ Under the strict profile an inline declaration does not run. The page reports an
 ```text
 dataFormula 'dataFormula_0' 'formula': inline code blocked by the Content Security
 Policy of the page (no 'unsafe-eval'); move the code to named logic (a method of
-the page companion _aux.js) or serve the page with the permissive CSP profile,
-which allows 'unsafe-eval'
+the page's class Logic) or serve the page with the permissive CSP profile, which
+allows 'unsafe-eval'
 ```
 
 Nothing is written to the Data. With `contentSecurityPolicy: null` no header is
@@ -104,3 +107,23 @@ Block ID: **GN-120-025**.
 - `maxPages` registered pages at most; `HostCapacity` answers 503.
 - `close()` on the returned application clears every registered page and stops
   the server.
+
+<a id="gn-120-030"></a>
+
+## 030 · Application assets
+
+Block ID: **GN-120-030**.
+
+`assets` serves files of the application that are not below the pages folder:
+
+```js
+await startServer({pages, mountPath: '/app', assets: {
+    '/img/logo.svg': {file: '/srv/app/logo.svg', type: 'image/svg+xml'},
+}});
+```
+
+`GET /app/img/logo.svg` answers the file with that `Content-Type`; `HEAD` answers
+the headers; another method answers 405. A key that does not start with `/`, or an
+entry without `file` and `type`, is an error at start. The file is read at each
+request. Order of the rules: runtime, core themes (`/themes/`, when the core has
+the file), assets, companions below the pages folder, pages.

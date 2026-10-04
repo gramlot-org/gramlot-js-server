@@ -1,13 +1,18 @@
 import {Host, PageNotFound} from '@gramlot/gramlot/host';
 
 /** One JS Page hosted inside a dedicated Worker; execution belongs to Host.
- * aux is the URL that names the page companion (foo_aux.js), or null. The Worker
- * only returns it: the window maps it to the module and imports it there. */
+ * logic is the URL that names the page logic module (the page module foo.js or the
+ * companion foo_aux.js), or null. The Worker only returns it: the window maps it to the
+ * module and imports it there. stylesheet is the URL of the same-name stylesheet foo.css,
+ * or null; with inlineCss the document already holds every stylesheet and no CSS URL
+ * is returned. */
 export class WorkerHost extends Host {
-    constructor(PageClass, {aux = null, ...options} = {}) {
+    constructor(PageClass, {logic = null, stylesheet = null, inlineCss = false, ...options} = {}) {
         super(options);
         this.PageClass = PageClass;
-        this.aux = aux;
+        this.logic = logic;
+        this.stylesheet = stylesheet;
+        this.inlineCss = inlineCss;
         this.scope = self;
         this.scope.addEventListener('message', event => this.dispatch(event.data));
     }
@@ -21,9 +26,10 @@ export class WorkerHost extends Host {
         return this.PageClass;
     }
 
-    /** Page.css URLs as written, then the companion. */
+    /** Page.css URLs as written, then the same-name stylesheet and the page logic. */
     async resolveResources(path, PageClass) {
-        return {css: [...PageClass.css], js: this.aux === null ? [] : [{url: this.aux, group: null}]};
+        const css = this.inlineCss ? [] : [...PageClass.css, ...(this.stylesheet === null ? [] : [this.stylesheet])];
+        return {css, js: this.logic === null ? [] : [{url: this.logic, group: null}]};
     }
 
     async dispatch({id, operation, args}) {

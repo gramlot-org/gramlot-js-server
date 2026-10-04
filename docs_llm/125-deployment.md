@@ -12,7 +12,7 @@ Block ID: **GS-125-005**.
 
 Single file: double-click or `file://`. Directory: `index.html`, routes at
 `<route>/index.html`; relative paths to `assets/`, `assetRoot` = the directory;
-move it as a whole. No network request at start
+move it as a whole (runtime, workers, stylesheets, copied files). No network request at start
 (`serverless/scripts/verify_quickstart_browser.mjs` blocks HTTP(S)). Recipients need a
 browser, not Node.
 
@@ -37,8 +37,10 @@ build; `assets/standalone.js` changes with the core version.
 
 Block ID: **GS-125-015**.
 
-Nothing dynamic: only imported code, companions, listed assets. The companion is
-public: no server-only logic in an export. The single file runs the inline code of its
+Nothing dynamic: only imported code, page logic, stylesheets, copied files. The
+page logic is public: no server-only logic in an export. Typed data stay in the
+user's browser; they leave only through `gramlot.inout` or page code
+([No server: a tutorial](135-serverless-tutorial.md)). The single file runs the inline code of its
 Source; the core runs no code written later, refuses inline code read from Data,
 `on<event>` attributes and `javascript:` URLs. The
 Worker talks to no server. Build pages from trusted folders only: imports are
@@ -52,8 +54,7 @@ Block ID: **GS-125-020**.
 
 1. `npm test` and `verify_quickstart_browser.mjs` pass with the shipped core
    version.
-2. Directory `Page.css` URLs root-relative and listed in `assets`; single-file
-   pages declare none.
-3. Named logic only.
+2. `Page.css` URLs root-relative or `/themes/…`, files in the pages folder.
+3. Logic in `Logic` or short inline code; no server-only import.
 4. The export opens from `file://` without console errors.
 5. The runtime notices travel with the export.
