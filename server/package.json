@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/gramlot-js-server",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Node.js and Bun host adapter for Gramlot JavaScript pages",
   "license": "Apache-2.0",
   "repository": {
@@ -10,15 +10,27 @@
   },
   "homepage": "https://gramlot-js-server.readthedocs.io/",
   "type": "module",
+  "bin": {
+    "gramlot": "./src/cli.mjs"
+  },
   "scripts": {
-    "test": "node --test test/server.test.mjs test/quickstart.test.mjs",
-    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs"
+    "test": "node --test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs"
   },
   "engines": {
     "node": ">=22"
   },
   "peerDependencies": {
-    "@gramlot/gramlot": ">=0.2.1"
+    "@gramlot/gramlot": ">=0.2.5",
+    "@gramlot/gramlot-examples": ">=0.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@gramlot/gramlot-examples": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@gramlot/gramlot-examples": "0.2.4"
   },
   "exports": {
     "./node": "./src/node.mjs",
@@ -28,6 +40,7 @@
     "src",
     "README.md",
     "LICENSE",
-    "NOTICE"
+    "NOTICE",
+    "gallery"
   ]
 }

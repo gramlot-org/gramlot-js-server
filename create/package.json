@@ -1,0 +1,29 @@
+{
+  "name": "create-gramlot",
+  "version": "0.2.4",
+  "description": "npm create gramlot page|site <folder>: a new Gramlot project with one page or a site of pages",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gramlot-org/gramlot-js-server.git",
+    "directory": "create"
+  },
+  "homepage": "https://gramlot-js-server.readthedocs.io/",
+  "type": "module",
+  "bin": {
+    "create-gramlot": "./src/cli.js"
+  },
+  "files": [
+    "src",
+    "templates",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

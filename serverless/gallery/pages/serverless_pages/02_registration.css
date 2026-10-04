@@ -1,0 +1,2 @@
+body { max-inline-size: 48rem; margin-inline: auto; padding: 1.5rem; }
+#buttons { display: flex; flex-wrap: wrap; gap: .5rem; margin-block-start: 1rem; }

@@ -15,7 +15,8 @@ Serves JavaScript Gramlot pages from Node.js 22 (`@gramlot/gramlot-js-server/nod
 `node:http`) or Bun (`@gramlot/gramlot-js-server/bun`, `Bun.serve`) through the core's
 `FileHost`. Adapter: routing, bounded payloads, response and error mapping,
 request identity, mount prefix, CSP header. Core Host: page lookup, bootstrap,
-`main`, remote Source, close. No database, no Python.
+`main`, remote Source, close. No database, no Python. Command `gramlot node|bun
+gallery`: the gallery of `@gramlot/gramlot-examples` ([Reference](030-reference.md)).
 
 <a id="gn-105-010"></a>
 
@@ -24,9 +25,10 @@ request identity, mount prefix, CSP header. Core Host: page lookup, bootstrap,
 Block ID: **GN-105-010**.
 
 1. `GET /orders` → `FileHost` maps to `orders.js`, registers a page with a TTL.
-2. Bootstrap HTML: root `div`, nonce module script, resources, endpoint URLs; CSP
-   header when configured.
-3. Runtime from `/assets/gramlot.js` (served from the linked core).
+2. Bootstrap HTML: root `div`, nonce module script, resources (the page module
+   when it exports `Logic`), endpoint URLs; CSP header when configured.
+3. Runtime from `/assets/gramlot.js` (installed core); the import map resolves
+   `@gramlot/gramlot/page` of the page module to it.
 4. `POST /gramlot/main` with the page ID → `main(root)` → Source as TYTX JSON.
 5. Runtime renders the DOM, installs Data declarations, starts bindings.
 6. Named logic may call `remoteSource` → `POST /gramlot/source`.
@@ -38,7 +40,8 @@ Block ID: **GN-105-010**.
 
 Block ID: **GN-105-015**.
 
-- Python pages: [gramlot-uvicorn](https://github.com/gramlot-org/gramlot-uvicorn).
+- Python pages: [gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server).
 - No server: [@gramlot/gramlot-serverless](105-introduction.md).
-- Assets outside the pages folder: a front server ([Deployment](025-deployment.md)).
+- Files beyond the runtime, `/themes/`, `.css`/`.js` below the pages folder and
+  `assets`: a front server ([Deployment](025-deployment.md)).
 - Sessions and logins: only `ownerForRequest` passes an identity.

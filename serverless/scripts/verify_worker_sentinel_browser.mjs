@@ -1,6 +1,6 @@
 /** Real browser: the core page avvio built as one standalone file under its CSP.
- * Its companion avvio_aux.js counts every call on globalThis.gramlotSentinel: the
- * window runs the _init formula, the Worker never runs the companion. */
+ * Its Logic counts every call on globalThis.gramlotSentinel: the window runs the
+ * _init formula, the Worker never runs the Logic. */
 import assert from 'node:assert/strict';
 import {mkdtemp, readFile, realpath, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';

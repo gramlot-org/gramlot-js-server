@@ -1,0 +1,18 @@
+{
+  "environment": "node",
+  "families": [
+    {
+      "key": "node_pages",
+      "title": "Node.js",
+      "examples": [
+        {
+          "key": "node-01",
+          "title": "Quick start",
+          "folder": "01_quick_start",
+          "description": "The page of the README quick start, served by @gramlot/gramlot-js-server on Node.js.",
+          "explanation": "One module: Page builds the page on the server, Logic holds the greeting, which runs in the browser."
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,18 @@
 # @gramlot/gramlot-serverless
 
-No server: pages open from one HTML file or a static directory; the page logic
-runs in a Web Worker of the browser.
-
-The package exports JavaScript [Gramlot](https://github.com/gramlot-org/gramlot)
-pages to that form.
+No server: JavaScript [Gramlot](https://github.com/gramlot-org/gramlot) pages open
+from one HTML file or a static directory. The page runs in a Web Worker of the
+browser; the window renders it and runs its `Logic`.
 
 ```sh
 npm install @gramlot/gramlot @gramlot/gramlot-serverless
-npx gramlot-serverless build pages/index.js -o build/index.html
+npx gramlot-serverless build index.js -o index.html    # one page, one file
+npx gramlot-serverless build pages -o dist             # a folder of pages, a directory
 ```
+
+`npx gramlot-serverless gallery gallery` writes the gallery of
+`@gramlot/gramlot-examples` (an optional peer dependency) as a directory. A new
+project: `npm create gramlot page my-form`.
 
 Quick start, guides and compatibility: the
 [repository README](https://github.com/gramlot-org/gramlot-js-server#readme) and the

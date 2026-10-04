@@ -3,7 +3,7 @@
 Document ID: **GN-115**. [Expanded version](../docs/015-writing-pages.md).
 
 Binding and lifecycle: the core's [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
-Here: files, folders, companions, what is served.
+Here: files, folders, the page logic, what is served.
 
 <a id="gn-115-005"></a>
 
@@ -12,10 +12,12 @@ Here: files, folders, companions, what is served.
 Block ID: **GN-115-005**.
 
 `/` → `index.js` then `index/index.js`; `/shop/orders` → `shop/orders.js` then
-`shop/orders/orders.js`; the file wins. Segments: letters, digits, `_`, `-`; else
+`shop/orders/orders.js`; the file wins; `/orders/index.html` → `/orders`,
+`/index.html` → `/`. Segments: letters, digits, `_`, `-`; else
 404; a real path leaving the folder: 404. The module exports `Page` extending the
-core's `Page`; `static title` defaults to `Gramlot`. Beside the page:
-`orders.css` (stylesheet), `orders_aux.js` (companion exporting `Logic`),
+core's `Page`, and may export `Logic`; `static title` defaults to `Gramlot`.
+Beside the page: `orders.css` (stylesheet), `orders_aux.js` (logic module when
+the page module exports no `Logic`),
 `orders.md` (README, never served). `_aux` is reserved. Modules are trusted ESM,
 cached: a change needs a restart.
 
@@ -25,8 +27,10 @@ cached: a change needs a restart.
 
 Block ID: **GN-115-010**.
 
-`static css = ['/themes/base.css', 'print.css', 'https://…']`: root-relative gets
-the mount prefix once and is served only when below the pages folder; relative
+`static css = ['/themes/gramlot-base/theme.css', '/site.css', 'print.css', 'https://…']`:
+root-relative gets the mount prefix once and is served when below the pages
+folder or in `assets`; `/themes/…` comes from the installed core when it has the
+file; relative
 resolves in the browser; absolute stays. Order: `Page.css`, then `orders.css`;
 a repeated URL loads once, last position.
 
@@ -36,8 +40,10 @@ a repeated URL loads once, last position.
 
 Block ID: **GN-115-015**.
 
-The companion is the root group: `func: 'add'`. `js_requires`/`css_requires`
-raise `InvalidResourceName` on `FileHost`.
+One logic module: `Logic` of `orders.js`, else `orders_aux.js`; both → error.
+Root group: `func: 'add'`. Public, imports resolve in the browser
+(`@gramlot/gramlot/page` via the import map); server-only imports → `orders_aux.js`.
+`js_requires`/`css_requires` raise `InvalidResourceName` on `FileHost`.
 
 ```js
 export class Logic {
@@ -67,8 +73,8 @@ method`. Example: core `examples/controllers/08_remote_source`.
 
 Block ID: **GN-115-025**.
 
-`GET`/`HEAD` serve `.css` and `_aux.js` whose real path is below the pages
-folder (`text/css`, `text/javascript`). Page modules, READMEs, other extensions,
-escaping symlinks, encoded `..`: 404. `POST` on a companion: 405. Undecodable
-path: 400. The runtime at `/assets/gramlot.js` is served from the linked core.
-Nothing else ([Deployment](025-deployment.md)).
+`GET`/`HEAD` serve `.css` and `.js` whose real path is below the pages folder
+(`text/css`, `text/javascript`): page modules, `_aux.js`, stylesheets. READMEs,
+other extensions, escaping symlinks, encoded `..`: 404. `POST` on a companion:
+405. Undecodable path: 400. Also: runtime `/assets/gramlot.js` and every file of
+`/themes/` from the installed core, files of `assets`. Nothing else ([Deployment](025-deployment.md)).
