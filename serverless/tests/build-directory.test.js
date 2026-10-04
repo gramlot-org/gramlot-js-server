@@ -78,6 +78,19 @@ test('failed bundling leaves output absent and existing output is refused', asyn
     assert.equal(await readFile(output, 'utf8'), 'existing');
 });
 
+test('a previous export is replaced; any other directory at the output is refused', async t => {
+    const {folder, page, output} = await fixture(t);
+    await buildDirectory({pages: {index: page, e01: page}, output});
+    await buildDirectory({pages: {index: page}, output});
+    await assert.rejects(stat(join(output, 'e01')), {code: 'ENOENT'});
+    assert.ok((await stat(join(output, 'index.html'))).isFile());
+    const other = join(folder, 'other');
+    await mkdir(other);
+    await writeFile(join(other, 'keep.txt'), 'keep');
+    await assert.rejects(buildDirectory({pages: {index: page}, output: other}), /not a previous export/);
+    assert.equal(await readFile(join(other, 'keep.txt'), 'utf8'), 'keep');
+});
+
 test('a companion beside the page reaches the window bootstrap; a *_aux page is refused', async t => {
     const {folder, output} = await fixture(t);
     const page = join(root, 'tests/fixtures/companion/page.js');

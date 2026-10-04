@@ -75,6 +75,14 @@ async function regularFile(path, description) {
     if (!info.isFile()) throw new TypeError(`${description} must be a file: ${path}`);
 }
 
+/** Check the output path: absent (false) or a previous export holding assets/standalone.js
+ * (true), replaced by the new one; anything else raises an Error. */
+async function previousExport(destination) {
+    if (await missing(destination)) return false;
+    if ((await stat(destination)).isDirectory() && !(await missing(join(destination, 'assets/standalone.js')))) return true;
+    throw new Error(`Output directory already exists and is not a previous export: ${destination}`);
+}
+
 async function missing(path) {
     try { await stat(path); return false; }
     catch (error) {
@@ -138,12 +146,13 @@ export async function folderPages(folder) {
     return {pages, assets};
 }
 
-/** Export a set of JS Pages that open directly from the resulting directory. The same-name
+/** Export a set of JS Pages that open directly from the resulting directory, replacing a
+ * previous export at output (a directory with assets/standalone.js). The same-name
  * stylesheet foo.css of a page is written to assets/styles/<route>.css; a Page.css URL under
  * /themes/ is copied from the @gramlot/gramlot package unless an asset already has its path. */
 export async function buildDirectory({pages, output, assets = []}) {
     const {entries, destination} = validate({pages, output, assets});
-    if (!(await missing(destination))) throw new Error(`Output directory already exists: ${destination}`);
+    await previousExport(destination);
 
     let core;
     const loaded = {};
@@ -204,8 +213,14 @@ export async function buildDirectory({pages, output, assets = []}) {
             await mkdir(dirname(path), {recursive: true});
             await copyFile(source, path);
         }
-        if (!(await missing(destination))) throw new Error(`Output directory already exists: ${destination}`);
-        await rename(stage, destination);
+        if (await previousExport(destination)) {
+            const previous = `${destination}.${randomUUID()}.previous`;
+            await rename(destination, previous);
+            await rename(stage, destination);
+            await rm(previous, {recursive: true, force: true});
+        } else {
+            await rename(stage, destination);
+        }
         return {output: destination, routes: entries.map(([route]) => route)};
     } finally {
         await rm(stage, {recursive: true, force: true});
