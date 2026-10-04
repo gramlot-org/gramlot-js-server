@@ -2,11 +2,8 @@
 import {fileURLToPath} from 'node:url';
 
 const {startServer} = await import(globalThis.Bun ? '@gramlot/gramlot-js-server/bun' : '@gramlot/gramlot-js-server/node');
-// The core theme named by Page.css; the build takes it from the same package.
-const theme = {file: fileURLToPath(import.meta.resolve('@gramlot/gramlot/themes/gramlot-base/theme.css')),
-    type: 'text/css; charset=utf-8'};
+// The adapter serves the core theme of Page.css (/themes/gramlot-base/theme.css) by itself.
 const app = await startServer({
-    assets: {'/themes/gramlot-base/theme.css': theme},
     pages: fileURLToPath(new URL('./', import.meta.url)),
     hostname: process.env.HOST ?? '127.0.0.1', port: Number(process.env.PORT ?? 8080),
 });

@@ -234,3 +234,21 @@ export class Page extends BasePage { static title = ${JSON.stringify(title)}; ma
         }
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
+
+test('/themes/*.css comes from the core under the prefix; a pages folder file answers other theme paths', async () => {
+    const {folder, pages} = await pagesFolder();
+    const app = await startServer({pages, mountPath: '/app'});
+    try {
+        const core = await readFile(new URL(import.meta.resolve('@gramlot/gramlot/themes/gramlot-base/theme.css')), 'utf8');
+        const response = await fetch(app.url + '/app/themes/gramlot-base/theme.css');
+        assert.equal(response.status, 200);
+        assert.ok(response.headers.get('content-type').startsWith('text/css'));
+        assert.equal(await response.text(), core);
+        assert.equal(await (await fetch(app.url + '/app/themes/gramlot-base/theme.css', {method: 'HEAD'})).text(), '');
+        assert.equal(await (await fetch(app.url + '/app/themes/theme.css')).text(), 'body { margin: 0; }');
+        for (const path of ['/themes/gramlot-base/theme.css', '/app/themes/gramlot-base/README.md',
+            '/app/themes/%2e%2e/package.css', '/app/themes/missing.css']) {
+            assert.equal((await fetch(app.url + path)).status, 404, path);
+        }
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
+});

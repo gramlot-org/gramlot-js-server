@@ -1,9 +1,12 @@
 /** Gramlot host protocol over Request/Response, shared by the Node and Bun socket bridges. */
 import {readFile, realpath, stat} from 'node:fs/promises';
-import {isAbsolute, join, relative, sep} from 'node:path';
+import {dirname, isAbsolute, join, relative, sep} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {FileHost, PageExpired, PageNotFound, SourceNotFound, HostCapacity} from '@gramlot/gramlot/server';
 
 const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8'};
+// The themes folder of the installed core (export ./themes/*).
+const THEMES = dirname(dirname(fileURLToPath(import.meta.resolve('@gramlot/gramlot/themes/gramlot-base/theme.css'))));
 
 const inside = (filename, folder) => {
     const rel = relative(folder, filename);
@@ -27,7 +30,9 @@ async function companionFile(pagesDir, path) {
  * without its final slash. GET and HEAD serve a .css or .js file whose real path is below
  * host.pagesDir: the page modules, whose Logic reaches the browser, the FileHost companions
  * and Page.css files placed there. assets maps a URL path (without the prefix) to
- * {file, type}: application files served by GET and HEAD. A GET of <path>/index.html opens
+ * {file, type}: application files served by GET and HEAD. GET and HEAD of /themes/<path>.css
+ * answer the stylesheet of the core themes, as the runtime, when it exists; otherwise the
+ * companion rule applies. A GET of <path>/index.html opens
  * the page <path>, and /index.html the index, as a static host does. contentSecurityPolicy is the
  * application's policy, sent on each HTML page with {nonce} replaced by the bootstrap nonce.
  */
@@ -59,6 +64,13 @@ export async function createDispatch({pages, host = null, ownerForRequest = asyn
             if (!['GET', 'HEAD'].includes(request.method)) return reply('Method not allowed', 405);
             const {file, type} = assets[pathname];
             return reply(request.method === 'HEAD' ? null : await readFile(file), 200, type);
+        }
+        if (pathname.startsWith('/themes/') && pathname.endsWith('.css') && ['GET', 'HEAD'].includes(request.method)) {
+            let path;
+            try { path = decodeURIComponent(pathname.slice('/themes'.length)); }
+            catch { return reply('Invalid path', 400); }
+            const filename = await companionFile(THEMES, path);
+            if (filename) return reply(request.method === 'HEAD' ? null : await readFile(filename), 200, COMPANION_TYPES['.css']);
         }
         const suffix = Object.keys(COMPANION_TYPES).find(end => pathname.endsWith(end));
         if (suffix && host.pagesDir !== undefined) {
