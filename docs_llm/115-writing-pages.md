@@ -4,8 +4,8 @@ Document ID: **GS-115**.
 
 [Paired view](../docs/115-writing-pages.md).
 
-Binding: the core [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
-Here: what is specific to the export.
+Binding: the core's [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
+Here: what is specific to the export without a server.
 
 <a id="gs-115-005"></a>
 
@@ -13,31 +13,38 @@ Here: what is specific to the export.
 
 Block ID: **GS-115-005**.
 
-- `.js`/`.mjs` module exporting `class Page extends Page` of
-  `@gramlot/gramlot/page`; otherwise `Page modules must export a subclass of Page`.
-- Same core name as the exporter (`@gramlot/gramlot`, from npm);
-  another name bundles a second core and fails with the same error.
-- `<name>_aux.js` beside `<name>.js` is the companion; never a page
-  (`A *_aux file is a page companion, not a page`).
-- Browser-compatible imports only: a Node-only import fails the esbuild bundle;
-  the existing output is kept.
-- Pages are not executed at build time.
+- Page: `.js`/`.mjs` exporting `class Page` extends the core `Page`; no `Page` →
+  build error `The module exports no class Page`; not a subclass → start error.
+- Import the core as `@gramlot/gramlot` (npm); another name bundles a second copy.
+- `*_aux.js` is never a page.
+- Browser-compatible imports only (esbuild); `node:*` fails the build, output kept.
+- The build imports the module in Node (as `FileHost`) for `Page.css` and `Logic`;
+  `main` runs only in the Worker; module-level code runs at build.
+
+Folder: `build pages -o dist`: first-level `.js`/`.mjs` = pages (`index.js` →
+index, `about.js` → `about/index.html`); names `[a-z][a-z0-9_-]*`; subfolders hold
+imported modules (bundled); other files copied, dot names skipped. Links name the
+file (`about/index.html`, `../index.html`): same link from disk, static host and
+js-server.
 
 <a id="gs-115-010"></a>
 
-## 010 · The companion and named logic
+## 010 · The page logic
 
 Block ID: **GS-115-010**.
 
-`export class Logic`; methods are the root group (`func: 'greeting'`); formula
-`method(kwargs)` returns the value, controller `method(node, kwargs)`. Bundled as
-one ES module for the window; absent from the Worker bundle (checked by
-`serverless/tests/bundles.test.js`); the Worker returns only its URL, the window imports a
-Blob URL before start; a failed import stops the start and releases the Worker.
-One strict CSP profile: inline code (`formula`, `script`, `==`, `action`,
-`connect_on<event>`, `_if`/`_else`) raises the core `EvalError`
-([Troubleshooting](140-troubleshooting.md)). `js_requires` groups need
-a resource Host; `WorkerHost` resolves `Page.css` and the companion only.
+`Logic` of the page module, else `<name>_aux.js`; both → `Two logic modules for
+one page`. Root group: `func: 'greeting'`; formula `method(kwargs)`, controller
+`method(node, kwargs)`.
+
+- Bundled as one ES module for the window; `@gramlot/gramlot/page` → the core of
+  the window (`GramlotStandalone`): one core copy, small module.
+- The Worker returns the URL (`/<name>.js` or `/<name>_aux.js`); the window maps it
+  to a Blob URL; a failing import stops the start and releases the Worker.
+- Inline code runs in the window (`'unsafe-eval'` in the file, no policy in the
+  directory; [Configuration](120-configuration.md)).
+- `js_requires` groups need a resource system; `WorkerHost` resolves `Page.css`,
+  the page stylesheet and the page logic.
 
 <a id="gs-115-015"></a>
 
@@ -45,11 +52,12 @@ a resource Host; `WorkerHost` resolves `Page.css` and the companion only.
 
 Block ID: **GS-115-015**.
 
-`Page.css`: static array of URL strings, else `Standalone Page.css must be an array
-of strings`. Single file: leave it empty, use `style` attributes (`style-src
-'unsafe-inline'` only, no directory to resolve against). Directory: root-relative
-URLs listed in `assets`, resolved inside `assetRoot`; relative, `//…`, `.`/`..`
-refused. `Page.css` is not rewritten; only listed assets are copied.
+`Page.css`: array of strings, else start error. `<name>.css` loads after it.
+
+| Export | `Page.css` and `<name>.css` |
+| --- | --- |
+| One file | `<style>` in load order; `/themes/…` from the `@gramlot/gramlot` package, other URLs from the page folder; `http(s)://`, `//`, `.`/`..`, missing file → build error |
+| Directory | Links; root-relative URLs inside the export (folder build copies the folder's files, `buildDirectory` the listed `assets`); `/themes/…` copied from the core; `<name>.css` → `assets/styles/<route>.css`; relative, `//`, `.`/`..` refused |
 
 <a id="gs-115-020"></a>
 
@@ -57,12 +65,11 @@ refused. `Page.css` is not rewritten; only listed assets are copied.
 
 Block ID: **GS-115-020**.
 
-`source(Page.prototype.method)` methods run in the Worker on
-`gramlot.remoteSource(node, 'method', params)`. `main` and unmarked methods:
-`Unknown Source method`. Params must be structured-cloneable (`DataCloneError`
-otherwise). Fresh Page instance per call. The registered page expires after the
-core default 1800 s (`Unknown, expired or unowned page`); the exporter uses the
-core defaults; reload the file.
+`source(Page.prototype.method)`; the window calls `gramlot.remoteSource(node,
+'method', params)` → Worker → branch by message. `main` and unmarked methods:
+`Unknown Source method`. `params` must clone (`DataCloneError` for functions). Fresh
+Page per call. Registry TTL 1800 s (core default): later calls fail `Unknown,
+expired or unowned page`; reload the file.
 
 <a id="gs-115-025"></a>
 
@@ -70,7 +77,7 @@ core defaults; reload the file.
 
 Block ID: **GS-115-025**.
 
-Contained: runtime, `WorkerHost` with the page, companion, license notices
-(`gramlot-runtime-notices` JSON script, or `assets/runtime-notices.json`). Not
-contained: unimported files, unlisted assets, a server, a database, `dataRpc`,
-server resolvers. Everything in the export is public, the companion included.
+Contains: runtime, `WorkerHost` with the page, the page logic, the stylesheets,
+runtime notices as inert JSON (file) or `assets/runtime-notices.json` (directory).
+Not: unimported code, server, database, `dataRpc`, server resolvers. All public:
+no secrets in pages or their modules.

@@ -8,20 +8,20 @@ Document ID: **GN-125**. [Expanded version](../docs/025-deployment.md).
 
 Block ID: **GN-125-005**.
 
-Start with `mountPath: '/app'`; the front strips `/app/` and forwards to the
-adapter root.
+Start with `mountPath: '/app'`; the adapter serves under `/app/` and removes the
+prefix itself; the front forwards the path unchanged.
 
 ```nginx
 location /app/ {
-    proxy_pass http://127.0.0.1:8080/;
+    proxy_pass http://127.0.0.1:8080;
     proxy_set_header Host $host;
 }
 ```
 
-Browser: `/app/`, `/app/assets/gramlot.js`, `/app/gramlot/main`, `/app/index.css`;
-adapter: `/`, `/assets/gramlot.js`, `/gramlot/main`, `/index.css`.
-`server/test/browser-host.mjs` runs the pattern with a `node:http` front.
-No front: default `mountPath`, bind `hostname`.
+Browser and adapter see the same paths (`/app/`, `/app/assets/gramlot.js`, …).
+Until 0.2.3 the front removed `/app/` (`proxy_pass …:8080/;`): with 0.2.4 that
+answers 404. `server/test/browser-host.mjs` serves `/app` with no front.
+No front: bind `hostname`.
 
 <a id="gn-125-010"></a>
 
@@ -30,9 +30,10 @@ No front: default `mountPath`, bind `hostname`.
 Block ID: **GN-125-010**.
 
 Served by the adapter: the runtime (read once from the core's `dist/gramlot.js`),
-`*.css` and `*_aux.js` below the pages folder, the bootstrap HTML. Everything
-else: front server or application. A `Page.css` URL outside the folder gets the
-prefix and is requested from the front.
+every file of `/themes/` of the installed core, `.css` and `.js` below the pages folder,
+the files of `assets`, the bootstrap HTML. Everything else: front server or
+application. A `Page.css` URL outside these gets the prefix and is requested
+from the front.
 
 <a id="gn-125-015"></a>
 
@@ -41,9 +42,9 @@ prefix and is requested from the front.
 Block ID: **GN-125-015**.
 
 - Pages folder = trusted code run by the server process.
-- Never served: page modules, READMEs, other extensions, symlinks and `..` leaving
-  the folder.
-- Companions are public: no keys, queries or data access in them.
+- Never served: READMEs, other extensions, symlinks and `..` leaving the folder.
+- Page modules and stylesheets are public: no keys, queries or data access in the
+  pages folder.
 - CSP: strict with named logic only; permissive with inline code.
 - Identity: default `ownerForRequest` lets any client with a page ID read it.
 - Bodies > 4096 bytes: 413; `pageTtl`, `maxPages` bound the registry.
@@ -55,7 +56,8 @@ Block ID: **GN-125-015**.
 
 Block ID: **GN-125-020**.
 
-Node 22+ or Bun with the core linked; core `js/dist/gramlot.js` built;
-`pages` = deployed folder only; `mountPath` = stripped prefix; CSP profile set;
-`ownerForRequest` from the session; `onError` logged; assets on the front;
+Node 22+ or Bun with the core and the adapter installed from npm;
+`pages` = deployed folder only; `mountPath` = prefix of the front location,
+`proxy_pass` without URI; CSP profile set; `ownerForRequest` from the session;
+`onError` logged; other assets in `assets` or on the front;
 process manager, restart on page changes.

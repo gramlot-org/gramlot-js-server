@@ -3,13 +3,15 @@
 Read README.md and the guides in `docs/` before changing this repository.
 Follow ../gramlot/AGENTS.md and its constitution for framework matters.
 
-The repository is an npm workspace with two packages:
+The repository is an npm workspace with three packages:
 
-- `server/`, `@gramlot/gramlot-js-server`: the Node.js and Bun host adapter;
+- `server/`, `@gramlot/gramlot-js-server`: the Node.js and Bun host adapter and
+  the command `gramlot <runtime> gallery`;
 - `serverless/`, `@gramlot/gramlot-serverless`: the standalone Browser/Worker
-  exporter.
+  exporter and the command `gramlot-serverless build|gallery`;
+- `create/`, `create-gramlot`: `npm create gramlot page|site <folder>`.
 
-## Rules common to both packages
+## Rules common to the packages
 
 - `@gramlot/gramlot` is installed from the registry by `npm install` at the
   root. Verification against the core `main` branch links a checkout with
@@ -21,7 +23,8 @@ The repository is an npm workspace with two packages:
   anchor. Namespace **GN** for the server guides (files `005`–`040`, IDs
   GN-105 to GN-140; internal notes GN-005 and GN-010 in `docs/internal/`) and
   **GS** for the browser guides (files `105`–`140`, IDs GS-105 to GS-140;
-  internal notes GS-005 to GS-030 in `docs/internal/serverless/`). Internal
+  internal notes GS-005 to GS-030 in `docs/internal/serverless/`); the GS guides
+  also cover `create/`. Internal
   notes stay out of the published build. Document IDs are never reused: new
   guides take new numbers. Run `python scripts/check_docs.py` after changing
   documentation.
@@ -39,15 +42,21 @@ The repository is an npm workspace with two packages:
 
 - It serves the Gramlot 0.2.0 minimal Host contract (`resolvePage`,
   `resolveResources`, `openPage`) and owns only HTTP routing, payload parsing,
-  response mapping and request identity. Page execution, registrations and TTL
+  response mapping, request identity, the mount prefix (carried by every request
+  path) and the files it serves: runtime, core themes, `assets`, the `.css` and
+  `.js` files below the pages folder (GC-090 §030). Page execution, registrations and TTL
   stay in the core Host.
 - Use `node:http` on Node and the native `fetch` server on Bun; no Express, no
   database adapters.
 - The README quick start is the page in `server/test/fixtures/quickstart/`,
   executed by `server/test/quickstart.test.mjs`; change both together.
+- The gallery (`src/gallery.mjs`) stages pages as GE-010 §025 of gramlot-examples
+  describes; `@gramlot/gramlot-examples` is an optional peer dependency. The
+  family of each runtime is in `gallery/<runtime>/`.
 - Before a commit: `npm test -w server` and, from `server/`,
-  `bun test test/server.test.mjs test/quickstart.test.mjs`; for behavior
-  changes also the browser harness `server/test/browser.mjs`.
+  `bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs`;
+  for behavior changes also the browser harnesses `server/test/browser.mjs` and
+  `server/test/verify_gallery_browser.mjs`.
 
 ## serverless/
 
@@ -59,14 +68,27 @@ The repository is an npm workspace with two packages:
   or a fallback compiler. Fail if an accepted integration is unavailable.
 - Offline builds reject `dataRpc` and server resolvers. Only `application_data`
   crosses the JSON boundary through a typed Bag codec.
-- The single-file profile applies the strict CSP (script hash, `blob:`, no
-  `'unsafe-inline'`, no `'unsafe-eval'`); the directory profile writes no CSP.
-  A `*_aux` file is a page companion for the window, never a page.
+- The single-file profile writes its CSP as `<meta>` (script hash, `blob:`,
+  `'unsafe-eval'`, `connect-src *`, styles inline only, no `'unsafe-inline'` for
+  scripts); the directory profile writes no CSP.
+- The page logic is the `Logic` export of the page module, else `<name>_aux.js`;
+  both are an error. It is bundled for the window and takes
+  `@gramlot/gramlot/page` from the window runtime (`GramlotStandalone`). A `*_aux`
+  file is never a page. The build imports the page module (as `FileHost`) to read
+  `Page.css` and `Logic`; `main` runs only in the Worker.
 - The README quick start is `serverless/examples/quickstart/`, run by
   `serverless/tests/quickstart.test.js` and
   `serverless/scripts/verify_quickstart_browser.mjs`: change them together.
 - Before a commit: `npm test -w serverless`; for behavior changes also the
   browser checks in `serverless/scripts/`.
+
+## create/
+
+- No dependencies. The templates are `create/templates/page|site`; the command
+  writes `package.json` and `.gitignore` itself and installs nothing.
+- The page template is the gallery page `serverless-02`; `create/test/create.test.js`
+  builds and starts both templates with the packages of the workspace.
+- Before a commit: `npm test -w create`.
 
 ## History
 

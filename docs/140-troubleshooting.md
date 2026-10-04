@@ -17,10 +17,10 @@ Block ID: **GS-140-005**.
 | Message | Cause | Fix |
 | --- | --- | --- |
 | `Page modules must export a subclass of Page` | The module exports no `Page`, or its `Page` extends a second copy of the core: the page imports the core under another name (`@genro/gramlot`, or the former core name `@gramlot/native-html`) than the exporter (`@gramlot/gramlot`), or two installations are linked | Import `@gramlot/gramlot/page` in the page; keep one core installation in `node_modules` |
-| `Standalone module not provided: /<name>_aux.js` | A custom shell called `mount` without the companion in `modules` | Pass `modules: {'/<name>_aux.js': url}`; the exported documents do this themselves |
-| `/<name>_aux.js: import failed: <reason>` | The companion throws at import, or has no valid `Logic` class | Fix the companion; it must `export class Logic` with plain methods |
+| `Standalone module not provided: /<name>.js` | A custom shell called `mount` without the logic module in `modules` | Pass `modules: {'/<name>.js': url}`; the exported documents do this themselves |
+| `/<name>.js: import failed: <reason>` | The logic module throws at import, or has no valid `Logic` class | Fix the module; it must `export class Logic` with plain methods |
 | `Standalone Page.css must be an array of strings` | `static css` is not an array of strings | Declare `static css = ['/theme.css']` or leave it out |
-| `Standalone CSS with assetRoot must be root-relative without traversal`, `Standalone CSS must remain under assetRoot` | A directory export with a relative, protocol-relative or `..` stylesheet URL | Use `/path/inside/export.css` and list the file in `assets` |
+| `Standalone CSS with assetRoot must be root-relative without traversal`, `Standalone CSS must remain under assetRoot` | A directory export with a relative, protocol-relative or `..` stylesheet URL | Use `/path/inside/export.css` with the file in the folder of the pages (or in `assets`) |
 | Nothing happens, the console shows a `script-src` violation | The file was edited after the build: the hash in the policy no longer matches the script | Rebuild; never edit the exported script |
 
 <a id="gs-140-010"></a>
@@ -35,7 +35,7 @@ refuses these cases, naming the node and the attribute:
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `inline code runs only as received with the Source (main or a remote Source); a text written later is not run: use named logic` | Page code changed a code attribute after the start, or inserted a node with inline code in the live Source | Write the code in `main` or in a Source method, or move it to a method of `<name>_aux.js` named with `func` |
+| `inline code runs only as received with the Source (main or a remote Source); a text written later is not run: use named logic` | Page code changed a code attribute after the start, or inserted a node with inline code in the live Source | Write the code in `main` or in a Source method, or move it to a method of `Logic` named with `func` |
 | `'<attribute>' is inline code and cannot be the pointer '<pointer>'; inline code is never read from Data` | A code attribute holds `^path` or `=path` | Pass the data as a parameter (`a='^.a'`) and write the code as text |
 | `'<attribute>' has the form of a native event handler, run by the browser outside Gramlot; write connect_<attribute> for an event, or rename the attribute` | An attribute such as `onclick` | Use `connect_onclick` |
 | `'<attribute>' holds a javascript: URL, run by the browser as code; write connect_onclick or the action of a button instead` | `href`, `src`, `formaction` or `xlink:href` starts with `javascript:` | Use `connect_onclick` or a button `action` |
@@ -66,10 +66,15 @@ Block ID: **GS-140-020**.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `Standalone pages must be JavaScript (.js or .mjs)` | A `.py` or other file was passed | Python pages belong to `gramlot-uvicorn` |
+| `Standalone pages must be JavaScript (.js or .mjs)` | A `.py` or other file was passed | Python pages belong to `gramlot-py-server` |
 | `A *_aux file is a page companion, not a page: <path>` | The companion was passed as the page | Pass `<name>.js` |
+| `The module exports no class Page: <path>` | A module without `Page`, or a module at the first level of a folder build that is not a page | Export `Page`; in a folder, move shared modules to a subfolder |
+| `Page file <name>: a page name starts with a lowercase letter, …` | A first-level file of a folder build named outside `[a-z][a-z0-9_-]*` | Rename it (`chi-siamo.js`) |
+| `Two logic modules for one page: <page> and <aux>` | The page module exports `Logic` and `<name>_aux.js` exists | Keep one |
+| `One file cannot include the stylesheet <url>: only local files are inlined`, `Page.css <url> is not a file in the folder of the page` | A remote or missing `Page.css` URL in a single-file build | Use a file of the page folder or `/themes/…`; for remote stylesheets build a directory |
 | `Output must be an HTML file` | `-o` without `.html`/`.htm` | Name the output `.html` |
 | esbuild `Could not resolve "node:fs"` (or another Node module) | The page or an import needs Node | Keep page imports browser-compatible; the previous output is untouched |
-| `Output directory already exists: <path>` | `buildDirectory` never replaces a directory | Remove or rename it first |
+| `Output directory already exists and is not a previous export: <path>` | The output path exists and is not a directory written by a build (no `assets/standalone.js`) | Choose another output, or remove that path |
+| `The gallery needs @gramlot/gramlot-examples: …` | `gramlot-serverless gallery` without the examples package | `npm install @gramlot/gramlot-examples` |
 | `All Pages must resolve the same Gramlot core installation`, `Pages and @gramlot/gramlot-serverless must resolve the same Gramlot core installation` | Pages in different folders resolve different `node_modules`, or the core is linked twice | One `node_modules` with one `@gramlot/gramlot` for the pages and the exporter |
 | `Invalid asset target`, `Asset target conflicts with generated output` | A target with `/` first, `.`/`..`, forbidden characters, or under `assets/workers/` or over a generated file | Use a relative target such as `themes/base/theme.css` |

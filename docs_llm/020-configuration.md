@@ -16,7 +16,8 @@ Block ID: **GN-120-005**.
 | `host` | Host | `null` | Custom Host (`resolvePage`, `resolveResources`) |
 | `hostname` | string | `'127.0.0.1'` | Address |
 | `port` | number | `0` | Port; `0` = free port, see `app.url` |
-| `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs |
+| `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |
+| `assets` | object | `{}` | URL path → `{file, type}`, `GET`/`HEAD` |
 | `contentSecurityPolicy` | string/null | `null` | Header on HTML pages, `{nonce}` replaced |
 | `ownerForRequest` | `async (request) => owner` | `null` | Identity compared on main/source/close |
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
@@ -35,9 +36,10 @@ Block ID: **GN-120-010**.
 
 `mountPath: '/app'` (slashes trimmed) → bootstrap URLs `/app/assets/gramlot.js`,
 `/app/gramlot/main|source|close`, `/app/index.css`; relative and absolute
-`Page.css` unchanged; never `/app/app/`. Requests arrive **without** the prefix:
-a front server strips it ([Deployment](025-deployment.md)). `/app/index.css` on
-the adapter: 404.
+`Page.css` unchanged; never `/app/app/`. Requests carry the prefix: the adapter
+removes it; outside it 404; `/app` → 301 `/app/`. A front server forwards the
+path unchanged ([Deployment](025-deployment.md)). Until 0.2.3 the front server
+removed it.
 
 <a id="gn-120-015"></a>
 
@@ -54,7 +56,7 @@ Header on HTML pages only, nonce of the opening in `{nonce}`.
 
 Strict + inline declaration → `EvalError` `<tag> '<label>' '<attribute>': inline
 code blocked by the Content Security Policy of the page (no 'unsafe-eval'); move
-the code to named logic … or serve the page with the permissive CSP profile …`;
+the code to named logic (a method of the page's class Logic) or serve the page with the permissive CSP profile …`;
 nothing written. `null`: no header, inline runs.
 
 <a id="gn-120-020"></a>
@@ -76,3 +78,14 @@ Block ID: **GN-120-025**.
 JSON bodies ≤ 4096 bytes (413), content type `application/json` (415);
 `pageTtl` positive and finite, pruned at openings and main/source; `maxPages`
 → 503; `close()` clears the registry and stops the server.
+
+<a id="gn-120-030"></a>
+
+## 030 · Application assets
+
+Block ID: **GN-120-030**.
+
+`assets: {'/img/logo.svg': {file, type: 'image/svg+xml'}}` → `GET /app/img/logo.svg`
+with that type; `HEAD` headers only; other methods 405. Key without `/`, or no
+`file`/`type`: error at start; read at each request. Order: runtime, core themes
+(when the core has the file), assets, companions, pages.

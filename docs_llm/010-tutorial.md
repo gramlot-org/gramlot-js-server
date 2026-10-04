@@ -3,7 +3,8 @@
 Document ID: **GN-110**. [Expanded version](../docs/010-tutorial.md).
 
 The README quick start step by step; run with Node.js, verified in Chromium,
-executed by `server/test/quickstart.test.mjs` in CI.
+executed by `server/test/quickstart.test.mjs` in CI. `npm create gramlot site
+my-site` writes the same layout with `npm start` and `npm run start:bun`.
 
 <a id="gn-110-005"></a>
 
@@ -20,7 +21,7 @@ npm install @gramlot/gramlot @gramlot/gramlot-js-server
 mkdir pages
 ```
 
-`pages/index.js`, `pages/index_aux.js`, `pages/index.css`, `serve.mjs`.
+`pages/index.js` (Page and Logic), `pages/index.css`, `serve.mjs`.
 
 <a id="gn-110-010"></a>
 
@@ -43,6 +44,10 @@ export class Page extends BasePage {
         pane.dataSetter({destination_path: '.name', value: 'Ada'});
     }
 }
+
+export class Logic {
+    greeting(kwargs) { return 'Hello, ' + kwargs.name; }
+}
 ```
 
 `^.name` binds both ways under `person`; `live: true` writes per keystroke;
@@ -51,17 +56,14 @@ export class Page extends BasePage {
 
 <a id="gn-110-015"></a>
 
-## 015 · The companion with one named method
+## 015 · The Logic of the page
 
 Block ID: **GN-110-015**.
 
-`pages/index_aux.js`, public in the browser:
-
-```js
-export class Logic {
-    greeting(kwargs) { return 'Hello, ' + kwargs.name; }
-}
-```
+`Logic` runs in the browser, `main` on the server. The browser imports the page
+module for its `Logic`: public, imports must resolve in the browser
+(`@gramlot/gramlot/page` through the import map). `index_aux.js` still admitted;
+both → error.
 
 <a id="gn-110-020"></a>
 
@@ -74,6 +76,9 @@ Block ID: **GN-110-020**.
 ```css
 body { font-family: sans-serif; margin: 2rem; }
 ```
+
+Shared: `static css = ['/site.css']` below `pages/`; core theme
+`/themes/gramlot-base/theme.css`, served from the installed core.
 
 <a id="gn-110-025"></a>
 
@@ -91,7 +96,7 @@ console.log(app.url);
 
 `node serve.mjs` prints `http://127.0.0.1:8080`; Bun: import from
 `@gramlot/gramlot-js-server/bun`, `bun serve.mjs`. `curl -s http://127.0.0.1:8080/` shows
-`"resources":{"css":["/index.css"],"js":[{"url":"/index_aux.js","group":null}]}`.
+`"resources":{"css":["/index.css"],"js":[{"url":"/index.js","group":null}]}`.
 
 <a id="gn-110-030"></a>
 
@@ -101,5 +106,5 @@ Block ID: **GN-110-030**.
 
 The page shows `Name`, a field with `Ada` and `Hello, Ada` in sans-serif. Typing
 `Grace` gives `Hello, Grace` at every keystroke: field → `person.name` → formula
-→ `person.greeting` → paragraph. Verified 2026-10-01, Playwright Chromium 153,
-no console errors.
+→ `person.greeting` → paragraph. Verified 2026-10-04, Playwright Chromium 153,
+Node and Bun, no console errors.
