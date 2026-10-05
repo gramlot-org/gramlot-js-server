@@ -11,9 +11,10 @@ see `The Gramlot family
 <https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html>`_ for
 the core and the other repositories.
 
-This repository publishes two packages: ``@gramlot/gramlot-js-server``, the
-Node.js and Bun host adapter, and ``@gramlot/gramlot-serverless``, the
-standalone exporter whose pages open without a server.
+This repository publishes three packages: ``@gramlot/gramlot-js-server``, the
+Node.js and Bun host adapter; ``@gramlot/gramlot-serverless``, the standalone
+exporter whose pages open without a server; ``@gramlot/create``, the command
+``npm create @gramlot page|site <folder>`` that starts a new project.
 
 .. toctree::
    :maxdepth: 2
