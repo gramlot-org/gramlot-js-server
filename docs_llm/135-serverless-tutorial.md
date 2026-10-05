@@ -5,7 +5,7 @@ Document ID: **GS-135**.
 [Paired view](../docs/135-serverless-tutorial.md).
 
 Mario's club registration form without a server, then a small site. Uses
-`npm create @gramlot` (`@gramlot/create`) and the 0.2.4 packages; run on 2026-10-04,
+`npm create @gramlot` (`@gramlot/create`) and the packages 0.2.4 or later; run on 2026-10-04,
 both projects in CI (`create/test/create.test.js`).
 
 <a id="gs-135-005"></a>

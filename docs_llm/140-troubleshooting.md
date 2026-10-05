@@ -14,7 +14,7 @@ errors: `gramlot-serverless: <message>`.
 Block ID: **GS-140-005**.
 
 - `Page modules must export a subclass of Page`: no `Page` export, or a second core
-  copy (page imports `@genro/gramlot` or the former core name `@gramlot/native-html`, or two
+  copy (page imports a retired package name, `@genro/gramlot` or `@gramlot/native-html`, or two
   installations linked) → import `@gramlot/gramlot/page`, one installation.
 - `Standalone module not provided: /<name>.js`: custom `mount` without
   `modules` → pass the logic module URL.
@@ -42,7 +42,7 @@ is never read from Data` (pass data as parameters); `… has the form of a nativ
 handler …` (use `connect_onclick`); `… holds a javascript: URL …` in `href`, `src`,
 `formaction`, `xlink:href` (use `connect_onclick` or a button `action`). A file built
 with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
-'unsafe-eval') …`: rebuild with 0.2.3. The directory export sets no policy of its own.
+'unsafe-eval') …`: rebuild with 0.2.3 or later. The directory export sets no policy of its own.
 
 <a id="gs-140-015"></a>
 
