@@ -57,7 +57,9 @@ Block ID: **GN-125-015**.
 Block ID: **GN-125-020**.
 
 Node 22+ or Bun with the core and the adapter installed from npm;
-`pages` = deployed folder only; `mountPath` = prefix of the front location,
+`pages` = deployed folder only (the template `serve.mjs` of `npm create @gramlot` is for
+development: the page template serves the project folder, `node_modules` included;
+deploy the `npm run build` output or a folder of pages only); `mountPath` = prefix of the front location,
 `proxy_pass` without URI; CSP profile set; `ownerForRequest` from the session;
 `onError` logged; other assets in `assets` or on the front;
 process manager, restart on page changes.

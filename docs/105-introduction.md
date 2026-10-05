@@ -6,7 +6,7 @@ Document ID: **GS-105**.
 
 <a id="gs-105-005"></a>
 
-## 005 · What this repository does
+## 005 · What @gramlot/gramlot-serverless does
 
 Block ID: **GS-105-005**.
 
@@ -30,8 +30,9 @@ new project with the build ready ([No server: a tutorial](135-serverless-tutoria
 
 The Page runs in a dedicated Web Worker; the window renders its Source and keeps
 the Data bound to the controls. There is no HTTP endpoint, no database and no
-Python process. Pages in Python, or JavaScript pages behind a server, belong to
-the other adapters of the family.
+Python process. JavaScript pages behind a server belong to
+`@gramlot/gramlot-js-server`, in this repository ([Introduction](005-introduction.md));
+pages in Python to [gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server).
 
 <a id="gs-105-010"></a>
 

@@ -117,6 +117,11 @@ started from Bun runs again with `node`; a missing executable is reported as
 `gramlot: bun is not on PATH`. Without `@gramlot/gramlot-examples` the command
 answers `The gallery needs @gramlot/gramlot-examples: npm install @gramlot/gramlot-examples`.
 
+[gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server) installs a
+Python command with the same name, `gramlot`. Run each one from its own
+installation, so they do not clash: this command through `npx gramlot` or the
+project's `node_modules/.bin`, the Python command inside its virtual environment.
+
 The gallery stages one page module per example in a temporary folder, removed on
 stop: a subclass of the example that adds the gallery frame script, its stylesheet
 and a `<key>_aux.js` that re-exports `Logic` from the example's page module, served

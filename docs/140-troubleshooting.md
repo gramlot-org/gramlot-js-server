@@ -16,7 +16,7 @@ Block ID: **GS-140-005**.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `Page modules must export a subclass of Page` | The module exports no `Page`, or its `Page` extends a second copy of the core: the page imports the core under another name (`@genro/gramlot`, or the former core name `@gramlot/native-html`) than the exporter (`@gramlot/gramlot`), or two installations are linked | Import `@gramlot/gramlot/page` in the page; keep one core installation in `node_modules` |
+| `Page modules must export a subclass of Page` | The module exports no `Page`, or its `Page` extends a second copy of the core: the page imports the core under a retired package name (`@genro/gramlot`, `@gramlot/native-html`) instead of `@gramlot/gramlot`, as the exporter does, or two installations are linked | Import `@gramlot/gramlot/page` in the page; keep one core installation in `node_modules` |
 | `Standalone module not provided: /<name>.js` | A custom shell called `mount` without the logic module in `modules` | Pass `modules: {'/<name>.js': url}`; the exported documents do this themselves |
 | `/<name>.js: import failed: <reason>` | The logic module throws at import, or has no valid `Logic` class | Fix the module; it must `export class Logic` with plain methods |
 | `Standalone Page.css must be an array of strings` | `static css` is not an array of strings | Declare `static css = ['/theme.css']` or leave it out |
@@ -42,7 +42,7 @@ refuses these cases, naming the node and the attribute:
 
 A file built with gramlot-js-server 0.2.2 has no `'unsafe-eval'`: its inline code
 fails with `EvalError: … inline code blocked by the Content Security Policy of the
-page (no 'unsafe-eval') …`. Rebuild it with 0.2.3. The directory export carries no
+page (no 'unsafe-eval') …`. Rebuild it with 0.2.3 or later. The directory export carries no
 policy of its own.
 
 <a id="gs-140-015"></a>

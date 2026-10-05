@@ -1,5 +1,10 @@
 # 010 · Usage
 
+> **Historical record (2026-09-30 to 2026-10-03):** describes the use of the exporter
+> from 0.2.0 to 0.2.3; not the current state. Current: the serverless guides GS-105 to
+> GS-140 ([Introduction](https://gramlot-js-server.readthedocs.io/en/latest/105-introduction.html),
+> [Configuration](https://gramlot-js-server.readthedocs.io/en/latest/120-configuration.html), [Reference](https://gramlot-js-server.readthedocs.io/en/latest/130-reference.html)).
+
 Document ID: **GS-010**.
 
 [Paired view](../../../docs/internal/serverless/010-usage.md).

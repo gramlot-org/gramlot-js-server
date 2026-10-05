@@ -91,6 +91,7 @@ try {
     browser = await engine.launch({headless: true});
 
     const {page, errors} = await open(browser, gallery);
+    await page.waitForFunction(() => document.querySelector('.gallery-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.gallery-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
     await page.evaluate(() => { document.getElementById('open-c03').closest('details').open = true; });

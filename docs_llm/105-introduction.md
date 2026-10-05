@@ -6,7 +6,7 @@ Document ID: **GS-105**.
 
 <a id="gs-105-005"></a>
 
-## 005 · What this repository does
+## 005 · What @gramlot/gramlot-serverless does
 
 Block ID: **GS-105-005**.
 
@@ -17,7 +17,9 @@ application state in the browser; see [The Gramlot family](https://gramlot.readt
 exports a folder of pages to one static directory. `gramlot-serverless gallery`
 writes the gramlot-examples gallery; `npm create @gramlot page|site` writes a
 project ([No server: a tutorial](135-serverless-tutorial.md)). The Page runs in a
-Web Worker; the window renders and binds. No HTTP, no database, no Python.
+Web Worker; the window renders and binds. No HTTP, no database, no Python:
+JavaScript pages behind a server use `@gramlot/gramlot-js-server`
+([Introduction](005-introduction.md)), pages in Python gramlot-py-server.
 
 <a id="gs-105-010"></a>
 

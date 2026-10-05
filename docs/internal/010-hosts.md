@@ -4,6 +4,12 @@ orphan: true
 
 # 010 · Node and Bun hosts
 
+> **Historical record (2026-09-24 to 2026-10-03):** describes the Node and Bun adapter
+> from the 0.1.0 profile to 0.2.3; not the current state. Current: the server guides
+> GN-105 to GN-140 ([Introduction](https://gramlot-js-server.readthedocs.io/en/latest/005-introduction.html),
+> [Configuration](https://gramlot-js-server.readthedocs.io/en/latest/020-configuration.html), [Reference](https://gramlot-js-server.readthedocs.io/en/latest/030-reference.html))
+> and [CONTRIBUTING.md](../../CONTRIBUTING.md) for the checks.
+
 Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract, published on npm as `@gramlot/gramlot-js-server`.
 
 <a id="gn-010-005"></a>

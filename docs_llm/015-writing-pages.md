@@ -43,7 +43,8 @@ Block ID: **GN-115-015**.
 One logic module: `Logic` of `orders.js`, else `orders_aux.js`; both → error.
 Root group: `func: 'add'`. Public, imports resolve in the browser
 (`@gramlot/gramlot/page` via the import map); server-only imports → `orders_aux.js`.
-`js_requires`/`css_requires` raise `InvalidResourceName` on `FileHost`.
+`js_requires`/`css_requires` raise `InvalidResourceName` on `FileHost`; the resource
+system comes with genro-kajenn (Genro, the successor of GenroPy).
 
 ```js
 export class Logic {
@@ -65,7 +66,7 @@ Block ID: **GN-115-020**.
 `source(Page.prototype.details)` marks a remote method; named logic calls
 `this.page.remoteSource(targetNode, 'details', params)` → `POST /gramlot/source`
 `{pageId, method, params}`. `main`, unmarked or missing: 404 `Unknown Source
-method`. Example: core `examples/controllers/08_remote_source`.
+method`. Example: gramlot-examples [`controllers/08_remote_source.js`](https://github.com/gramlot-org/gramlot-examples/blob/main/src/gramlot_examples/pages/controllers/08_remote_source.js) (gallery `c08`).
 
 <a id="gn-115-025"></a>
 
