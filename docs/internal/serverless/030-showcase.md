@@ -1,5 +1,9 @@
 # 030 · Offline unified showcase
 
+> **Historical record (until 2026-10-01):** describes the offline PoC showcase, removed
+> on 2026-10-01; not the current state. Current: the gallery of
+> `gramlot-serverless gallery` ([Reference](https://gramlot-js-server.readthedocs.io/en/latest/130-reference.html)).
+
 Document ID: **GS-030**.
 
 Removed on 2026-10-01: `showcase.zip` and `examples/showcase/` were built from
