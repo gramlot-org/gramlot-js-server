@@ -3,6 +3,7 @@
 [![tests](https://github.com/gramlot-org/gramlot-js-server/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/gramlot-org/gramlot-js-server/actions/workflows/tests.yml)
 [![Coverage](https://codecov.io/gh/gramlot-org/gramlot-js-server/branch/main/graph/badge.svg)](https://app.codecov.io/gh/gramlot-org/gramlot-js-server)
 [![Documentation](https://readthedocs.org/projects/gramlot-js-server/badge/?version=latest)](https://gramlot-js-server.readthedocs.io/en/latest/)
+[![npm](https://img.shields.io/npm/v/@gramlot/gramlot-js-server)](https://www.npmjs.com/package/@gramlot/gramlot-js-server)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
 Gramlot describes web interfaces in Python or JavaScript and keeps them bound to
@@ -12,7 +13,8 @@ for the core and the other repositories.
 
 ## What this repository is
 
-This repository runs JavaScript Gramlot pages. It holds three npm packages:
+This repository runs JavaScript Gramlot pages. It holds three npm packages; the
+current release is 0.2.5, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
