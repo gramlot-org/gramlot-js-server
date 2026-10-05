@@ -90,5 +90,7 @@ Block ID: **GS-135-035**.
 
 `npm start` (Node) / `npm run start:bun` (Bun): `serve.mjs` serves the same pages
 on `http://127.0.0.1:8080/`; `main` and Source methods run on the server (files,
-database, secrets, shared registrations); `Logic` stays in the browser.
+database, secrets, shared registrations); `Logic` stays in the browser. `serve.mjs` is
+for development (page template: the project folder, `node_modules` included;
+[Deployment](025-deployment.md)).
 [Introduction](005-introduction.md).

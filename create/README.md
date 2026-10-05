@@ -15,7 +15,7 @@ then:
 cd my-form
 npm install
 npm run build        # page: index.html, one file; site: dist/, one folder per page
-npm start            # the same pages on http://127.0.0.1:8080/ with Node
+npm start            # development: the same pages on http://127.0.0.1:8080/ with Node
 npm run start:bun    # the same with Bun
 ```
 

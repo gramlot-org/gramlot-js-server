@@ -93,6 +93,10 @@ Block ID: **GN-125-020**.
       (`npm install @gramlot/gramlot @gramlot/gramlot-js-server`); the core's
       npm package ships the runtime `dist/gramlot.js`.
 - [ ] `pages` points to the deployed pages folder; nothing else lives there.
+      The `serve.mjs` of the `npm create @gramlot` templates (`npm start`) is
+      for development: the page template serves the project folder,
+      `node_modules` included. A deployment publishes the output of
+      `npm run build`, or serves a folder that holds only the pages.
 - [ ] `mountPath` equals the prefix of the front server location; `proxy_pass`
       forwards the path unchanged (no URI).
 - [ ] `contentSecurityPolicy` set to the strict or the permissive profile.

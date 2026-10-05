@@ -216,5 +216,7 @@ npm run start:bun    # Bun
 `http://127.0.0.1:8080/`. The pages do not change. What changes is where `main`
 and the Source methods run: on the server, which can read files, use a database,
 keep secrets and gather the registrations of everybody in one place.
-`Logic` still runs in the browser. The server guides start at
+`Logic` still runs in the browser. `serve.mjs` is for development: the page
+template serves the project folder, `node_modules` included
+([Deployment](025-deployment.md)). The server guides start at
 [Introduction](005-introduction.md).

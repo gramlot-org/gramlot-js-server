@@ -14,3 +14,6 @@ npm run start:bun    # the same with Bun
 
 The menu links `registration/index.html`: the same link works from `dist/`
 opened from disk, on a static web site and with `npm start`.
+
+`npm start` is for development. To publish the site, use `dist/` from
+`npm run build`.
