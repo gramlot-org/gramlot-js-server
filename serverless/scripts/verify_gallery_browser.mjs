@@ -82,6 +82,7 @@ try {
     await context.route(/^https?:/, route => { external.push(route.request().url()); return route.abort(); });
 
     const {page, errors} = await open(context, pathToFileURL(join(output, 'index.html')).href);
+    await page.waitForFunction(() => document.querySelector('.gallery-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.gallery-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
     await page.evaluate(() => { document.getElementById('open-c03').closest('details').open = true; });
