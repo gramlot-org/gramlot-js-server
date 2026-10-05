@@ -3,6 +3,7 @@
 [![tests](https://github.com/gramlot-org/gramlot-js-server/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/gramlot-org/gramlot-js-server/actions/workflows/tests.yml)
 [![Coverage](https://codecov.io/gh/gramlot-org/gramlot-js-server/branch/main/graph/badge.svg)](https://app.codecov.io/gh/gramlot-org/gramlot-js-server)
 [![Documentation](https://readthedocs.org/projects/gramlot-js-server/badge/?version=latest)](https://gramlot-js-server.readthedocs.io/en/latest/)
+[![npm](https://img.shields.io/npm/v/@gramlot/gramlot-js-server)](https://www.npmjs.com/package/@gramlot/gramlot-js-server)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
 Gramlot describes web interfaces in Python or JavaScript and keeps them bound to
@@ -12,7 +13,8 @@ for the core and the other repositories.
 
 ## What this repository is
 
-This repository runs JavaScript Gramlot pages. It holds three npm packages:
+This repository runs JavaScript Gramlot pages. It holds three npm packages; the
+current release is 0.2.5, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
@@ -44,6 +46,9 @@ npm run build        # page: index.html; site: dist/
 npm start            # the same pages on http://127.0.0.1:8080/ (Node.js)
 npm run start:bun    # the same with Bun
 ```
+
+`npm start` is for development: the page template serves the project folder,
+`node_modules` included. To publish, use the output of `npm run build`.
 
 The file `index.html` (or the folder `dist/`) opens with a double-click, travels by
 mail or sits on any static web site. The templates hold a form whose data leave
@@ -165,7 +170,7 @@ npx gramlot-serverless gallery gallery   # a folder that opens from disk: galler
 
 | | Verified |
 | --- | --- |
-| Gramlot | `@gramlot/gramlot` 0.2.5; `@gramlot/gramlot-examples` 0.2.4; `@genrojs/builders` 0.4.1 |
+| Gramlot | `@gramlot/gramlot` 0.2.6; `@gramlot/gramlot-examples` 0.2.5; `@genrojs/builders` 0.4.2 |
 | Runtimes | Node.js 22 (CI) and 23.11; Bun 1.3.14 (server and gallery) |
 | Browsers | Chromium 153 and WebKit 26.6 (pages, gallery, exports); Firefox 155 for the core qualification of 0.2.0. WebKit is not Safari; Safari is not verified. |
 

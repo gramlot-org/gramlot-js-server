@@ -1,9 +1,10 @@
 gramlot-js-server (concise)
 ===========================
 
-Concise view of the guides of the two packages: the Node.js and Bun host
-adapter and the exporter whose pages run in a browser Web Worker. The expanded view lives in the
-repository's docs directory.
+Concise view of the guides of the three packages: the Node.js and Bun host
+adapter, the exporter whose pages run in a browser Web Worker, and
+``npm create @gramlot``. The expanded view lives in the repository's docs
+directory.
 
 .. toctree::
    :maxdepth: 2

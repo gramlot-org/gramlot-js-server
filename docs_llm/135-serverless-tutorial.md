@@ -5,7 +5,7 @@ Document ID: **GS-135**.
 [Paired view](../docs/135-serverless-tutorial.md).
 
 Mario's club registration form without a server, then a small site. Uses
-`npm create @gramlot` (`@gramlot/create`) and the 0.2.4 packages; run on 2026-10-04,
+`npm create @gramlot` (`@gramlot/create`) and the packages 0.2.4 or later; run on 2026-10-04,
 both projects in CI (`create/test/create.test.js`).
 
 <a id="gs-135-005"></a>
@@ -90,5 +90,7 @@ Block ID: **GS-135-035**.
 
 `npm start` (Node) / `npm run start:bun` (Bun): `serve.mjs` serves the same pages
 on `http://127.0.0.1:8080/`; `main` and Source methods run on the server (files,
-database, secrets, shared registrations); `Logic` stays in the browser.
+database, secrets, shared registrations); `Logic` stays in the browser. `serve.mjs` is
+for development (page template: the project folder, `node_modules` included;
+[Deployment](025-deployment.md)).
 [Introduction](005-introduction.md).

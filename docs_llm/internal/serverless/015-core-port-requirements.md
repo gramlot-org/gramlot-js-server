@@ -12,9 +12,9 @@ Block ID: **GS-015-005**.
 
 The integration imports Gramlot from @gramlot/gramlot and Host/Page through
 the browser-safe /host and /page public entries, and `PageBootstrap` from the root
-entry. Serverless owns /worker-host and /standalone. It requires core >=0.2.0
-(`@gramlot/gramlot`, released on JSR on 2026-09-30) and `@genrojs/builders`
->=0.4.0. The 0.1.x archives do not provide this boundary. It consumes packaged runtime notices and HtmlBuilder's
+entry. Serverless owns /worker-host and /standalone. It requires
+`@gramlot/gramlot` >=0.2.5 and `@genrojs/builders` >=0.4.1, the ranges of
+`serverless/package.json`. The 0.1.x archives do not provide this boundary. It consumes packaged runtime notices and HtmlBuilder's
 static renderer. Attribute-only template interpolation is required so embedded
 JavaScript template literals remain unchanged. No installed dependency is patched.
 

@@ -70,5 +70,7 @@ Block ID: **GN-130-025**.
 families + `node-01`/`bun-01` + each `--catalog`. Prints `Gramlot gallery (node):
 <URL>`; stops on `SIGINT`/`SIGTERM`; runs again with `bun`/`node` when asked
 (`gramlot: bun is not on PATH`); missing examples package → `The gallery needs
-@gramlot/gramlot-examples: …`. Staging in a temporary folder (GE-010 §025); checked
+@gramlot/gramlot-examples: …`. gramlot-py-server installs a Python `gramlot` too: run
+this one through `npx gramlot` or `node_modules/.bin`, the Python one inside its
+virtual environment. Staging in a temporary folder (GE-010 §025); checked
 by `server/test/verify_gallery_browser.mjs`.
