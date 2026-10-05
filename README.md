@@ -45,6 +45,9 @@ npm start            # the same pages on http://127.0.0.1:8080/ (Node.js)
 npm run start:bun    # the same with Bun
 ```
 
+`npm start` is for development: the page template serves the project folder,
+`node_modules` included. To publish, use the output of `npm run build`.
+
 The file `index.html` (or the folder `dist/`) opens with a double-click, travels by
 mail or sits on any static web site. The templates hold a form whose data leave
 the browser through `gramlot.inout`: an email, a saved file, a download.
@@ -165,7 +168,7 @@ npx gramlot-serverless gallery gallery   # a folder that opens from disk: galler
 
 | | Verified |
 | --- | --- |
-| Gramlot | `@gramlot/gramlot` 0.2.5; `@gramlot/gramlot-examples` 0.2.4; `@genrojs/builders` 0.4.1 |
+| Gramlot | `@gramlot/gramlot` 0.2.6; `@gramlot/gramlot-examples` 0.2.5; `@genrojs/builders` 0.4.2 |
 | Runtimes | Node.js 22 (CI) and 23.11; Bun 1.3.14 (server and gallery) |
 | Browsers | Chromium 153 and WebKit 26.6 (pages, gallery, exports); Firefox 155 for the core qualification of 0.2.0. WebKit is not Safari; Safari is not verified. |
 
