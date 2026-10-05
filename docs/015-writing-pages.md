@@ -75,7 +75,8 @@ On this host a page has one logic module: the `Logic` export of the page module
 `orders.js`, else `orders_aux.js`; both at once raise an error when the page
 opens. Its methods form the root group: `func: 'add'`. `static js_requires` and
 `static css_requires` need a Host with a resource system; on `FileHost` a name in
-either field raises `InvalidResourceName` when the page opens.
+either field raises `InvalidResourceName` when the page opens. The resource
+system comes with genro-kajenn, part of Genro, the framework that succeeds GenroPy.
 
 ```js
 export class Logic {
@@ -117,8 +118,9 @@ source(Page.prototype.details);
 ```
 
 `main` cannot be requested as a remote method; an unmarked or missing method
-answers 404 `Unknown Source method`. The core example
-`examples/controllers/08_remote_source` shows the complete pattern.
+answers 404 `Unknown Source method`. The example
+[`controllers/08_remote_source.js`](https://github.com/gramlot-org/gramlot-examples/blob/main/src/gramlot_examples/pages/controllers/08_remote_source.js) of gramlot-examples (gallery key
+`c08`) shows the complete pattern.
 
 <a id="gn-115-025"></a>
 
