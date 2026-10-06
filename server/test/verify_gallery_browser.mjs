@@ -3,7 +3,7 @@
  * `node test/verify_gallery_browser.mjs node|bun PLAYWRIGHT_ENTRY [ENGINE]`.
  * The gallery page loads its logo, script and theme under the prefix, opens an example in its
  * frame and passes the theme to it; every example route starts without errors or failed
- * requests, and b08, c03, c08 and c09 call methods of the Logic of their page module.
+ * requests, and b08, c03 and c08 call methods of the Logic of their page module.
  */
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
@@ -43,17 +43,9 @@ const LOGIC = {
         assert.equal(await text('#changes'), '1');
     },
     async c08(page, text) {
-        await page.selectOption('#topic', 'svg');
-        await page.click('#load');
-        await page.waitForSelector('#remote-title');
-        assert.equal(await text('#remote-title'), 'SVG');
-    },
-    async c09(page, text) {
         await page.click('#press', {modifiers: ['Shift']});
         assert.equal(await text('#presses'), 'Pressed 1 times');
         assert.equal(await text('#modifiers'), 'with Shift');
-        await page.click('#loadExtras');
-        await page.waitForSelector('#extras-title');
         await page.click('#freeze');
         await page.click('#removeNote');
         assert.equal(await page.locator('#notes > *').count(), 2);
@@ -113,7 +105,7 @@ try {
         await page.close();
     }
     console.log(`${engineName} ${browser.version()} PASS gramlot ${runtime} gallery under ${MOUNT}: gallery page, frame and theme, ` +
-        `${keys.length} examples, Logic of b08, c03, c08 and c09, no errors or failed requests`);
+        `${keys.length} examples, Logic of b08, c03 and c08, no errors or failed requests`);
 } finally {
     await browser?.close();
     child.kill();

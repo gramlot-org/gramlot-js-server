@@ -55,8 +55,9 @@ browser:
    instance (`window.gramlot`) and starts the page.
 4. The start sends `main` to the Worker. The Worker runs `Page.main`, builds the
    Source and returns it. The window renders the DOM and binds the Data.
-5. A method marked with `source(...)` runs in the Worker when the window calls
-   `remoteSource`; messages replace HTTP.
+5. The Worker also answers the operation `source`, which builds a Source branch
+   by message instead of HTTP. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API:
+   they arrive together with the `remote` grammar attribute and `@endpoint`.
 6. `window.gramlot.dispose()` terminates the Worker; a dedicated Worker also
    ends with its document. Nothing is sent anywhere.
 

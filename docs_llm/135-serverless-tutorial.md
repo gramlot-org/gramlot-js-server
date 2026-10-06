@@ -47,7 +47,7 @@ web site. Old copies keep working.
 Block ID: **GS-135-020**.
 
 No Python ([gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server)).
-Source methods run in the Worker of the same browser: no shared data, database,
+`main` runs in the Worker of the same browser: no shared data, database,
 files or secrets; the file is readable by anyone. Typed data stay in the browser
 and are lost on close unless sent (025). The file receives nothing: registrations
 come by email, files or a service of Mario's.
@@ -89,7 +89,7 @@ Block ID: **GS-135-030**.
 Block ID: **GS-135-035**.
 
 `npm start` (Node) / `npm run start:bun` (Bun): `serve.mjs` serves the same pages
-on `http://127.0.0.1:8080/`; `main` and Source methods run on the server (files,
+on `http://127.0.0.1:8080/`; `main` runs on the server (files,
 database, secrets, shared registrations); `Logic` stays in the browser. `serve.mjs` is
 for development (page template: the project folder, `node_modules` included;
 [Deployment](025-deployment.md)).

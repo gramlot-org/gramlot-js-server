@@ -103,7 +103,6 @@ Block ID: **GN-140-025**.
   in `_aux.js`. `@gramlot/gramlot/page` resolves through the import map.
 - **`The gallery needs @gramlot/gramlot-examples`.** `gramlot … gallery` without
   the examples package: `npm install @gramlot/gramlot-examples`.
-- **Payload too large (413).** A `params` object above 4096 bytes; send less data
-  or load it server-side in the Source method.
+- **Payload too large (413).** A JSON body above 4096 bytes; send less data.
 - **A changed page is not visible.** Modules are cached by the runtime; restart
   the server.

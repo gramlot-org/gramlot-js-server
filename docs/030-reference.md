@@ -65,6 +65,8 @@ Paths are shown with the default Host options and without mount prefix; with
 Every response of the adapter carries `Cache-Control: no-store`, except the
 runtime, which carries `X-Content-Type-Options: nosniff`.
 
+The route `/gramlot/source` answers the remote Source requests. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+
 <a id="gn-130-020"></a>
 
 ## 020 · Status codes
@@ -98,7 +100,7 @@ gramlot bun gallery  [same options]
 ```
 
 `gallery` serves the gallery of `@gramlot/gramlot-examples` on Node.js or Bun:
-the common families (`e01`–`e13`, `b01`–`b11`, `c01`–`c09`), the family of the
+the common families (`e01`–`e13`, `b01`–`b11`, `c01`–`c08`), the family of the
 runtime of this package (`node-01` or `bun-01`, the quick start of the README) and
 the families of each `--catalog`, a pair of an environment `catalog.json` and its
 pages folder (GE-010 of gramlot-examples).

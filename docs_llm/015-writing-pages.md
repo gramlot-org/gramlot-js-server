@@ -63,10 +63,8 @@ logic runs under the strict CSP; inline code needs the permissive profile
 
 Block ID: **GN-115-020**.
 
-`source(Page.prototype.details)` marks a remote method; named logic calls
-`this.page.remoteSource(targetNode, 'details', params)` → `POST /gramlot/source`
-`{pageId, method, params}`. `main`, unmarked or missing: 404 `Unknown Source
-method`. Example: gramlot-examples [`controllers/08_remote_source.js`](https://github.com/gramlot-org/gramlot-examples/blob/main/src/gramlot_examples/pages/controllers/08_remote_source.js) (gallery `c08`).
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The route `POST /gramlot/source` stays in the adapter ([Reference](030-reference.md)).
 
 <a id="gn-115-025"></a>
 

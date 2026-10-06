@@ -31,7 +31,8 @@ Block ID: **GN-105-010**.
    `@gramlot/gramlot/page` of the page module to it.
 4. `POST /gramlot/main` with the page ID → `main(root)` → Source as TYTX JSON.
 5. Runtime renders the DOM, installs Data declarations, starts bindings.
-6. Named logic may call `remoteSource` → `POST /gramlot/source`.
+6. `POST /gramlot/source` (page ID, method, params → Source branch) stays in the
+   adapter. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 7. Leaving the page → `POST /gramlot/close`; the TTL covers lost closes.
 
 <a id="gn-105-015"></a>

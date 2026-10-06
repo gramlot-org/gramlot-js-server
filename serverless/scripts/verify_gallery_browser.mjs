@@ -2,8 +2,8 @@
  * The command `gramlot-serverless gallery` opened from disk in a real browser:
  * `node scripts/verify_gallery_browser.mjs PLAYWRIGHT_ENTRY [ENGINE]`.
  * The gallery page loads its logo, script and theme, opens an example in its frame and passes
- * the theme to it; every example starts without errors or network requests, and b08, c03, c08
- * and c09 call methods of the Logic of their page module.
+ * the theme to it; every example starts without errors or network requests, and b08, c03 and
+ * c08 call methods of the Logic of their page module.
  */
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
@@ -40,17 +40,9 @@ const LOGIC = {
         assert.equal(await text('#changes'), '1');
     },
     async c08(page, text) {
-        await page.selectOption('#topic', 'svg');
-        await page.click('#load');
-        await page.waitForSelector('#remote-title');
-        assert.equal(await text('#remote-title'), 'SVG');
-    },
-    async c09(page, text) {
         await page.click('#press', {modifiers: ['Shift']});
         assert.equal(await text('#presses'), 'Pressed 1 times');
         assert.equal(await text('#modifiers'), 'with Shift');
-        await page.click('#loadExtras');
-        await page.waitForSelector('#extras-title');
         await page.click('#freeze');
         await page.click('#removeNote');
         assert.equal(await page.locator('#notes > *').count(), 2);
@@ -105,7 +97,7 @@ try {
     }
     assert.deepEqual(external, []);
     console.log(`${engineName} ${browser.version()} PASS gramlot-serverless gallery from disk: gallery page, frame and theme, ` +
-        `${keys.length} examples, Logic of b08, c03, c08 and c09, no errors or network requests`);
+        `${keys.length} examples, Logic of b08, c03 and c08, no errors or network requests`);
 } finally {
     await browser.close();
     await rm(folder, {recursive: true, force: true});

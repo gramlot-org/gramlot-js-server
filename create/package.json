@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/create",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "npm create @gramlot page|site <folder>: a new Gramlot project with one page or a site of pages",
   "license": "Apache-2.0",
   "repository": {
