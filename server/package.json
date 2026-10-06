@@ -30,7 +30,7 @@
     }
   },
   "devDependencies": {
-    "@gramlot/gramlot-examples": "0.2.5"
+    "@gramlot/gramlot-examples": "0.2.7"
   },
   "exports": {
     "./node": "./src/node.mjs",
