@@ -73,6 +73,8 @@ Block ID: **GS-130-015**.
   `Unknown Worker operation: <name>`. Errors cross the channel as
   `{name, message}`.
 
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+
 <a id="gs-130-020"></a>
 
 ## 020 · Exported files
@@ -102,7 +104,7 @@ Block ID: **GS-130-025**.
 | --- | --- |
 | `npm test` | 32 tests: exporter output and failure handling, stylesheets, page logic, directory and folder export, gallery, bundles, Worker host and transport, `mount`, the quick start with typing (jsdom) |
 | `serverless/scripts/verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` | A page with `Page` and `Logic` in one module, a core theme, `Page.css` and its stylesheet, as one file and as a directory |
-| `serverless/scripts/verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` | `gramlot-serverless gallery` from disk: the gallery page, frames and theme, every example, the `Logic` of b08, c03, c08 and c09 |
+| `serverless/scripts/verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` | `gramlot-serverless gallery` from disk: the gallery page, frames and theme, every example, the `Logic` of b08, c03 and c08 |
 | `serverless/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |
 | `serverless/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |
 | `serverless/scripts/verify_inline_browser.mjs HTML PLAYWRIGHT [EXECUTABLE] [ENGINE]` | An exported file with inline code (`examples/inline-code`): formula, controller, `==`, `_if`/`_else`, `action`, `connect_onclick` and a remote Source, no CSP violation, no HTTP(S) |
@@ -122,7 +124,7 @@ gramlot-serverless gallery OUTPUT [--catalog CATALOG.json PAGES]...
 writes the gallery of `@gramlot/gramlot-examples` as a directory that opens from
 disk: `OUTPUT/index.html` is the gallery page, each example is the route
 `<key>/` (`OUTPUT/c03/index.html`). It holds every common family (`e01`–`e13`,
-`b01`–`b11`, `c01`–`c09`), the family of this package (`serverless-01`, the quick
+`b01`–`b11`, `c01`–`c08`), the family of this package (`serverless-01`, the quick
 start; `serverless-02`, the page of `npm create @gramlot page`) and the families of
 each `--catalog`. The command prints `Built <output>: the gallery and <n> examples;
 open index.html`.
@@ -130,7 +132,7 @@ open index.html`.
 The gallery page is the browser-safe `GalleryPage` of gramlot-examples with its
 texts as data; each example extends its page with the gallery frame script, links
 its stylesheet and takes the `Logic` of its page module. The directory follows the
-rules of `buildDirectory`: a previous gallery at `OUTPUT` is replaced. With 36
+rules of `buildDirectory`: a previous gallery at `OUTPUT` is replaced. With 35
 routes it takes about 30 MB, since every route holds its Worker. Without
 `@gramlot/gramlot-examples` the command answers `The gallery needs
 @gramlot/gramlot-examples: npm install @gramlot/gramlot-examples`.

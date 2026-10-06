@@ -33,6 +33,8 @@ Block ID: **GN-120-005**.
 The Host options reach `FileHost` only when the adapter builds it. A custom `host`
 carries its own.
 
+`sourceUrl` names the remote Source endpoint. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+
 <a id="gn-120-010"></a>
 
 ## 010 · Mount prefix

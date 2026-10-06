@@ -57,7 +57,7 @@ Block ID: **GN-140-025**.
   or not extending the core's `Page`.
 - `ENOENT` on `dist/gramlot.js` at start: `npm --prefix ../gramlot/js run build`.
 - `requires need a Host with a resource system`: drop `js_requires`/`css_requires`.
-- 413: `params` above 4096 bytes.
+- 413: JSON body above 4096 bytes.
 - A changed page not visible: restart the server.
 - `Two logic modules for one page`: `Logic` in the module and in `_aux.js`; keep one.
 - Browser cannot resolve an import of the page module: a server-only import; move

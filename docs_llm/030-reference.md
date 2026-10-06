@@ -46,6 +46,7 @@ In order, each path under `mountPath`:
 | `GET` | page path, `<path>/index.html` | — | 200 HTML bootstrap, CSP header when configured |
 
 `Cache-Control: no-store` everywhere but the runtime (`X-Content-Type-Options: nosniff`).
+`/gramlot/source`: remote Source requests. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gn-130-020"></a>
 

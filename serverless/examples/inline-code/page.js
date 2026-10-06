@@ -1,3 +1,4 @@
+// CI fixture for the Worker `source` operation, not an example of the page-writing API.
 import {Page as BasePage, source} from '@gramlot/gramlot/page';
 export class Page extends BasePage {
     static title = 'Inline Code';

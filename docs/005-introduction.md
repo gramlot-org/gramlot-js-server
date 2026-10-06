@@ -49,9 +49,10 @@ Block ID: **GN-105-010**.
 5. **Source to browser.** The runtime renders the DOM from the Source, installs the
    Data declarations and starts the bindings. Typing in a bound field writes the
    Data; formulas and controllers react; the DOM follows.
-6. **Remote Source.** A named method of the page can call `remoteSource`; the
-   runtime posts the page ID, the method name and the parameters to
-   `/gramlot/source` and receives a Source branch.
+6. **Remote Source.** The adapter keeps the route `/gramlot/source`: it
+   receives the page ID, a method name and parameters and answers with a Source
+   branch. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API:
+   they arrive together with the `remote` grammar attribute and `@endpoint`.
 7. **Close.** When the browser leaves the page it posts the page ID to
    `/gramlot/close`; the TTL covers the cases where that request is lost.
 

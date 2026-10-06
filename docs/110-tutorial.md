@@ -177,7 +177,7 @@ Block ID: **GS-110-030**.
 - [No server: a tutorial](135-serverless-tutorial.md): a project of your own with
   `npm create @gramlot`, a form, a site, and how the data leave the browser.
 - [Writing pages for this host](115-writing-pages.md): layout, logic,
-  `Page.css`, Source methods, what the bundle accepts.
+  `Page.css`, what the bundle accepts.
 - [Configuration](120-configuration.md): every option of `build`, `buildDirectory`
   and `mount`, and the Content Security Policy of the export.
 - The core guide [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html)

@@ -27,6 +27,7 @@ Block ID: **GN-120-005**.
 | `maxPages` | integer | `1000` | Registry capacity; above: 503 |
 
 Host options reach `FileHost` only when the adapter builds it.
+`sourceUrl`: remote Source endpoint. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gn-120-010"></a>
 

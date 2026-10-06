@@ -35,7 +35,7 @@ refuses these cases, naming the node and the attribute:
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `inline code runs only as received with the Source (main or a remote Source); a text written later is not run: use named logic` | Page code changed a code attribute after the start, or inserted a node with inline code in the live Source | Write the code in `main` or in a Source method, or move it to a method of `Logic` named with `func` |
+| `inline code runs only as received with the Source (main or a remote Source); a text written later is not run: use named logic` | Page code changed a code attribute after the start, or inserted a node with inline code in the live Source | Write the code in `main`, or move it to a method of `Logic` named with `func` |
 | `'<attribute>' is inline code and cannot be the pointer '<pointer>'; inline code is never read from Data` | A code attribute holds `^path` or `=path` | Pass the data as a parameter (`a='^.a'`) and write the code as text |
 | `'<attribute>' has the form of a native event handler, run by the browser outside Gramlot; write connect_<attribute> for an event, or rename the attribute` | An attribute such as `onclick` | Use `connect_onclick` |
 | `'<attribute>' holds a javascript: URL, run by the browser as code; write connect_onclick or the action of a button instead` | `href`, `src`, `formaction` or `xlink:href` starts with `javascript:` | Use `connect_onclick` or a button `action` |
@@ -51,9 +51,12 @@ policy of its own.
 
 Block ID: **GS-140-015**.
 
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The messages below come from the Worker operation `source`.
+
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `Unknown Source method` | `remoteSource` called with `main`, with a non-string, or with a method not marked by `source(...)` | Mark the method: `source(Page.prototype.details)` |
+| `Unknown Source method` | `remoteSource` called with `main`, with a non-string, or with a method not marked by `source(...)` | Page code does not call `remoteSource` yet (note above) |
 | `Unknown, expired or unowned page` | The page registered in the Worker expired (core default 1800 s), or the page ID is wrong | Reload the file; the exporter uses the core defaults |
 | `DataCloneError` | `params` contains a value that structured cloning refuses (a function, a DOM node) | Pass plain data |
 | `Worker transport is disposed` | The instance was disposed, or the Worker crashed (`Worker communication failed`) | Reload; look for the earlier error in the console |

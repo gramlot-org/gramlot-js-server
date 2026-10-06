@@ -102,25 +102,9 @@ strict Content Security Policy profile; inline code (`formula`, `script`, `==`,
 
 Block ID: **GN-115-020**.
 
-A page method marked with `source` is a remote Source method. The browser asks for
-it from named logic with `this.page.remoteSource(targetNode, 'details', params)`;
-the adapter posts `{pageId, method, params}` to `/gramlot/source` and the Host runs
-the method on a new Page instance.
-
-```js
-import {Page as BasePage, source} from '@gramlot/gramlot/page';
-
-export class Page extends BasePage {
-    main(root) { root.section({node_id: 'details'}); }
-    details(root, {topic = 'binding'} = {}) { root.p(topic); }
-}
-source(Page.prototype.details);
-```
-
-`main` cannot be requested as a remote method; an unmarked or missing method
-answers 404 `Unknown Source method`. The example
-[`controllers/08_remote_source.js`](https://github.com/gramlot-org/gramlot-examples/blob/main/src/gramlot_examples/pages/controllers/08_remote_source.js) of gramlot-examples (gallery key
-`c08`) shows the complete pattern.
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The route `POST /gramlot/source` stays in the adapter; the
+[Reference](030-reference.md) lists it.
 
 <a id="gn-115-025"></a>
 
