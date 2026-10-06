@@ -65,11 +65,8 @@ Block ID: **GS-115-015**.
 
 Block ID: **GS-115-020**.
 
-`source(Page.prototype.method)`; the window calls `gramlot.remoteSource(node,
-'method', params)` → Worker → branch by message. `main` and unmarked methods:
-`Unknown Source method`. `params` must clone (`DataCloneError` for functions). Fresh
-Page per call. Registry TTL 1800 s (core default): later calls fail `Unknown,
-expired or unowned page`; reload the file.
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The Worker keeps the operation `source` ([Reference](130-reference.md)).
 
 <a id="gs-115-025"></a>
 

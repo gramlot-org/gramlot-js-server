@@ -114,9 +114,8 @@ page can and cannot do:
 
 - **No Python.** The page is JavaScript. Pages in Python need a Python server
   ([gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server)).
-- **The Source methods run in the Worker.** A method marked with `source(...)`
-  runs in a Web Worker of the same browser, with the memory and the computing
-  power of that browser. It sees no shared data, no database and no file of
+- **The page runs in the Worker.** `main` runs in a Web Worker of the same
+  browser, with the memory and the computing power of that browser. It sees no shared data, no database and no file of
   Mario's computer, and it keeps no secret: everything in the file is readable by
   whoever has the file.
 - **The data stay in the browser.** What a person types into the form stays in
@@ -214,7 +213,7 @@ npm run start:bun    # Bun
 
 `serve.mjs` serves the same pages with `@gramlot/gramlot-js-server` on
 `http://127.0.0.1:8080/`. The pages do not change. What changes is where `main`
-and the Source methods run: on the server, which can read files, use a database,
+runs: on the server, which can read files, use a database,
 keep secrets and gather the registrations of everybody in one place.
 `Logic` still runs in the browser. `serve.mjs` is for development: the page
 template serves the project folder, `node_modules` included

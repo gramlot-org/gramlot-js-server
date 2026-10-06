@@ -62,7 +62,7 @@ Block ID: **GS-125-015**.
 - The single file runs the inline code of its Source, built from your pages. The
   core runs no code written later in the page, refuses inline code read from Data,
   and refuses `on<event>` attributes and `javascript:` URLs.
-- The Worker has no server to talk to; `remoteSource` stays inside the browser.
+- The Worker has no server to talk to.
 - Build only pages from folders you trust: `build` and `buildDirectory` bundle
   the page's imports as they are.
 

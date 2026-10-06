@@ -36,7 +36,7 @@ Block ID: **GS-140-010**.
 The single file runs the inline code of the Source its Worker builds. The core refuses,
 naming node and attribute: `inline code runs only as received with the Source (main or a
 remote Source); a text written later is not run: use named logic` (code attribute
-changed or node inserted after the start: write it in `main`/a Source method or a
+changed or node inserted after the start: write it in `main` or a
 `Logic` method with `func`); `'<attribute>' is inline code and cannot be the pointer '<pointer>'; inline code
 is never read from Data` (pass data as parameters); `… has the form of a native event
 handler …` (use `connect_onclick`); `… holds a javascript: URL …` in `href`, `src`,
@@ -50,7 +50,10 @@ with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
 
 Block ID: **GS-140-015**.
 
-`Unknown Source method` (`main`, non-string, or unmarked method → `source(...)`);
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Messages of the Worker operation `source`:
+`Unknown Source method` (`main`, non-string, or unmarked method; page code does
+not call `remoteSource` yet);
 `Unknown, expired or unowned page` (core default 1800 s expiry → reload);
 `DataCloneError` (uncloneable params → plain data); `Worker transport is disposed`
 / `Worker communication failed` (disposed or crashed → reload, read the earlier

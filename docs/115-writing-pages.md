@@ -91,18 +91,9 @@ A URL that points outside the export is not served by anything.
 
 Block ID: **GS-115-020**.
 
-A method marked with `source(Page.prototype.method)` builds a Source branch on
-request. In the export it runs in the Worker; the window calls it with
-`gramlot.remoteSource(node, 'method', params)` and receives the branch through a
-message. `main` cannot be called this way (`Unknown Source method`), and a method
-that is not marked is unknown too. Parameters must survive structured cloning: a
-function in `params` fails with `DataCloneError`. The core creates a fresh Page
-instance for every call.
-
-The page registered in the Worker expires after the core default of 1800
-seconds; a `remoteSource` after that fails with `Unknown, expired or unowned page`.
-The exporter creates the `WorkerHost` with the core defaults. Reload the file to
-start again.
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The Worker keeps the operation `source`; the [Reference](130-reference.md)
+lists it.
 
 <a id="gs-115-025"></a>
 

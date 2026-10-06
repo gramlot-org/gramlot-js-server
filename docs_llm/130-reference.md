@@ -46,6 +46,7 @@ Block ID: **GS-130-015**.
 `pending`, `closed`; Worker `error`/`messageerror` dispose it. `WorkerHost`:
 extends core `Host`; `open`, `main`, `source` over `postMessage`; `Unknown Worker
 operation: <name>`; errors cross as `{name, message}`.
+Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gs-130-020"></a>
 
@@ -87,5 +88,5 @@ gramlot-examples gallery as a directory from disk; `index.html` + `<key>/index.h
 common families + `serverless-01` (quick start), `serverless-02` (`npm create @gramlot
 page`) + each `--catalog`. Prints `Built <output>: the gallery and <n> examples; open
 index.html`. Rules of `buildDirectory` (a previous gallery is replaced); about 30 MB
-for 36 routes (one Worker each). Missing examples package → `The gallery needs
+for 35 routes (one Worker each). Missing examples package → `The gallery needs
 @gramlot/gramlot-examples: …`.
