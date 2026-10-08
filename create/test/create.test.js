@@ -46,7 +46,7 @@ test('page: index.js with Page and Logic, the scripts, built to one file and ser
     assert.deepEqual(manifest.scripts, {build: 'gramlot-serverless build index.js -o index.html',
         start: 'node serve.mjs', 'start:bun': 'bun serve.mjs'});
     assert.deepEqual(manifest.dependencies, {'@gramlot/gramlot': '>=0.2.12',
-        '@gramlot/gramlot-js-server': `^${version}`, '@gramlot/gramlot-serverless': `^${version}`});
+        '@gramlot/gramlot-js-server': `>=${version}`, '@gramlot/gramlot-serverless': `>=${version}`});
     const page = await import(join(project, 'index.js'));
     assert.equal(typeof page.Page, 'function');
     assert.equal(page.Logic.prototype.summary({name: 'Ada', email: 'ada@example.org'}), 'Ada <ada@example.org>');

@@ -22,8 +22,8 @@ function manifest(name, template) {
         },
         dependencies: {
             '@gramlot/gramlot': '>=0.2.12',
-            '@gramlot/gramlot-js-server': `^${own.version}`,
-            '@gramlot/gramlot-serverless': `^${own.version}`,
+            '@gramlot/gramlot-js-server': `>=${own.version}`,
+            '@gramlot/gramlot-serverless': `>=${own.version}`,
         },
     };
 }
