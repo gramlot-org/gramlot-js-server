@@ -22,7 +22,7 @@ function policy(script) {
         "style-src 'unsafe-inline'; img-src data: blob:; connect-src *; base-uri 'none'; form-action 'none'";
 }
 
-/** Bundle one JS Page into one HTML file. The page module is imported, as FileHost does, to
+/** Bundle one JS Page into one HTML file. The page module is imported, as GramlotFileServer does, to
  * read Page.css; main runs only in the browser. Runtime behavior belongs to Gramlot. */
 export async function build({page, output}) {
     const input = resolve(page);
@@ -38,7 +38,7 @@ export async function build({page, output}) {
     const runtime = (await bundle({...options, globalName: 'GramlotStandalone', stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
-export {Page, source} from './src/standalone.js';
+export {Page} from './src/standalone.js';
 const blob = text => URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
 const workerUrl = blob(${JSON.stringify(worker)});
 const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));

@@ -13,7 +13,7 @@ what is served.
 
 Block ID: **GN-115-005**.
 
-The adapter serves one pages folder through the core's `FileHost`. The page
+The adapter serves one pages folder through the core's `GramlotFileServer`. The page
 path of a request maps to a file:
 
 | Request path | Page file | Then |
@@ -74,7 +74,7 @@ Block ID: **GN-115-015**.
 On this host a page has one logic module: the `Logic` export of the page module
 `orders.js`, else `orders_aux.js`; both at once raise an error when the page
 opens. Its methods form the root group: `func: 'add'`. `static js_requires` and
-`static css_requires` need a Host with a resource system; on `FileHost` a name in
+`static css_requires` need a `GramlotServer` with a resource system; on `GramlotFileServer` a name in
 either field raises `InvalidResourceName` when the page opens. The resource
 system comes with genro-kajenn, part of Genro, the framework that succeeds GenroPy.
 
@@ -102,7 +102,7 @@ strict Content Security Policy profile; inline code (`formula`, `script`, `==`,
 
 Block ID: **GN-115-020**.
 
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 The route `POST /gramlot/source` stays in the adapter; the
 [Reference](030-reference.md) lists it.
 

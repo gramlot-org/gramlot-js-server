@@ -18,7 +18,7 @@ Block ID: **GS-115-005**.
 - Import the core as `@gramlot/gramlot` (npm); another name bundles a second copy.
 - `*_aux.js` is never a page.
 - Browser-compatible imports only (esbuild); `node:*` fails the build, output kept.
-- The build imports the module in Node (as `FileHost`) for `Page.css` and `Logic`;
+- The build imports the module in Node (as `GramlotFileServer`) for `Page.css` and `Logic`;
   `main` runs only in the Worker; module-level code runs at build.
 
 Folder: `build pages -o dist`: first-level `.js`/`.mjs` = pages (`index.js` →
@@ -43,7 +43,7 @@ one page`. Root group: `func: 'greeting'`; formula `method(kwargs)`, controller
   to a Blob URL; a failing import stops the start and releases the Worker.
 - Inline code runs in the window (`'unsafe-eval'` in the file, no policy in the
   directory; [Configuration](120-configuration.md)).
-- `js_requires` groups need a resource system; `WorkerHost` resolves `Page.css`,
+- `js_requires` groups need a resource system; `GramlotWorkerServer` resolves `Page.css`,
   the page stylesheet and the page logic.
 
 <a id="gs-115-015"></a>
@@ -65,7 +65,7 @@ Block ID: **GS-115-015**.
 
 Block ID: **GS-115-020**.
 
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 The Worker keeps the operation `source` ([Reference](130-reference.md)).
 
 <a id="gs-115-025"></a>
@@ -74,7 +74,7 @@ The Worker keeps the operation `source` ([Reference](130-reference.md)).
 
 Block ID: **GS-115-025**.
 
-Contains: runtime, `WorkerHost` with the page, the page logic, the stylesheets,
+Contains: runtime, `GramlotWorkerServer` with the page, the page logic, the stylesheets,
 runtime notices as inert JSON (file) or `assets/runtime-notices.json` (directory).
 Not: unimported code, server, database, `dataRpc`, server resolvers. All public:
 no secrets in pages or their modules.

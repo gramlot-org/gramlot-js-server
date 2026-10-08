@@ -2,7 +2,7 @@ import {PageBootstrap} from '@gramlot/gramlot';
 import {WorkerTransport} from './worker-transport.js';
 
 // A logic module imports @gramlot/gramlot/page from the core of the window (GramlotStandalone).
-export {Page, source} from '@gramlot/gramlot';
+export {Page} from '@gramlot/gramlot';
 
 function exportRoot(assetRoot) {
     if (assetRoot === null) return null;

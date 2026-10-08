@@ -27,13 +27,13 @@ JavaScript pages behind a server use `@gramlot/gramlot-js-server`
 
 Block ID: **GS-105-010**.
 
-Build: the page module is imported (as `FileHost`) for `Page.css` and `Logic`;
+Build: the page module is imported (as `GramlotFileServer`) for `Page.css` and `Logic`;
 `main` does not run; the page is bundled for the Worker, its logic for the window.
-Run: `mount` creates the Worker and sends `open`; `WorkerHost` returns the title,
+Run: `mount` creates the Worker and sends `open`; `GramlotWorkerServer` returns the title,
 the stylesheet URLs (none in the single file) and the logic URL; `PageBootstrap`
 writes the CSS links, imports the logic, registers `Logic`, creates
 `window.gramlot`, starts; `main` runs in the Worker; the window renders and binds;
 `dispose()` ends the Worker. The Worker keeps the operation `source`.
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 Logic: `Logic` of the page module, else `<page>_aux.js`; window only; imports
 `@gramlot/gramlot/page` from the core of the window ([Configuration](120-configuration.md)).

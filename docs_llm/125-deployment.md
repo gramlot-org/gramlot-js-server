@@ -39,7 +39,7 @@ Block ID: **GS-125-015**.
 
 Nothing dynamic: only imported code, page logic, stylesheets, copied files. The
 page logic is public: no server-only logic in an export. Typed data stay in the
-user's browser; they leave only through `gramlot.inout` or page code
+user's browser; they leave only through `gramlot.utl.inout` or page code
 ([No server: a tutorial](135-serverless-tutorial.md)). The single file runs the inline code of its
 Source; the core runs no code written later, refuses inline code read from Data,
 `on<event>` attributes and `javascript:` URLs. The

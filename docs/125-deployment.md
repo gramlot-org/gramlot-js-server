@@ -56,7 +56,7 @@ Block ID: **GS-125-015**.
 - The page logic runs in the browser and is readable by anyone who has the file.
   Server-only logic (queries, keys, data access) has no place in an export.
 - The data typed into a page stay in the browser of whoever uses it. They leave
-  it only through `gramlot.inout` (an email the user sends, a file the user
+  it only through `gramlot.utl.inout` (an email the user sends, a file the user
   saves, an HTTP `POST` to an address of the page) or code of the page
   ([No server: a tutorial](135-serverless-tutorial.md)).
 - The single file runs the inline code of its Source, built from your pages. The

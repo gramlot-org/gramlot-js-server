@@ -19,7 +19,7 @@ Block ID: **GS-020-005**.
 `npm test` checks output, that `main` does not run at build time, rejected
 Python/Node-only inputs, CLI use and preservation of existing output on failure.
 `npm test` also checks the page logic (the `Logic` export or the companion, bundled
-for the window, absent from the Worker bundle), the esbuild metafile of the WorkerHost bundle (no `binding/inline.js`), the
+for the window, absent from the Worker bundle), the esbuild metafile of the GramlotWorkerServer bundle (no `binding/inline.js`), the
 CSP hash of the final script bytes, and the `PageBootstrap` subclass that releases
 the Worker without a close beacon.
 `scripts/verify_export_browser.mjs` opens an actual exported artifact from file,

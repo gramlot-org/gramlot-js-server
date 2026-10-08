@@ -3,23 +3,24 @@ import assert from 'node:assert/strict';
 import {mkdir, mkdtemp, readFile, rm, symlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {Host, Page, source} from '@gramlot/gramlot/server';
+import {fileURLToPath} from 'node:url';
+import {GramlotServer, Page, checkProtocol} from '@gramlot/gramlot/server';
 const {startServer} = await import(globalThis.Bun ? '../src/bun.mjs' : '../src/node.mjs');
 
 class HtmlPage extends Page {
     main(root) { root.h1('Hello World'); }
     details(root) { root.p('Remote HTML'); }
 }
-source(HtmlPage.prototype.details);
-class TestHost extends Host {
+HtmlPage.registerSource('details');
+class TestServer extends GramlotServer {
     async resolvePage(path) { return path === '/' ? HtmlPage : super.resolvePage(path); }
     async resolveResources() { return {css: [], js: []}; }
 }
 
 test('real listener serves packaged runtime and typed main/remote; errors and shutdown', async () => {
-    const host = new TestHost();
+    const server = new TestServer();
     const failures = [];
-    const app = await startServer({host, ownerForRequest: request => request.headers.get('x-owner'),
+    const app = await startServer({server, ownerForRequest: request => request.headers.get('x-owner'),
         onError: error => failures.push(error)});
     let pageId;
     try {
@@ -68,11 +69,11 @@ test('real listener serves packaged runtime and typed main/remote; errors and sh
         assert.equal((await fetch(app.url + '/gramlot/close')).status, 405);
         const expiring = await fetch(app.url, {headers: {'x-owner': 'alice'}});
         const expiringId = bootstrap(await expiring.text()).argument.config.pageId;
-        host.pages.get(expiringId).expires = 0;
+        server.pages.get(expiringId).expires = 0;
         assert.equal((await post('/gramlot/main', {pageId: expiringId})).status, 404);
         assert.deepEqual(failures, []);
     } finally { await app.close(); }
-    assert.equal(host.pages.size, 0);
+    assert.equal(server.pages.size, 0);
     await assert.rejects(fetch(app.url));
 });
 
@@ -256,4 +257,13 @@ test('/themes/* comes from the core under the prefix, before assets; a pages fol
             assert.equal((await fetch(app.url + path)).status, 404, path);
         }
     } finally { await app.close(); await rm(folder, {recursive: true}); }
+});
+
+test('GC-230: checkProtocol passes on the quick-start pages, with and without a mount prefix and a policy', async () => {
+    const pages = fileURLToPath(new URL('./fixtures/quickstart/', import.meta.url));
+    for (const options of [{}, {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]) {
+        const app = await startServer({pages, ...options});
+        try { await checkProtocol(app.url + (options.mountPath ?? ''), '/'); }
+        finally { await app.close(); }
+    }
 });

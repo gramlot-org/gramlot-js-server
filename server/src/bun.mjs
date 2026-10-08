@@ -7,7 +7,7 @@ export async function startServer({hostname = '127.0.0.1', port = 0, onError = c
     const server = Bun.serve({hostname, port, fetch: request => dispatch.fetch(request),
         error(error) { onError(error); return new Response('Internal server error', {status: 500}); },
     });
-    return {host: dispatch.host, server, url: `http://${hostname}:${server.port}`,
-        async close() { dispatch.host.pages.clear(); await server.stop(true); },
+    return {gramlotServer: dispatch.server, server, url: `http://${hostname}:${server.port}`,
+        async close() { dispatch.server.closeAll(); await server.stop(true); },
     };
 }

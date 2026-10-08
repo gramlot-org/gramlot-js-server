@@ -26,7 +26,7 @@ Block ID: **GS-115-005**.
 - Imports must be browser-compatible. The page and its imports are bundled for the
   Worker with esbuild: a Node-only import (`node:fs`, …) fails the build, and the
   existing output is kept.
-- The build imports the page module in Node, as the core `FileHost` does, to read
+- The build imports the page module in Node, as the core `GramlotFileServer` does, to read
   `Page.css` and the `Logic` export; `main` runs only in the Worker. Module-level
   code of the page runs at build time too.
 
@@ -65,8 +65,8 @@ method as `method(node, kwargs)`.
   `_if`/`_else`) runs in the window: the single file allows `'unsafe-eval'`, the
   directory has no policy ([Configuration](120-configuration.md)). A short
   computation fits inline; a longer one belongs in a method of `Logic`.
-- `js_requires` groups (`func: 'business.discount'`) need a Host with a resource
-  system. `WorkerHost` resolves `Page.css`, the page stylesheet and the page logic.
+- `js_requires` groups (`func: 'business.discount'`) need a `GramlotServer` with a resource
+  system. `GramlotWorkerServer` resolves `Page.css`, the page stylesheet and the page logic.
 
 <a id="gs-115-015"></a>
 
@@ -91,7 +91,7 @@ A URL that points outside the export is not served by anything.
 
 Block ID: **GS-115-020**.
 
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 The Worker keeps the operation `source`; the [Reference](130-reference.md)
 lists it.
 
@@ -101,7 +101,7 @@ lists it.
 
 Block ID: **GS-115-025**.
 
-- Contained: the Gramlot runtime, the `WorkerHost` with the page, the page logic,
+- Contained: the Gramlot runtime, the `GramlotWorkerServer` with the page, the page logic,
   the stylesheets, the runtime license notices as inert JSON (`<script
   type="application/json" id="gramlot-runtime-notices">` in the file,
   `assets/runtime-notices.json` in the directory).

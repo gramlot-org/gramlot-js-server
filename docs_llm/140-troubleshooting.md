@@ -50,7 +50,7 @@ with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
 
 Block ID: **GS-140-015**.
 
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 Messages of the Worker operation `source`:
 `Unknown Source method` (`main`, non-string, or unmarked method; page code does
 not call `remoteSource` yet);

@@ -1,14 +1,14 @@
 import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {Host, Page, source} from '@gramlot/gramlot/server';
+import {GramlotServer, Page} from '@gramlot/gramlot/server';
 const {startServer} = await import(globalThis.Bun ? '@gramlot/gramlot-js-server/bun' : '@gramlot/gramlot-js-server/node');
 class HtmlPage extends Page {
  main(root) { root.h1('Hello World'); root.div(null, {id:'slot'}); }
  details(root) { root.span('Remote HTML'); }
 }
-source(HtmlPage.prototype.details);
-class TestHost extends Host {
+HtmlPage.registerSource('details');
+class TestServer extends GramlotServer {
  async resolvePage() { return HtmlPage; }
  async resolveResources() { return {css: [], js: []}; }
 }
@@ -39,7 +39,7 @@ export class Logic {
 await writeFile(join(pages, 'inline.js'), `import {Page as BasePage} from ${JSON.stringify(pageModule)};
 export class Page extends BasePage { main(root) { root.div('==a * 2', {id: 'inline', a: 21}); } }\n`);
 
-const app = await startServer({host:new TestHost()});
+const app = await startServer({server: new TestServer()});
 // The adapter itself serves the mount prefix: no front server strips it.
 const mounted = [];
 for (const policy of [STRICT_CSP, PERMISSIVE_CSP]) {

@@ -21,7 +21,7 @@ npm run start:bun    # the same with Bun
 
 A page is one module that exports `Page`, which builds the page, and `Logic`, the
 methods the page calls in the browser. The templates show a form whose data leave
-the browser through `gramlot.inout` (email, file, download).
+the browser through `gramlot.utl.inout` (email, file, download).
 
 The build uses `@gramlot/gramlot-serverless`, the server uses
 `@gramlot/gramlot-js-server`; both live in the repository

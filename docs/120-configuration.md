@@ -112,7 +112,7 @@ called by the exported documents. It is public for custom shells:
 
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
-| `workerUrl` | string | required | URL of the bundled Worker script (`WorkerHost` plus the page). |
+| `workerUrl` | string | required | URL of the bundled Worker script (`GramlotWorkerServer` plus the page). |
 | `modules` | object | `{}` | Logic module URL returned by the Worker → URL the window imports. A URL the Worker names and `modules` lacks: `Standalone module not provided: <url>`. |
 | `element` | Element | `null` | Root element; when `null`, the element with id `rootId`. |
 | `rootId` | string | `'gramlot-root'` | Id of the root element. The document must contain it. |
@@ -121,18 +121,18 @@ called by the exported documents. It is public for custom shells:
 | `assetRoot` | string or `null` | `null` | Absolute `file:`, `http:` or `https:` directory URL ending in `/`. With it, every `Page.css` URL must be root-relative, without `.`/`..`, and is resolved inside the directory. |
 
 It resolves to the started `Gramlot` instance, also set on `window.gramlot`; the
-instance exposes `transport` (the `WorkerTransport`) and `dispose()`. On any start
+instance exposes `rpc.transport` (the `WorkerTransport`) and `dispose()`. On any start
 failure, `mount` disposes the Worker and the half-created instance before
 rejecting.
 
 <a id="gs-120-025"></a>
 
-## 025 · `WorkerHost`
+## 025 · `GramlotWorkerServer`
 
 Block ID: **GS-120-025**.
 
-`new WorkerHost(PageClass, {logic, stylesheet, inlineCss, ...hostOptions})` from
-`@gramlot/gramlot-serverless/worker-host` runs inside the Worker. The exporter writes the
+`new GramlotWorkerServer(PageClass, {logic, stylesheet, inlineCss, ...serverOptions})` from
+`@gramlot/gramlot-serverless/gramlot-worker-server` runs inside the Worker. The exporter writes the
 Worker entry itself, so these options are relevant to custom Worker bundles only.
 Until 0.2.3 the option `logic` was called `aux`; the old name is not accepted.
 
@@ -141,9 +141,9 @@ Until 0.2.3 the option `logic` was called `aux`; the old name is not accepted.
 | `logic` | string or `null` | `null` | URL that names the page logic module, returned in the `open` resources with group `null`. |
 | `stylesheet` | string or `null` | `null` | URL of the page stylesheet, returned after `Page.css`. |
 | `inlineCss` | boolean | `false` | The document holds the stylesheets: no CSS URL is returned. The single file sets it. |
-| `pageTtl` | number (seconds) | `1800` | Core Host option: the registered page expires after it. |
-| `maxPages` | integer | `1000` | Core Host option: registry capacity. |
+| `pageTtl` | number (seconds) | `1800` | Core `GramlotServer` option: the registered page expires after it. |
+| `maxPages` | integer | `1000` | Core `GramlotServer` option: registry capacity. |
 
-The remaining core Host options describe server URLs and have no effect in a
-Worker. `WorkerHost` serves one page (`/`); `resolveResources` returns `Page.css`
+The remaining core `GramlotServer` options describe server URLs and have no effect in a
+Worker. `GramlotWorkerServer` serves one page (`/`); `resolveResources` returns `Page.css`
 as written, the page stylesheet and the logic URL.

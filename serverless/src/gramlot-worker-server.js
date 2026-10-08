@@ -1,12 +1,12 @@
-import {Host, PageNotFound} from '@gramlot/gramlot/host';
+import {GramlotServer, PageNotFound} from '@gramlot/gramlot/gramlot-server';
 
-/** One JS Page hosted inside a dedicated Worker; execution belongs to Host.
+/** One JS Page served inside a dedicated Worker; execution belongs to GramlotServer.
  * logic is the URL that names the page logic module (the page module foo.js or the
  * companion foo_aux.js), or null. The Worker only returns it: the window maps it to the
  * module and imports it there. stylesheet is the URL of the same-name stylesheet foo.css,
  * or null; with inlineCss the document already holds every stylesheet and no CSS URL
  * is returned. */
-export class WorkerHost extends Host {
+export class GramlotWorkerServer extends GramlotServer {
     constructor(PageClass, {logic = null, stylesheet = null, inlineCss = false, ...options} = {}) {
         super(options);
         this.PageClass = PageClass;

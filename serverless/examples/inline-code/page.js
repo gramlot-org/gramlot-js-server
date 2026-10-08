@@ -1,5 +1,5 @@
 // CI fixture for the Worker `source` operation, not an example of the page-writing API.
-import {Page as BasePage, source} from '@gramlot/gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 export class Page extends BasePage {
     static title = 'Inline Code';
     main(root) {
@@ -16,4 +16,4 @@ export class Page extends BasePage {
         root.p(text);
     }
 }
-source(Page.prototype.details);
+Page.registerSource('details');

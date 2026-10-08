@@ -3,7 +3,7 @@
  * `node test/verify_templates_browser.mjs PLAYWRIGHT_ENTRY [ENGINE] [RUNTIME]`.
  * Each project is created inside the workspace, built with `npm run build` and opened from
  * disk and from `npm start` (RUNTIME node or bun, default node). The form computes its summary
- * with Logic, the theme applies, the menu links work, the buttons of gramlot.inout prepare the
+ * with Logic, the theme applies, the menu links work, the buttons of gramlot.utl.inout prepare the
  * email, save a file that Reload reads back, and download JSON.
  */
 import assert from 'node:assert/strict';
@@ -33,7 +33,7 @@ async function start(project) {
     return {url, stop: () => { child.kill('SIGTERM'); }};
 }
 
-/** A tab that records errors and the mailto: links followed by gramlot.inout. */
+/** A tab that records errors and the mailto: links followed by gramlot.utl.inout. */
 async function open(context, url) {
     const page = await context.newPage();
     const errors = [];

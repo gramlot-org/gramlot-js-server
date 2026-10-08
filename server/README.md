@@ -1,7 +1,7 @@
 # @gramlot/gramlot-js-server
 
 Node.js and Bun host adapter for JavaScript [Gramlot](https://github.com/gramlot-org/gramlot)
-pages. It connects a folder of Page modules to the core's `FileHost` and serves
+pages. It connects a folder of Page modules to the core's `GramlotFileServer` and serves
 the bootstrap document, the Source requests, the page modules and stylesheets,
 the core themes and the files you list, under a mount prefix of your choice.
 

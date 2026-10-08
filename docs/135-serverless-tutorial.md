@@ -132,15 +132,15 @@ page can and cannot do:
 
 Block ID: **GS-135-025**.
 
-`gramlot.inout` holds the functions that send, save and load the data of a page.
+`gramlot.utl.inout` holds the functions that send, save and load the data of a page.
 Each takes the path of the data, here `modulo`. The form of section 010 has one
 button for each:
 
 ```javascript
-buttons.button('Send by email', {id: 'send', action: "gramlot.inout.sendMail('modulo', 'office@example.org')"});
-buttons.button('Save', {id: 'save', action: "gramlot.inout.save('modulo', 'registration.json')"});
-buttons.button('Reload a saved file', {id: 'restore', action: "gramlot.inout.restore('modulo')"});
-buttons.button('Download JSON', {id: 'download', action: "gramlot.inout.download('modulo', 'registration.json', 'json')"});
+buttons.button('Send by email', {id: 'send', action: "gramlot.utl.inout.sendMail('modulo', 'office@example.org')"});
+buttons.button('Save', {id: 'save', action: "gramlot.utl.inout.save('modulo', 'registration.json')"});
+buttons.button('Reload a saved file', {id: 'restore', action: "gramlot.utl.inout.restore('modulo')"});
+buttons.button('Download JSON', {id: 'download', action: "gramlot.utl.inout.download('modulo', 'registration.json', 'json')"});
 ```
 
 | Function | What happens |
@@ -152,7 +152,7 @@ buttons.button('Download JSON', {id: 'download', action: "gramlot.inout.download
 | `download('modulo', 'registration.json', 'json' or 'xml')` | Exports the data for other programs; types become text. `restore` does not read it back. |
 
 `action` holds inline code; the single file allows it. A longer procedure belongs
-in a method of `Logic`, where `this.page.inout` is the same object.
+in a method of `Logic`, where `this.page.utl.inout` is the same object.
 
 <a id="gs-135-030"></a>
 
