@@ -28,7 +28,7 @@ try {
         heading.setValue('Updated');
         heading.setAttr({title: 'Live attribute'});
         const update = [document.querySelector('h1').textContent, document.querySelector('h1').title];
-        app.builder.wrapSource(contents).strong('Inserted');
+        app.src.builder.wrapSource(contents).strong('Inserted');
         const inserted = contents.getNodes().at(-1);
         const insert = document.querySelector('#gramlot-root strong').textContent;
         contents.popNode(inserted.label);
@@ -46,7 +46,7 @@ try {
         let rejected = false;
         try { await transport.main(app.pageId); } catch { rejected = true; }
         return {update, insert, deleted, remote, cleared, state:app.state, rejected, closed:transport.closed,
-            pending:transport.pending.size, remaining:app.renderer.records.size,
+            pending:transport.pending.size, remaining:app.src.renderer.records.size,
             children:document.querySelector('#gramlot-root').childNodes.length};
     }, method);
     assert.deepEqual(result, {update:['Updated', 'Live attribute'], insert:'Inserted', deleted:true,

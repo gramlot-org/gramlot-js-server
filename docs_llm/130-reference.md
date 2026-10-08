@@ -16,7 +16,7 @@ Block ID: **GS-130-005**.
 `folderPages`. Command `gramlot-serverless` (`node serverless/src/cli.js`): `build
 PAGE.js -o OUTPUT.html`, `build FOLDER -o OUTPUT`, `gallery OUTPUT [--catalog …]`.
 Dependencies `@gramlot/gramlot >=0.2.12`, `@genrojs/builders >=0.4.1`, `esbuild`;
-optional peer `@gramlot/gramlot-examples >=0.2.4` (gallery).
+optional peer `@gramlot/gramlot-examples >=0.2.9` (gallery).
 
 <a id="gs-130-010"></a>
 

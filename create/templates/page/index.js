@@ -2,7 +2,7 @@ import {Page as BasePage} from '@gramlot/gramlot/page';
 
 /** One page, one module: Page builds the page, Logic holds the methods it calls in the browser.
  * The data typed in the form live under the path `modulo` and leave the browser only through
- * the buttons of gramlot.inout. */
+ * the buttons of gramlot.utl.inout. */
 export class Page extends BasePage {
     static title = 'Registration';
     static css = ['/themes/gramlot-base/theme.css'];
@@ -19,11 +19,11 @@ export class Page extends BasePage {
 
         const buttons = root.div({id: 'buttons'});
         buttons.button('Send by email', {id: 'send',
-            action: "gramlot.inout.sendMail('modulo', 'office@example.org')"});
-        buttons.button('Save', {id: 'save', action: "gramlot.inout.save('modulo', 'registration.json')"});
-        buttons.button('Reload a saved file', {id: 'restore', action: "gramlot.inout.restore('modulo')"});
+            action: "gramlot.utl.inout.sendMail('modulo', 'office@example.org')"});
+        buttons.button('Save', {id: 'save', action: "gramlot.utl.inout.save('modulo', 'registration.json')"});
+        buttons.button('Reload a saved file', {id: 'restore', action: "gramlot.utl.inout.restore('modulo')"});
         buttons.button('Download JSON', {id: 'download',
-            action: "gramlot.inout.download('modulo', 'registration.json', 'json')"});
+            action: "gramlot.utl.inout.download('modulo', 'registration.json', 'json')"});
     }
 }
 

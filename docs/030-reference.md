@@ -18,7 +18,7 @@ resolve the same copy of the core, or `instanceof Page` fails
 ([Troubleshooting](040-troubleshooting.md)). The Page base class,
 `GramlotServer` and `GramlotFileServer` are the core's: `@gramlot/gramlot/page` and
 `@gramlot/gramlot/server`. The package installs the command `gramlot`
-(section 025); `@gramlot/gramlot-examples` 0.2.4 or later is an optional peer
+(section 025); `@gramlot/gramlot-examples` 0.2.9 or later is an optional peer
 dependency, needed by `gramlot … gallery` only.
 
 <a id="gn-130-010"></a>

@@ -12,7 +12,7 @@ npm run start:bun    # the same with Bun
 
 `index.html` can travel by mail, on a USB stick or on any web site. The data typed
 in it stay in the browser of whoever fills it in; the buttons send them by email,
-save them to a file or download them (`gramlot.inout`).
+save them to a file or download them (`gramlot.utl.inout`).
 
 `npm start` is for development: `serve.mjs` serves this folder, `node_modules`
 included. To publish the page, use `index.html` from `npm run build`.

@@ -13,7 +13,7 @@ Block ID: **GN-130-005**.
 host requires Bun`). `@gramlot/gramlot` is a peer: one copy for adapter and
 pages. `Page`: `@gramlot/gramlot/page`; `GramlotServer`, `GramlotFileServer`:
 `@gramlot/gramlot/server`. Command `gramlot` (025); optional peer
-`@gramlot/gramlot-examples` >=0.2.4 for the gallery.
+`@gramlot/gramlot-examples` >=0.2.9 for the gallery.
 
 <a id="gn-130-010"></a>
 

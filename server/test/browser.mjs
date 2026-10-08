@@ -16,10 +16,10 @@ try {
  const result=await page.evaluate(async()=>{
   const app=window.gramlot, source=app.src.source.getItem('main');
   source.getNodes()[0].setValue('Updated');const updated=document.querySelector('h1').textContent;
-  const child=app.builder.wrapSource(source).p('Added');const inserted=document.querySelector('p').textContent;
+  const child=app.src.builder.wrapSource(source).p('Added');const inserted=document.querySelector('p').textContent;
   source.popNode(child.label);const deleted=document.querySelector('p')===null;
   await app.src.remoteSource(source.getNodes()[1],'details');const remote=document.getElementById('slot').textContent;
-  app.dispose();return {updated,inserted,deleted,remote,records:app.renderer.records.size,dom:document.getElementById('gramlot-root').childNodes.length};
+  app.dispose();return {updated,inserted,deleted,remote,records:app.src.renderer.records.size,dom:document.getElementById('gramlot-root').childNodes.length};
  });
  assert.deepEqual(result,{updated:'Updated',inserted:'Added',deleted:true,remote:'Remote HTML',records:0,dom:0});
  await page.waitForFunction(async pageId => (await fetch('/gramlot/main', {
