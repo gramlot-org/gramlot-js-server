@@ -55,7 +55,7 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "@gramlot/gramlot-examples": "0.2.9",
+    "@gramlot/gramlot-examples": ">=0.2.9",
     "jsdom": "27.0.1"
   }
 }
