@@ -40,12 +40,13 @@ The repository is an npm workspace with three packages:
 
 ## server/
 
-- It serves the Gramlot 0.2.0 minimal Host contract (`resolvePage`,
-  `resolveResources`, `openPage`) and owns only HTTP routing, payload parsing,
+- It connects the core `GramlotServer` (`resolvePage`, `resolveResources`,
+  `openPage`) to HTTP following the server protocol GC-230, checked by
+  `checkProtocol` in `server/test/server.test.mjs`, and owns only HTTP routing, payload parsing,
   response mapping, request identity, the mount prefix (carried by every request
   path) and the files it serves: runtime, core themes, `assets`, the `.css` and
   `.js` files below the pages folder (GC-090 §030). Page execution, registrations and TTL
-  stay in the core Host.
+  stay in the core `GramlotServer`.
 - Use `node:http` on Node and the native `fetch` server on Bun; no Express, no
   database adapters.
 - The README quick start is the page in `server/test/fixtures/quickstart/`,
@@ -60,10 +61,10 @@ The repository is an npm workspace with three packages:
 
 ## serverless/
 
-- It owns JS bundling, HTML and directory packaging, `WorkerHost`,
+- It owns JS bundling, HTML and directory packaging, `GramlotWorkerServer`,
   `WorkerTransport` and the standalone startup. It does not own Gramlot Source,
-  Data Bags, Host or the browser runtime; `WorkerHost` delegates Page execution
-  to the core Host through `@gramlot/gramlot/host`.
+  Data Bags, `GramlotServer` or the browser runtime; `GramlotWorkerServer` delegates
+  Page execution to the core `GramlotServer` through `@gramlot/gramlot/gramlot-server`.
 - Never ship a substitute runtime, a manual application DOM, an eval bootstrap
   or a fallback compiler. Fail if an accepted integration is unavailable.
 - Offline builds reject `dataRpc` and server resolvers. Only `application_data`
@@ -74,7 +75,7 @@ The repository is an npm workspace with three packages:
 - The page logic is the `Logic` export of the page module, else `<name>_aux.js`;
   both are an error. It is bundled for the window and takes
   `@gramlot/gramlot/page` from the window runtime (`GramlotStandalone`). A `*_aux`
-  file is never a page. The build imports the page module (as `FileHost`) to read
+  file is never a page. The build imports the page module (as `GramlotFileServer`) to read
   `Page.css` and `Logic`; `main` runs only in the Worker.
 - The README quick start is `serverless/examples/quickstart/`, run by
   `serverless/tests/quickstart.test.js` and

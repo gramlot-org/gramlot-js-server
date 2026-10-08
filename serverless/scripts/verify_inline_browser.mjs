@@ -33,8 +33,8 @@ try {
             byId('expression').getAttribute('title'), app.data.getItem('clicked'), app.data.getItem('connected')];
         app.data.setItem('a', -1);
         const otherwise = app.data.getItem('doubled');
-        const target = app.source.getItem('main').getNodes().find(node => node.attr.id === 'details');
-        await app.remoteSource(target, 'details', {text: 'From Worker'});
+        const target = app.src.source.getItem('main').getNodes().find(node => node.attr.id === 'details');
+        await app.src.remoteSource(target, 'details', {text: 'From Worker'});
         app.data.setItem('b', 'remote');
         const remote = [app.data.getItem('remote'), byId('details').textContent];
         app.dispose();

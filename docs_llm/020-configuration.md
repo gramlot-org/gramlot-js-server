@@ -12,8 +12,8 @@ Block ID: **GN-120-005**.
 
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
-| `pages` | string | — | Pages folder → `new FileHost(pages, options)` unless `host` |
-| `host` | Host | `null` | Custom Host (`resolvePage`, `resolveResources`) |
+| `pages` | string | — | Pages folder → `new GramlotFileServer(pages, options)` unless `server` |
+| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`) |
 | `hostname` | string | `'127.0.0.1'` | Address |
 | `port` | number | `0` | Port; `0` = free port, see `app.url` |
 | `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |
@@ -21,13 +21,17 @@ Block ID: **GN-120-005**.
 | `contentSecurityPolicy` | string/null | `null` | Header on HTML pages, `{nonce}` replaced |
 | `ownerForRequest` | `async (request) => owner` | `null` | Identity compared on main/source/close |
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
-| `runtimeUrl`, `mainUrl`, `sourceUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/main`, `/gramlot/source`, `/gramlot/close` | Host URLs |
+| `runtimeUrl`, `mainUrl`, `sourceUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/main`, `/gramlot/source`, `/gramlot/close` | `GramlotServer` URLs |
 | `rootId` | string | `'gramlot-root'` | Root element id |
 | `pageTtl` | number | `1800` | Seconds a page stays registered |
 | `maxPages` | integer | `1000` | Registry capacity; above: 503 |
+| `reload` | boolean or `null` | `null` | `GramlotFileServer`: re-import a changed page module; `null` → from `GRAMLOT_DEV` |
 
-Host options reach `FileHost` only when the adapter builds it.
-`sourceUrl`: remote Source endpoint. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`GramlotServer` options and `reload` reach `GramlotFileServer` only when the adapter builds it.
+`GRAMLOT_DEV`: unset → `gramlot.min.js`, page modules imported once; `YES` →
+`gramlot.min.js`, changed page modules re-imported; `DEBUG` → `gramlot.js`,
+re-imported; other values fail the start. Same runtime URL in every mode.
+`sourceUrl`: remote Source endpoint. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gn-120-010"></a>
 

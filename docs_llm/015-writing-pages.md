@@ -43,7 +43,7 @@ Block ID: **GN-115-015**.
 One logic module: `Logic` of `orders.js`, else `orders_aux.js`; both → error.
 Root group: `func: 'add'`. Public, imports resolve in the browser
 (`@gramlot/gramlot/page` via the import map); server-only imports → `orders_aux.js`.
-`js_requires`/`css_requires` raise `InvalidResourceName` on `FileHost`; the resource
+`js_requires`/`css_requires` raise `InvalidResourceName` on `GramlotFileServer`; the resource
 system comes with genro-kajenn (Genro, the successor of GenroPy).
 
 ```js
@@ -63,7 +63,7 @@ logic runs under the strict CSP; inline code needs the permissive profile
 
 Block ID: **GN-115-020**.
 
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 The route `POST /gramlot/source` stays in the adapter ([Reference](030-reference.md)).
 
 <a id="gn-115-025"></a>

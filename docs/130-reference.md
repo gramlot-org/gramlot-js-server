@@ -18,13 +18,13 @@ or later:
 | `@gramlot/gramlot-serverless` | `build({page, output})` | Node, at build time |
 | `@gramlot/gramlot-serverless/directory` | `buildDirectory({pages, output, assets})`, `folderPages(folder)` | Node, at build time |
 | `@gramlot/gramlot-serverless/standalone` | `mount(options)` | Browser window |
-| `@gramlot/gramlot-serverless/worker-host` | `WorkerHost` | Web Worker |
+| `@gramlot/gramlot-serverless/gramlot-worker-server` | `GramlotWorkerServer` | Web Worker |
 
 Command `gramlot-serverless` (`bin` of the package; from the checkout,
 `node serverless/src/cli.js`): `build PAGE.js -o OUTPUT.html`, `build FOLDER -o
 OUTPUT`, `gallery OUTPUT [--catalog CATALOG.json PAGES]...`
-([GS-120-005](120-configuration.md)). Dependencies: `@gramlot/gramlot >=0.2.5`,
-`@genrojs/builders >=0.4.1`, `esbuild`; `@gramlot/gramlot-examples >=0.2.4` is an
+([GS-120-005](120-configuration.md)). Dependencies: `@gramlot/gramlot >=0.2.12`,
+`@genrojs/builders >=0.4.1`, `esbuild`; `@gramlot/gramlot-examples >=0.2.9` is an
 optional peer dependency, needed by `gallery` only.
 
 <a id="gs-130-010"></a>
@@ -61,19 +61,19 @@ Block ID: **GS-130-015**.
 - `mount(options) → Promise<Gramlot>`: options in
   [GS-120-020](120-configuration.md). The exported documents call it
   and set `globalThis.gramlot`.
-- `Gramlot` instance (core): `state` (`'started'` once the page runs), `source`,
-  `data`, `remoteSource(node, method, params)`, `dispose()`. In the export,
-  `transport` is the `WorkerTransport` and `dispose()` terminates the Worker.
+- `Gramlot` instance (core): `state` (`'started'` once the page runs), `src.source`,
+  `data`, `src.remoteSource(node, method, params)`, `dispose()`. In the export,
+  `rpc.transport` is the `WorkerTransport` and `dispose()` terminates the Worker.
 - `WorkerTransport` (`serverless/src/worker-transport.js`): `open(signal)`,
   `main(pageId, signal)`, `source(pageId, method, params, signal)`,
   `dispose(error)`; `pending` (outstanding requests), `closed`. A Worker `error`
   or `messageerror` event disposes it and rejects every pending request.
-- `WorkerHost` (`serverless/src/worker-host.js`): extends the core `Host`; operations
+- `GramlotWorkerServer` (`serverless/src/gramlot-worker-server.js`): extends the core `GramlotServer`; operations
   `open`, `main`, `source` over `postMessage`; an unknown operation answers
   `Unknown Worker operation: <name>`. Errors cross the channel as
   `{name, message}`.
 
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gs-130-020"></a>
 
@@ -85,7 +85,7 @@ Single file: `<!doctype html>`, `<meta charset>`, viewport, the policy meta, the
 title, `<script type="application/json" id="gramlot-runtime-notices">` (the
 license notices of the bundled runtime and of this package), `<div id="gramlot-root">`
 one `<style>` per stylesheet in `<head>`, and one `<script>` with the runtime
-(global `GramlotStandalone`, which exposes `Page` and `source` to the logic
+(global `GramlotStandalone`, which exposes `Page` to the logic
 module), the Worker source and the logic module source as strings turned into
 Blob URLs at start and revoked after it.
 
@@ -102,7 +102,7 @@ Block ID: **GS-130-025**.
 
 | Script | Checks |
 | --- | --- |
-| `npm test` | 32 tests: exporter output and failure handling, stylesheets, page logic, directory and folder export, gallery, bundles, Worker host and transport, `mount`, the quick start with typing (jsdom) |
+| `npm test` | 32 tests: exporter output and failure handling, stylesheets, page logic, directory and folder export, gallery, bundles, `GramlotWorkerServer` and transport, `mount`, the quick start with typing (jsdom) |
 | `serverless/scripts/verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` | A page with `Page` and `Logic` in one module, a core theme, `Page.css` and its stylesheet, as one file and as a directory |
 | `serverless/scripts/verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` | `gramlot-serverless gallery` from disk: the gallery page, frames and theme, every example, the `Logic` of b08, c03 and c08 |
 | `serverless/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |

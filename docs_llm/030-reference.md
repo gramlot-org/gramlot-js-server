@@ -11,9 +11,9 @@ Block ID: **GN-130-005**.
 `@gramlot/gramlot-js-server/node` → `startServer` (Node 22+, `node:http`);
 `@gramlot/gramlot-js-server/bun` → `startServer` (Bun; elsewhere throws `The Bun
 host requires Bun`). `@gramlot/gramlot` is a peer: one copy for adapter and
-pages. `Page`, `source`: `@gramlot/gramlot/page`; `Host`, `FileHost`:
+pages. `Page`: `@gramlot/gramlot/page`; `GramlotServer`, `GramlotFileServer`:
 `@gramlot/gramlot/server`. Command `gramlot` (025); optional peer
-`@gramlot/gramlot-examples` >=0.2.4 for the gallery.
+`@gramlot/gramlot-examples` >=0.2.9 for the gallery.
 
 <a id="gn-130-010"></a>
 
@@ -23,7 +23,7 @@ Block ID: **GN-130-010**.
 
 `const app = await startServer(options)` ([Configuration](020-configuration.md));
 rejects when it cannot listen or read the runtime. Result: `url`
-(`http://<hostname>:<port>`), `host`, `server` (`http.Server` or `Bun.Server`),
+(`http://<hostname>:<port>`), `gramlotServer` (the `GramlotServer`), `server` (`http.Server` or `Bun.Server`),
 `close()` (clears the registry, closes connections, stops).
 
 <a id="gn-130-015"></a>
@@ -36,7 +36,7 @@ In order, each path under `mountPath`:
 
 | Method | Path | Request | Response |
 | --- | --- | --- | --- |
-| `GET`/`HEAD` | `/assets/gramlot.js` | — | 200 runtime |
+| `GET`/`HEAD` | `/assets/gramlot.js` | — | 200 runtime of `runtimeAsset()` (`GRAMLOT_DEV`) |
 | `GET`/`HEAD` | `/themes/<path>` of the core | — | 200, type by extension |
 | `GET`/`HEAD` | key of `assets` | — | 200, its `type` |
 | `GET`/`HEAD` | `*.css`, `*.js` below pages | — | 200 file |
@@ -46,7 +46,7 @@ In order, each path under `mountPath`:
 | `GET` | page path, `<path>/index.html` | — | 200 HTML bootstrap, CSP header when configured |
 
 `Cache-Control: no-store` everywhere but the runtime (`X-Content-Type-Options: nosniff`).
-`/gramlot/source`: remote Source requests. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`/gramlot/source`: remote Source requests. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gn-130-020"></a>
 

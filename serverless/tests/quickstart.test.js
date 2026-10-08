@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
-import {Page as BasePage, source} from '@gramlot/gramlot/page';
+import {Page as BasePage} from '@gramlot/gramlot/page';
 import {logicBundle} from '../src/bundles.js';
 import {JSDOM} from 'jsdom';
 import {Page} from '../examples/quickstart/page.js';
-import {WorkerHost} from '../src/worker-host.js';
+import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
 import {mount} from '../src/standalone.js';
 
 // The README quick start, run through mount with the page module's Logic imported by the window.
@@ -24,7 +24,7 @@ function channel(PageClass, options) {
     worker.terminate = () => { terminated = true; };
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'self');
     globalThis.self = scope;
-    try { new WorkerHost(PageClass, options); }
+    try { new GramlotWorkerServer(PageClass, options); }
     finally { if (previous) Object.defineProperty(globalThis, 'self', previous); else delete globalThis.self; }
     return {worker, terminated: () => terminated};
 }
@@ -40,7 +40,7 @@ test('the quick start greets Ada and follows the field while typing', async t =>
     };
     const logic = await logicBundle({file: fileURLToPath(new URL('../examples/quickstart/page.js', import.meta.url))},
         {bundle: true, platform: 'browser', write: false});
-    globalThis.GramlotStandalone = {Page: BasePage, source};
+    globalThis.GramlotStandalone = {Page: BasePage};
     t.after(() => { delete globalThis.GramlotStandalone; });
     const {window} = new JSDOM('<div id="gramlot-root"></div>');
     const app = await mount({workerUrl: 'page-worker.js', document: window.document,

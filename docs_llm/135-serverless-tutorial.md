@@ -58,8 +58,8 @@ come by email, files or a service of Mario's.
 
 Block ID: **GS-135-025**.
 
-`gramlot.inout`, path `modulo`, called from button `action` (inline, allowed in the
-file) or from `Logic` (`this.page.inout`):
+`gramlot.utl.inout`, path `modulo`, called from button `action` (inline, allowed in the
+file) or from `Logic` (`this.page.utl.inout`):
 
 - `sendMail('modulo', 'office@example.org')`: the user's mail program, subject the
   page title, one line per value; leaves on send; > 2000 characters → error.

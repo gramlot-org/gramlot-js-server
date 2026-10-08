@@ -12,11 +12,11 @@ Block ID: **GS-130-005**.
 
 `@gramlot/gramlot-serverless` (`serverless/package.json`), Node ≥ 22:
 `@gramlot/gramlot-serverless` → `build`; `/directory` → `buildDirectory`; `/standalone` →
-`mount` (window); `/worker-host` → `WorkerHost` (Worker); `/directory` also
+`mount` (window); `/gramlot-worker-server` → `GramlotWorkerServer` (Worker); `/directory` also
 `folderPages`. Command `gramlot-serverless` (`node serverless/src/cli.js`): `build
 PAGE.js -o OUTPUT.html`, `build FOLDER -o OUTPUT`, `gallery OUTPUT [--catalog …]`.
-Dependencies `@gramlot/gramlot >=0.2.5`, `@genrojs/builders >=0.4.1`, `esbuild`;
-optional peer `@gramlot/gramlot-examples >=0.2.4` (gallery).
+Dependencies `@gramlot/gramlot >=0.2.12`, `@genrojs/builders >=0.4.1`, `esbuild`;
+optional peer `@gramlot/gramlot-examples >=0.2.9` (gallery).
 
 <a id="gs-130-010"></a>
 
@@ -40,13 +40,13 @@ export`, the two "same Gramlot core installation" errors, esbuild errors.
 Block ID: **GS-130-015**.
 
 `mount(options) → Gramlot` ([GS-120-020](120-configuration.md));
-`globalThis.gramlot`. `Gramlot`: `state` (`'started'`), `source`, `data`,
-`remoteSource(node, method, params)`, `dispose()` (terminates the Worker),
-`transport`. `WorkerTransport`: `open`, `main`, `source`, `dispose(error)`,
-`pending`, `closed`; Worker `error`/`messageerror` dispose it. `WorkerHost`:
-extends core `Host`; `open`, `main`, `source` over `postMessage`; `Unknown Worker
+`globalThis.gramlot`. `Gramlot`: `state` (`'started'`), `src.source`, `data`,
+`src.remoteSource(node, method, params)`, `dispose()` (terminates the Worker),
+`rpc.transport`. `WorkerTransport`: `open`, `main`, `source`, `dispose(error)`,
+`pending`, `closed`; Worker `error`/`messageerror` dispose it. `GramlotWorkerServer`:
+extends core `GramlotServer`; `open`, `main`, `source` over `postMessage`; `Unknown Worker
 operation: <name>`; errors cross as `{name, message}`.
-Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gs-130-020"></a>
 

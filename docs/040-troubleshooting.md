@@ -92,8 +92,8 @@ Block ID: **GN-140-025**.
   module exports no `Page`, or `Page` does not extend the core's `Page`.
 - **`ENOENT` naming `dist/gramlot.js` at start.** The linked core is not built:
   `npm --prefix ../gramlot/js run build`.
-- **`requires need a Host with a resource system`.** The page declares
-  `js_requires` or `css_requires`; `FileHost` has no resource system. Use the
+- **`requires need a GramlotServer with a resource system`.** The page declares
+  `js_requires` or `css_requires`; `GramlotFileServer` has no resource system. Use the
   page's `Logic`.
 - **`Two logic modules for one page`.** The page module exports `Logic` and an
   `_aux.js` beside it exports another: keep one.

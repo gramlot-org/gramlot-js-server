@@ -56,7 +56,7 @@ Block ID: **GN-140-025**.
 - 500 `Page modules must export a subclass of Page`, one copy: no `Page` export
   or not extending the core's `Page`.
 - `ENOENT` on `dist/gramlot.js` at start: `npm --prefix ../gramlot/js run build`.
-- `requires need a Host with a resource system`: drop `js_requires`/`css_requires`.
+- `requires need a GramlotServer with a resource system`: drop `js_requires`/`css_requires`.
 - 413: JSON body above 4096 bytes.
 - A changed page not visible: restart the server.
 - `Two logic modules for one page`: `Logic` in the module and in `_aux.js`; keep one.

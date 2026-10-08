@@ -47,7 +47,7 @@ export class WorkerTransport {
         this.worker.removeEventListener('message', this.receive);
         this.worker.removeEventListener('error', this.failed);
         this.worker.removeEventListener('messageerror', this.failed);
-        // One Worker owns the entire local host: termination releases all its pages.
+        // One Worker owns its whole GramlotWorkerServer: termination releases all its pages.
         this.worker.terminate();
     }
 }

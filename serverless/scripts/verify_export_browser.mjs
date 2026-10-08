@@ -21,14 +21,14 @@ try {
     assert.equal(await page.locator('#gramlot-root h1').textContent(), expectedText);
     const result = await page.evaluate(async method => {
         const app = globalThis.gramlot;
-        const contents = app.source.getItem('main');
+        const contents = app.src.source.getItem('main');
         // The 0.2.0 wire names the Source class (__cls): main holds the root's GramlotBuilderBag class.
-        if (contents.constructor !== app.source.constructor) throw Error('main lost its typed Source');
+        if (contents.constructor !== app.src.source.constructor) throw Error('main lost its typed Source');
         const heading = contents.getNodes()[0];
         heading.setValue('Updated');
         heading.setAttr({title: 'Live attribute'});
         const update = [document.querySelector('h1').textContent, document.querySelector('h1').title];
-        app.builder.wrapSource(contents).strong('Inserted');
+        app.src.builder.wrapSource(contents).strong('Inserted');
         const inserted = contents.getNodes().at(-1);
         const insert = document.querySelector('#gramlot-root strong').textContent;
         contents.popNode(inserted.label);
@@ -36,17 +36,17 @@ try {
         let remote = null, cleared = null;
         if (method) {
             const target = contents.getNodes().find(node => node.attr.id === 'details');
-            await app.remoteSource(target, method, {text:'From Worker'});
+            await app.src.remoteSource(target, method, {text:'From Worker'});
             remote = document.querySelector('#details').textContent;
             target.value.clear();
             cleared = document.querySelector('#details').textContent;
         }
-        const transport = app.transport;
+        const transport = app.rpc.transport;
         app.dispose();
         let rejected = false;
         try { await transport.main(app.pageId); } catch { rejected = true; }
         return {update, insert, deleted, remote, cleared, state:app.state, rejected, closed:transport.closed,
-            pending:transport.pending.size, remaining:app.renderer.records.size,
+            pending:transport.pending.size, remaining:app.src.renderer.records.size,
             children:document.querySelector('#gramlot-root').childNodes.length};
     }, method);
     assert.deepEqual(result, {update:['Updated', 'Live attribute'], insert:'Inserted', deleted:true,

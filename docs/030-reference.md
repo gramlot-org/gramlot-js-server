@@ -15,10 +15,10 @@ Block ID: **GN-130-005**.
 
 `@gramlot/gramlot` is a peer dependency: the application and the adapter
 resolve the same copy of the core, or `instanceof Page` fails
-([Troubleshooting](040-troubleshooting.md)). The Page base class, `source`,
-`Host` and `FileHost` are the core's: `@gramlot/gramlot/page` and
+([Troubleshooting](040-troubleshooting.md)). The Page base class,
+`GramlotServer` and `GramlotFileServer` are the core's: `@gramlot/gramlot/page` and
 `@gramlot/gramlot/server`. The package installs the command `gramlot`
-(section 025); `@gramlot/gramlot-examples` 0.2.4 or later is an optional peer
+(section 025); `@gramlot/gramlot-examples` 0.2.9 or later is an optional peer
 dependency, needed by `gramlot … gallery` only.
 
 <a id="gn-130-010"></a>
@@ -38,7 +38,7 @@ runtime file missing). The result:
 | Property | Type | Meaning |
 | --- | --- | --- |
 | `url` | string | `http://<hostname>:<port>` with the bound port |
-| `host` | Host | The `FileHost` built from `pages`, or the `host` passed in |
+| `gramlotServer` | `GramlotServer` | The `GramlotFileServer` built from `pages`, or the `server` passed in |
 | `server` | `http.Server` or `Bun.Server` | The listening server |
 | `close()` | `async () => void` | Clears the page registry, closes connections, stops the server |
 
@@ -48,12 +48,12 @@ runtime file missing). The result:
 
 Block ID: **GN-130-015**.
 
-Paths are shown with the default Host options and without mount prefix; with
+Paths are shown with the default `GramlotServer` options and without mount prefix; with
 `mountPath` every path starts with it. In this order:
 
 | Method | Path | Request | Response |
 | --- | --- | --- | --- |
-| `GET`, `HEAD` | `/assets/gramlot.js` | — | 200 `text/javascript`, the runtime |
+| `GET`, `HEAD` | `/assets/gramlot.js` | — | 200 `text/javascript`, the runtime chosen by `runtimeAsset()` of the core (`GRAMLOT_DEV`, [Configuration](020-configuration.md)) |
 | `GET`, `HEAD` | `/themes/<path>`, a file of the core themes | — | 200, media type of the extension |
 | `GET`, `HEAD` | a key of `assets` | — | 200, the `type` of the entry |
 | `GET`, `HEAD` | `*.css`, `*.js` below the pages folder | — | 200 `text/css` or `text/javascript` |
@@ -65,7 +65,7 @@ Paths are shown with the default Host options and without mount prefix; with
 Every response of the adapter carries `Cache-Control: no-store`, except the
 runtime, which carries `X-Content-Type-Options: nosniff`.
 
-The route `/gramlot/source` answers the remote Source requests. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The route `/gramlot/source` answers the remote Source requests. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gn-130-020"></a>
 

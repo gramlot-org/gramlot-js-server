@@ -12,7 +12,7 @@ Block ID: **GS-105-005**.
 
 Gramlot describes a web interface in Python or JavaScript and keeps it bound to the
 application state in the browser. [The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html)
-explains the core concepts (Page, Source, Data, logic, Host) and lists the repositories.
+explains the core concepts (Page, Source, Data, logic, server) and lists the repositories.
 
 `@gramlot/gramlot-serverless` takes JavaScript Gramlot pages and produces something
 that opens without a server. One command, `gramlot-serverless build`, does both:
@@ -40,14 +40,14 @@ pages in Python to [gramlot-py-server](https://github.com/gramlot-org/gramlot-py
 
 Block ID: **GS-105-010**.
 
-At build time the exporter imports the page module, as the core `FileHost` does,
+At build time the exporter imports the page module, as the core `GramlotFileServer` does,
 to read `Page.css` and its `Logic` export; `main` does not run. It bundles the
 page for the Worker and the page logic for the window. At run time, in the
 browser:
 
 1. The runtime script of the exported document calls `mount`. `mount` creates the
    Worker from the bundled script and sends it the `open` request.
-2. In the Worker, `WorkerHost` registers the Page and answers with the page ID,
+2. In the Worker, `GramlotWorkerServer` registers the Page and answers with the page ID,
    the title and the resources: the stylesheet URLs (none in the single file,
    which holds the stylesheets) and the URL that names the page logic module.
 3. In the window, the core `PageBootstrap` writes the stylesheet links, imports
@@ -56,7 +56,7 @@ browser:
 4. The start sends `main` to the Worker. The Worker runs `Page.main`, builds the
    Source and returns it. The window renders the DOM and binds the Data.
 5. The Worker also answers the operation `source`, which builds a Source branch
-   by message instead of HTTP. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API:
+   by message instead of HTTP. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
    they arrive together with the `remote` grammar attribute and `@endpoint`.
 6. `window.gramlot.dispose()` terminates the Worker; a dedicated Worker also
    ends with its document. Nothing is sent anywhere.
