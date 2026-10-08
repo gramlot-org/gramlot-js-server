@@ -14,7 +14,7 @@ for the core and the other repositories.
 ## What this repository is
 
 This repository runs JavaScript Gramlot pages. It holds three npm packages; the
-current release is 0.2.6, the same version for the three:
+current release is 0.2.7, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
@@ -170,7 +170,7 @@ npx gramlot-serverless gallery gallery   # a folder that opens from disk: galler
 
 | | Verified |
 | --- | --- |
-| Gramlot | `@gramlot/gramlot` 0.2.7; `@gramlot/gramlot-examples` 0.2.7; `@genrojs/builders` 0.4.2 |
+| Gramlot | `@gramlot/gramlot` 0.2.12; `@gramlot/gramlot-examples` 0.2.7; `@genrojs/builders` 0.4.2 |
 | Runtimes | Node.js 22 (CI) and 23.11; Bun 1.3.14 (server and gallery) |
 | Browsers | Chromium 153 and WebKit 26.6 (pages, gallery, exports); Firefox 155 for the core qualification of 0.2.0. WebKit is not Safari; Safari is not verified. |
 

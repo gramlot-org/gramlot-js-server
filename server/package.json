@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/gramlot-js-server",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Node.js and Bun host adapter for Gramlot JavaScript pages",
   "license": "Apache-2.0",
   "repository": {
