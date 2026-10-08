@@ -17,7 +17,7 @@
     ".": "./src/build.js",
     "./directory": "./src/build-directory.js",
     "./standalone": "./src/standalone.js",
-    "./worker-host": "./src/worker-host.js"
+    "./gramlot-worker-server": "./src/gramlot-worker-server.js"
   },
   "files": [
     "src/build.js",
@@ -28,7 +28,7 @@
     "README.md",
     "LICENSE",
     "src/standalone.js",
-    "src/worker-host.js",
+    "src/gramlot-worker-server.js",
     "src/worker-transport.js",
     "src/runtime-notices.js",
     "NOTICE",
@@ -39,7 +39,7 @@
     "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout tests/*.test.js"
   },
   "dependencies": {
-    "@gramlot/gramlot": ">=0.2.5",
+    "@gramlot/gramlot": ">=0.2.12",
     "@genrojs/builders": ">=0.4.1",
     "esbuild": "0.28.2"
   },

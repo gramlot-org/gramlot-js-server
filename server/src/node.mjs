@@ -1,4 +1,4 @@
-/** Reusable Node HTTP bridge for the current Gramlot Host protocol. */
+/** Reusable Node HTTP bridge for the Gramlot server protocol (GC-230). */
 import {createServer} from 'node:http';
 import {Readable} from 'node:stream';
 import {createDispatch} from './fetch.mjs';
@@ -27,9 +27,9 @@ export async function startServer({hostname = '127.0.0.1', port = 0, onError = c
         server.listen(port, hostname, () => { server.off('error', reject); resolve(); });
     });
     return {
-        host: dispatch.host, server, url: `http://${hostname}:${server.address().port}`,
+        gramlotServer: dispatch.server, server, url: `http://${hostname}:${server.address().port}`,
         async close() {
-            dispatch.host.pages.clear();
+            dispatch.server.closeAll();
             await new Promise((resolve, reject) => {
                 server.close(error => error ? reject(error) : resolve());
                 server.closeAllConnections();

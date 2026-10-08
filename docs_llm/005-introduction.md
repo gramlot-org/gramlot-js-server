@@ -13,8 +13,8 @@ Block ID: **GN-105-005**.
 
 Serves JavaScript Gramlot pages from Node.js 22 (`@gramlot/gramlot-js-server/node`,
 `node:http`) or Bun (`@gramlot/gramlot-js-server/bun`, `Bun.serve`) through the core's
-`FileHost`. Adapter: routing, bounded payloads, response and error mapping,
-request identity, mount prefix, CSP header. Core Host: page lookup, bootstrap,
+`GramlotFileServer`. Adapter: routing, bounded payloads, response and error mapping,
+request identity, mount prefix, CSP header. Core `GramlotServer`: page lookup, bootstrap,
 `main`, remote Source, close. No database, no Python. Command `gramlot node|bun
 gallery`: the gallery of `@gramlot/gramlot-examples` ([Reference](030-reference.md)).
 
@@ -24,7 +24,7 @@ gallery`: the gallery of `@gramlot/gramlot-examples` ([Reference](030-reference.
 
 Block ID: **GN-105-010**.
 
-1. `GET /orders` → `FileHost` maps to `orders.js`, registers a page with a TTL.
+1. `GET /orders` → `GramlotFileServer` maps to `orders.js`, registers a page with a TTL.
 2. Bootstrap HTML: root `div`, nonce module script, resources (the page module
    when it exports `Logic`), endpoint URLs; CSP header when configured.
 3. Runtime from `/assets/gramlot.js` (installed core); the import map resolves
@@ -32,7 +32,7 @@ Block ID: **GN-105-010**.
 4. `POST /gramlot/main` with the page ID → `main(root)` → Source as TYTX JSON.
 5. Runtime renders the DOM, installs Data declarations, starts bindings.
 6. `POST /gramlot/source` (page ID, method, params → Source branch) stays in the
-   adapter. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+   adapter. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 7. Leaving the page → `POST /gramlot/close`; the TTL covers lost closes.
 
 <a id="gn-105-015"></a>

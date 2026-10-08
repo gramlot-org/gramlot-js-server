@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {Page, source} from '@gramlot/gramlot/page';
-import {WorkerHost} from '../src/worker-host.js';
+import {Page} from '@gramlot/gramlot/page';
+import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
 import {WorkerTransport} from '../src/worker-transport.js';
 import {Gramlot} from '@gramlot/gramlot';
 import {mount} from '../src/standalone.js';
@@ -22,37 +22,37 @@ function channel(PageClass, options) {
     worker.terminate = () => { terminated = true; };
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'self');
     globalThis.self = scope;
-    let host;
-    try { host = new WorkerHost(PageClass, options); }
+    let server;
+    try { server = new GramlotWorkerServer(PageClass, options); }
     finally { if (previous) Object.defineProperty(globalThis, 'self', previous); else delete globalThis.self; }
-    return {worker, host, transport: new WorkerTransport(worker), terminated: () => terminated};
+    return {worker, server, transport: new WorkerTransport(worker), terminated: () => terminated};
 }
 class Hello extends Page {
     main(root) { root.h1('Hello Worker'); root.section(null, {id: 'details'}); return null; }
     details(root, {name}) { root.p(name); }
     broken() { throw new TypeError('Page failed'); }
 }
-source(Hello.prototype.details);
-source(Hello.prototype.broken);
+Hello.registerSource('details');
+Hello.registerSource('broken');
 
 const document = () => new JSDOM('<div id="gramlot-root"></div>').window.document;
 
-test('Worker host uses shared main/Source execution, typed Source and normal live rendering', async () => {
-    const {transport, host, terminated} = channel(Hello);
+test('Worker server uses shared main/Source execution, typed Source and normal live rendering', async () => {
+    const {transport, server, terminated} = channel(Hello);
     const {pageId} = await transport.open();
     const doc = document();
     const app = new Gramlot({pageId, transport, document: doc});
     await app.start();
-    const nodes = app.source.getItem('main').getNodes();
+    const nodes = app.src.source.getItem('main').getNodes();
     assert.equal(doc.querySelectorAll('h1, section').length, 2);
     assert.equal(nodes[0].value, 'Hello Worker');
-    await app.remoteSource(nodes[1], 'details', {name: 'From Worker'});
+    await app.src.remoteSource(nodes[1], 'details', {name: 'From Worker'});
     assert.equal(doc.querySelector('#details').textContent, 'From Worker');
     nodes[0].setValue('Live');
     assert.equal(doc.querySelector('h1').textContent, 'Live');
-    await assert.rejects(app.remoteSource(nodes[1], 'main'), /Unknown Source method/);
-    await assert.rejects(app.remoteSource(nodes[1], 'broken'), {name: 'TypeError', message: 'Page failed'});
-    assert.equal(host.pages.size, 1);
+    await assert.rejects(app.src.remoteSource(nodes[1], 'main'), /Unknown Source method/);
+    await assert.rejects(app.src.remoteSource(nodes[1], 'broken'), {name: 'TypeError', message: 'Page failed'});
+    assert.equal(server.pages.size, 1);
     app.dispose();
     assert.equal(terminated(), true);
     assert.equal(transport.pending.size, 0);
@@ -65,7 +65,7 @@ test('aborted Worker request drops its late reply without cancelling another req
     class Slow extends Hello {
         async wait(root) { await new Promise(resolve => { release = resolve; }); root.p('late'); }
     }
-    source(Slow.prototype.wait);
+    Slow.registerSource('wait');
     const {transport} = channel(Slow);
     const {pageId} = await transport.open();
     const abort = new AbortController();
@@ -160,8 +160,8 @@ test('PageBootstrap writes Page.css links and receives the Worker transport in i
     assert.equal(doc.title, 'Gramlot');
     assert.deepEqual([...doc.querySelectorAll('link[rel="stylesheet"]')].map(link => link.getAttribute('href')), Styled.css);
     assert.equal(doc.querySelector('h1').textContent, 'Hello Worker');
-    assert.equal(app.transport, doc.defaultView.gramlot.transport);
-    assert.equal(app.transport.worker, endpoints[0].worker);
+    assert.equal(app.rpc.transport, doc.defaultView.gramlot.rpc.transport);
+    assert.equal(app.rpc.transport.worker, endpoints[0].worker);
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
 });
@@ -174,7 +174,7 @@ test('the window imports the logic module named by the Worker and registers its 
     }});
     assert.equal(doc.title, 'Companion');
     assert.equal(doc.querySelector('#pronto').textContent, 'ok: window');
-    assert.equal(endpoints[0].host.logic, '/page_aux.js');
+    assert.equal(endpoints[0].server.logic, '/page_aux.js');
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
 });

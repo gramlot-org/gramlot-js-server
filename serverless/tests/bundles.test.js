@@ -71,11 +71,11 @@ test('one file inlines /themes/ from the core package, other URLs from the page 
     assert.deepEqual(await inlineStylesheets(join(path, 'page.js'), styled(['/a.css', 'a.css'])), [join(path, 'a.css')]);
 });
 
-test('inline.js is not reachable from the WorkerHost bundle', async () => {
+test('inline.js is not reachable from the GramlotWorkerServer bundle', async () => {
     const {metafile} = await workerBundle(page, options, {logic: '/page_aux.js'});
     const inputs = Object.keys(metafile.inputs);
-    // The core Host entry proves the graph was read from the linked core.
-    assert.ok(inputs.some(path => path.endsWith('src/adapters/host.js')));
-    assert.ok(inputs.some(path => path.endsWith('src/worker-host.js')));
+    // The core GramlotServer entry proves the graph was read from the linked core.
+    assert.ok(inputs.some(path => path.endsWith('src/server/gramlot-server.js')));
+    assert.ok(inputs.some(path => path.endsWith('src/gramlot-worker-server.js')));
     assert.deepEqual(inputs.filter(path => /binding\/inline\.js$/.test(path)), []);
 });

@@ -77,18 +77,18 @@ provided: <url>`); `element` `null`; `rootId` `'gramlot-root'`; `document`
 `globalThis.document`; `signal` (abort disposes the Worker, rejects with the
 reason); `assetRoot` `null` (absolute `file:`/`http:`/`https:` directory URL ending
 in `/`; `Page.css` then root-relative, no `.`/`..`, resolved inside it). Resolves to
-the started `Gramlot` (`window.gramlot`, `transport`, `dispose()`); on failure
+the started `Gramlot` (`window.gramlot`, `rpc.transport`, `dispose()`); on failure
 disposes Worker and half-created instance.
 
 <a id="gs-120-025"></a>
 
-## 025 · `WorkerHost`
+## 025 · `GramlotWorkerServer`
 
 Block ID: **GS-120-025**.
 
-`new WorkerHost(PageClass, {logic = null, stylesheet = null, inlineCss = false,
-pageTtl = 1800, maxPages = 1000, …})` (`@gramlot/gramlot-serverless/worker-host`), in
+`new GramlotWorkerServer(PageClass, {logic = null, stylesheet = null, inlineCss = false,
+pageTtl = 1800, maxPages = 1000, …})` (`@gramlot/gramlot-serverless/gramlot-worker-server`), in
 the Worker; `logic` was `aux` until 0.2.3 (old name not accepted). The exporter
-writes the entry itself; options matter for custom Worker bundles. Other core Host
+writes the entry itself; options matter for custom Worker bundles. Other core `GramlotServer`
 options are server URLs. One page (`/`); `resolveResources` returns `Page.css`, the
 page stylesheet (none with `inlineCss`) and the logic URL.

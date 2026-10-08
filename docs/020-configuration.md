@@ -13,8 +13,8 @@ Block ID: **GN-120-005**.
 
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
-| `pages` | string | — | Path of the pages folder; builds `new FileHost(pages, options)` when `host` is not given |
-| `host` | Host | `null` | A custom Host implementing `resolvePage` and `resolveResources`; `pages` is then ignored |
+| `pages` | string | — | Path of the pages folder; builds `new GramlotFileServer(pages, options)` when `server` is not given |
+| `server` | `GramlotServer` | `null` | A custom `GramlotServer` implementing `resolvePage` and `resolveResources`; `pages` is then ignored |
 | `hostname` | string | `'127.0.0.1'` | Listening address |
 | `port` | number | `0` | Listening port; `0` selects a free port, reported in `app.url` |
 | `mountPath` | string | `''` | Mount prefix: added once to the root-relative bootstrap URLs and carried by every request path |
@@ -22,18 +22,26 @@ Block ID: **GN-120-005**.
 | `contentSecurityPolicy` | string or null | `null` | Policy sent on HTML pages, `{nonce}` replaced by the bootstrap nonce |
 | `ownerForRequest` | `async (request) => owner` | returns `null` | Identity of the request, compared on main, source and close |
 | `onError` | `(error) => void` | `console.error` | Receives unexpected errors; the response is 500 |
-| `runtimeUrl` | string | `'/assets/gramlot.js'` | Host option: URL of the runtime |
-| `mainUrl` | string | `'/gramlot/main'` | Host option: URL of the main endpoint |
-| `sourceUrl` | string | `'/gramlot/source'` | Host option: URL of the remote Source endpoint |
-| `closeUrl` | string | `'/gramlot/close'` | Host option: URL of the close endpoint |
-| `rootId` | string | `'gramlot-root'` | Host option: id of the root element |
-| `pageTtl` | number | `1800` | Host option: seconds a registered page stays open without a close |
-| `maxPages` | integer | `1000` | Host option: registered pages at most; above it, 503 |
+| `runtimeUrl` | string | `'/assets/gramlot.js'` | `GramlotServer` option: URL of the runtime |
+| `mainUrl` | string | `'/gramlot/main'` | `GramlotServer` option: URL of the main endpoint |
+| `sourceUrl` | string | `'/gramlot/source'` | `GramlotServer` option: URL of the remote Source endpoint |
+| `closeUrl` | string | `'/gramlot/close'` | `GramlotServer` option: URL of the close endpoint |
+| `rootId` | string | `'gramlot-root'` | `GramlotServer` option: id of the root element |
+| `pageTtl` | number | `1800` | `GramlotServer` option: seconds a registered page stays open without a close |
+| `maxPages` | integer | `1000` | `GramlotServer` option: registered pages at most; above it, 503 |
+| `reload` | boolean or `null` | `null` | `GramlotFileServer` option: import a page module again when its file changes; `null` takes the value from `GRAMLOT_DEV` |
 
-The Host options reach `FileHost` only when the adapter builds it. A custom `host`
+The `GramlotServer` options and `reload` reach `GramlotFileServer` only when the adapter builds it. A custom `server`
 carries its own.
 
-`sourceUrl` names the remote Source endpoint. Source methods (`source(...)`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+The environment variable `GRAMLOT_DEV` is read by the core at start: unset (deployment)
+serves the minified runtime `gramlot.min.js` and imports each page module once;
+`YES` (development) serves the minified runtime and imports a page module again
+when its file changes; `DEBUG` serves the readable runtime `gramlot.js` and imports
+again as `YES`. Any other value fails the start. The runtime URL is `runtimeUrl` in
+every mode.
+
+`sourceUrl` names the remote Source endpoint. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
 
 <a id="gn-120-010"></a>
 
@@ -106,7 +114,7 @@ Block ID: **GN-120-025**.
   answers 413. The content type must start with `application/json`, else 415.
 - Pages expire `pageTtl` seconds after opening; expired pages are pruned at each
   opening and each main or source request. `pageTtl` must be positive and finite.
-- `maxPages` registered pages at most; `HostCapacity` answers 503.
+- `maxPages` registered pages at most; `ServerCapacity` answers 503.
 - `close()` on the returned application clears every registered page and stops
   the server.
 

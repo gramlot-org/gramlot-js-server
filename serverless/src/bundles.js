@@ -4,17 +4,17 @@ import {createRequire} from 'node:module';
 import {basename, dirname, extname, isAbsolute, join, relative, sep} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
-const workerHost = fileURLToPath(new URL('./worker-host.js', import.meta.url));
+const workerServer = fileURLToPath(new URL('./gramlot-worker-server.js', import.meta.url));
 const require = createRequire(import.meta.url);
 
-/** The window exposes the Page and source of its own core as GramlotStandalone: a logic module
+/** The window exposes the Page of its own core as GramlotStandalone: a logic module
  * imports @gramlot/gramlot/page from there, so the window holds one core instance. */
 const windowCore = {
     name: 'gramlot-window-core',
     setup(build) {
         build.onResolve({filter: /^@gramlot\/gramlot\/page$/}, () => ({path: 'page', namespace: 'gramlot-window-core'}));
         build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, () => ({
-            contents: 'export const {Page, source} = globalThis.GramlotStandalone;', loader: 'js',
+            contents: 'export const {Page} = globalThis.GramlotStandalone;', loader: 'js',
         }));
     },
 };
@@ -40,7 +40,7 @@ export function checkPage(page) {
     }
 }
 
-/** Import the page module, as FileHost does; it must export a class Page. */
+/** Import the page module, as GramlotFileServer does; it must export a class Page. */
 export async function loadPage(page) {
     const module = await import(pathToFileURL(page).href);
     if (typeof module.Page !== 'function') throw new TypeError(`The module exports no class Page: ${page}`);
@@ -48,7 +48,7 @@ export async function loadPage(page) {
 }
 
 /** The page logic with the URL that names it, or null: the Logic export of the page module
- * foo.js, else the companion foo_aux.js beside it. Both at once raise an Error, as FileHost. */
+ * foo.js, else the companion foo_aux.js beside it. Both at once raise an Error, as GramlotFileServer. */
 export async function logicModule(page, module) {
     const stem = basename(page, extname(page));
     const aux = join(dirname(page), `${stem}_aux.js`);
@@ -96,13 +96,13 @@ export async function inlineStylesheets(page, PageClass) {
     return files.filter((file, index) => files.lastIndexOf(file) === index);
 }
 
-/** The Worker script: WorkerHost and the Page. The logic module runs in the window. */
+/** The Worker script: GramlotWorkerServer and the Page. The logic module runs in the window. */
 export async function workerBundle(page, options, {logic = null, stylesheet = null, inlineCss = false} = {}) {
     const result = await bundle({...options, metafile: true, stdin: {
         resolveDir: dirname(page),
-        contents: `import {WorkerHost} from ${JSON.stringify(workerHost)};
+        contents: `import {GramlotWorkerServer} from ${JSON.stringify(workerServer)};
 import {Page} from ${JSON.stringify(page)};
-new WorkerHost(Page, ${JSON.stringify({logic, stylesheet, inlineCss})});`,
+new GramlotWorkerServer(Page, ${JSON.stringify({logic, stylesheet, inlineCss})});`,
     }});
     return {text: result.outputFiles[0].text, metafile: result.metafile};
 }

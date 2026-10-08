@@ -18,7 +18,7 @@ async function fixture(t) {
 test('exports a self-contained shell through HtmlBuilder without running main', async t => {
     const {folder, output} = await fixture(t);
     const page = join(folder, 'page.js');
-    // The build imports the module, as FileHost does, to read Page.css; main runs only in the Worker.
+    // The build imports the module, as GramlotFileServer does, to read Page.css; main runs only in the Worker.
     await writeFile(page, `import {Page as BasePage} from '@gramlot/gramlot/page';
 export class Page extends BasePage {
     main(root) { if (typeof WorkerGlobalScope === 'undefined') throw new Error('must run only in the Worker'); root.h1('Hello'); }

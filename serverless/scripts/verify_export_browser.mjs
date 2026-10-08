@@ -21,9 +21,9 @@ try {
     assert.equal(await page.locator('#gramlot-root h1').textContent(), expectedText);
     const result = await page.evaluate(async method => {
         const app = globalThis.gramlot;
-        const contents = app.source.getItem('main');
+        const contents = app.src.source.getItem('main');
         // The 0.2.0 wire names the Source class (__cls): main holds the root's GramlotBuilderBag class.
-        if (contents.constructor !== app.source.constructor) throw Error('main lost its typed Source');
+        if (contents.constructor !== app.src.source.constructor) throw Error('main lost its typed Source');
         const heading = contents.getNodes()[0];
         heading.setValue('Updated');
         heading.setAttr({title: 'Live attribute'});
@@ -36,12 +36,12 @@ try {
         let remote = null, cleared = null;
         if (method) {
             const target = contents.getNodes().find(node => node.attr.id === 'details');
-            await app.remoteSource(target, method, {text:'From Worker'});
+            await app.src.remoteSource(target, method, {text:'From Worker'});
             remote = document.querySelector('#details').textContent;
             target.value.clear();
             cleared = document.querySelector('#details').textContent;
         }
-        const transport = app.transport;
+        const transport = app.rpc.transport;
         app.dispose();
         let rejected = false;
         try { await transport.main(app.pageId); } catch { rejected = true; }
