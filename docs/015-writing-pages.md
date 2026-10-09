@@ -102,9 +102,9 @@ strict Content Security Policy profile; inline code (`formula`, `script`, `==`,
 
 Block ID: **GN-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
-The route `POST /gramlot/source` stays in the adapter; the
-[Reference](030-reference.md) lists it.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+The adapter answers them on `POST /gramlot/rpc` with `contentType: 'source'`; the
+[Reference](030-reference.md) lists the route.
 
 <a id="gn-115-025"></a>
 

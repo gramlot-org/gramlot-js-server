@@ -31,7 +31,7 @@ Block ID: **GN-140-010**.
 
 Block ID: **GN-140-015**.
 
-main/source 404 for an open page: `pageTtl` (1800 s) elapsed, page closed,
+rpc answers the outcome `page_expired` (`RpcError`) for an open page: `pageTtl` (1800 s) elapsed, page closed,
 server restarted, or a different owner. Reload; raise `pageTtl`; keep
 `ownerForRequest` stable.
 
@@ -57,7 +57,7 @@ Block ID: **GN-140-025**.
   or not extending the core's `Page`.
 - `ENOENT` on `dist/gramlot.js` at start: `npm --prefix ../gramlot/js run build`.
 - `requires need a GramlotServer with a resource system`: drop `js_requires`/`css_requires`.
-- 413: JSON body above 4096 bytes.
+- 413: from the proxy in front, the adapter sets no limit; raise the proxy limit.
 - A changed page not visible: restart the server.
 - `Two logic modules for one page`: `Logic` in the module and in `_aux.js`; keep one.
 - Browser cannot resolve an import of the page module: a server-only import; move

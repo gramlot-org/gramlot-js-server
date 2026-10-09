@@ -57,15 +57,19 @@ Paths are shown with the default `GramlotServer` options and without mount prefi
 | `GET`, `HEAD` | `/themes/<path>`, a file of the core themes | — | 200, media type of the extension |
 | `GET`, `HEAD` | a key of `assets` | — | 200, the `type` of the entry |
 | `GET`, `HEAD` | `*.css`, `*.js` below the pages folder | — | 200 `text/css` or `text/javascript` |
-| `POST` | `/gramlot/main` | `{"pageId"}` as `application/json` | 200 `application/json`, the Source of `main` in TYTX |
-| `POST` | `/gramlot/source` | `{"pageId", "method", "params"?}` | 200 `application/json`, the Source of the method |
+| `POST` | `/gramlot/rpc` | the request envelope `{id, pageId, contentType, name, params}` as TYTX JSON, `application/json` | 200 `application/json`, the response envelope of `GramlotServer.call`: `{id, contentType, value}` or `{id, contentType, error: {code, name, message}}` |
 | `POST` | `/gramlot/close` | `{"pageId"}` | 200 `{"ok": true}`, always |
 | `GET` | any page path (`/`, `/orders`, `/orders/index.html`) | — | 200 `text/html`, the bootstrap document; `Content-Security-Policy` when configured |
 
 Every response of the adapter carries `Cache-Control: no-store`, except the
 runtime, which carries `X-Content-Type-Options: nosniff`.
 
-The route `/gramlot/source` answers the remote Source requests. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`/gramlot/rpc` answers every call of the page: `contentType: 'source'` with `name: 'main'`
+for the page, `'source'` with another name for a Source method, `'data'` for an endpoint
+(`Page.registerEndpoint`). An unknown, expired or unowned page, an unknown name, an `auth`
+rule and an exception of the method are outcomes in the envelope (`page_expired`,
+`not_found`, `not_authenticated`, `not_authorized`, `application_error`), with status 200.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
 
 <a id="gn-130-020"></a>
 
@@ -77,12 +81,11 @@ Block ID: **GN-130-020**.
 | --- | --- | --- |
 | 301 | — | The mount prefix without its final slash; `Location` is the prefix with `/` |
 | 400 | `Invalid path` | A path that does not decode |
-| 400 | `Invalid main payload`, `Missing main payload`, `Missing pageId`, `Invalid Source request` | A body that is not JSON, has no `pageId`, or a `method`/`params` of the wrong type |
-| 404 | `Not found` | A path outside the mount prefix, unknown page path, invalid segment, path leaving the folder, file not a companion, expired or unowned page |
-| 404 | `Unknown Source method` | `method` is `main`, unmarked or missing |
-| 405 | `Method not allowed` | `POST` on a page, a companion, an asset, a theme file or the runtime; `GET` on an endpoint |
-| 413 | `Payload too large` | A JSON body above 4096 bytes |
-| 415 | `Expected application/json` | Another content type on an endpoint |
+| 400 | `Invalid envelope` | An rpc body that `GramlotServer.call` refuses with `InvalidRequest`: not TYTX JSON, not an object, `id`, `pageId`, `contentType` or `name` not a string, `contentType` neither `source` nor `data`, `params` not an object |
+| 400 | `Invalid close request`, `Missing pageId` | A close body that is not JSON or has no string `pageId` |
+| 404 | `Not found` | A path outside the mount prefix, unknown page path, invalid segment, path leaving the folder, file not a companion |
+| 405 | `Method not allowed` | `POST` on a page, a companion, an asset, a theme file or the runtime; `GET` on rpc or close |
+| 415 | `Expected application/json` | Another content type on rpc or close |
 | 503 | `Page registry capacity reached` | `maxPages` reached |
 | 500 | `Internal server error` | Any other error; the error object reaches `onError` |
 

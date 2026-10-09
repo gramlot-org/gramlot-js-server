@@ -20,11 +20,10 @@ Block ID: **GN-120-005**.
 | `mountPath` | string | `''` | Mount prefix: added once to the root-relative bootstrap URLs and carried by every request path |
 | `assets` | object | `{}` | Application files: URL path (without the prefix) → `{file, type}`, served by `GET` and `HEAD` |
 | `contentSecurityPolicy` | string or null | `null` | Policy sent on HTML pages, `{nonce}` replaced by the bootstrap nonce |
-| `ownerForRequest` | `async (request) => owner` | returns `null` | Identity of the request, compared on main, source and close |
+| `ownerForRequest` | `async (request) => owner` | returns `null` | Identity of the request, compared on rpc and close |
 | `onError` | `(error) => void` | `console.error` | Receives unexpected errors; the response is 500 |
 | `runtimeUrl` | string | `'/assets/gramlot.js'` | `GramlotServer` option: URL of the runtime |
-| `mainUrl` | string | `'/gramlot/main'` | `GramlotServer` option: URL of the main endpoint |
-| `sourceUrl` | string | `'/gramlot/source'` | `GramlotServer` option: URL of the remote Source endpoint |
+| `rpcUrl` | string | `'/gramlot/rpc'` | `GramlotServer` option: URL that receives every request envelope |
 | `closeUrl` | string | `'/gramlot/close'` | `GramlotServer` option: URL of the close endpoint |
 | `rootId` | string | `'gramlot-root'` | `GramlotServer` option: id of the root element |
 | `pageTtl` | number | `1800` | `GramlotServer` option: seconds a registered page stays open without a close |
@@ -41,7 +40,9 @@ when its file changes; `DEBUG` serves the readable runtime `gramlot.js` and impo
 again as `YES`. Any other value fails the start. The runtime URL is `runtimeUrl` in
 every mode.
 
-`sourceUrl` names the remote Source endpoint. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`rpcUrl` receives the request envelopes of `main`, of the Source methods and of the
+endpoints. Core 0.2.14 removed `mainUrl` and `sourceUrl`; the adapter has no route
+`/gramlot/main` or `/gramlot/source`.
 
 <a id="gn-120-010"></a>
 
@@ -51,8 +52,8 @@ Block ID: **GN-120-010**.
 
 `mountPath: '/app'` (leading and trailing slashes are trimmed) is passed to
 `openPage` as the mount prefix. The bootstrap document then carries
-`/app/assets/gramlot.js`, `/app/gramlot/main`, `/app/gramlot/source`,
-`/app/gramlot/close` and `/app/index.css`; a relative or absolute `Page.css`
+`/app/assets/gramlot.js`, `/app/gramlot/rpc`, `/app/gramlot/close` and
+`/app/index.css`; a relative or absolute `Page.css`
 URL stays as written. The prefix is added once: `/app/app/…` never appears.
 
 Request paths carry the prefix: `GET /app/orders` opens the page `orders`. The
@@ -110,10 +111,10 @@ from its own session cookie or header.
 
 Block ID: **GN-120-025**.
 
-- JSON payloads of main, source and close are read up to 4096 bytes; a larger body
-  answers 413. The content type must start with `application/json`, else 415.
+- The bodies of rpc and close have no size limit in the adapter; a proxy in front
+  may set one. The content type must start with `application/json`, else 415.
 - Pages expire `pageTtl` seconds after opening; expired pages are pruned at each
-  opening and each main or source request. `pageTtl` must be positive and finite.
+  opening and each rpc request. `pageTtl` must be positive and finite.
 - `maxPages` registered pages at most; `ServerCapacity` answers 503.
 - `close()` on the returned application clears every registered page and stops
   the server.

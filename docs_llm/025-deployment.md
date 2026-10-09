@@ -47,7 +47,8 @@ Block ID: **GN-125-015**.
   pages folder.
 - CSP: strict with named logic only; permissive with inline code.
 - Identity: default `ownerForRequest` lets any client with a page ID read it.
-- Bodies > 4096 bytes: 413; `pageTtl`, `maxPages` bound the registry.
+- No body size limit in the adapter: set it in the proxy (nginx `client_max_body_size`, 413);
+  `pageTtl`, `maxPages` bound the registry.
 - 500 responses carry a fixed text; the error goes to `onError`.
 
 <a id="gn-125-020"></a>

@@ -50,8 +50,8 @@ allows 'unsafe-eval'
 
 Block ID: **GN-140-015**.
 
-**Symptom.** `POST /gramlot/main` or `/gramlot/source` answers 404 `Not found`
-for a page that was open.
+**Symptom.** `POST /gramlot/rpc` answers 200 with the outcome `page_expired`
+(`RpcError` with `code: 'page_expired'` in the browser) for a page that was open.
 
 **Causes.** More than `pageTtl` seconds (default 1800) passed since the opening;
 the page was closed; the server restarted and its registry is empty; the
@@ -103,6 +103,7 @@ Block ID: **GN-140-025**.
   in `_aux.js`. `@gramlot/gramlot/page` resolves through the import map.
 - **`The gallery needs @gramlot/gramlot-examples`.** `gramlot … gallery` without
   the examples package: `npm install @gramlot/gramlot-examples`.
-- **Payload too large (413).** A JSON body above 4096 bytes; send less data.
+- **Payload too large (413).** The adapter sets no limit: the proxy in front
+  answered 413. Raise its limit (nginx `client_max_body_size`) or send less data.
 - **A changed page is not visible.** Modules are cached by the runtime; restart
   the server.

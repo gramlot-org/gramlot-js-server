@@ -63,8 +63,8 @@ logic runs under the strict CSP; inline code needs the permissive profile
 
 Block ID: **GN-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
-The route `POST /gramlot/source` stays in the adapter ([Reference](030-reference.md)).
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+The adapter answers them on `POST /gramlot/rpc`, `contentType: 'source'` ([Reference](030-reference.md)).
 
 <a id="gn-115-025"></a>
 

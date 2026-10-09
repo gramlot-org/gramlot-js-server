@@ -51,14 +51,14 @@ policy of its own.
 
 Block ID: **GS-140-015**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
-The messages below come from the Worker operation `source`.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+The outcomes below come from the Worker answering an envelope; in the window
+`remoteSource` rejects with an `RpcError` carrying the `code`.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `Unknown Source method` | `remoteSource` called with `main`, with a non-string, or with a method not marked by `Page.registerSource` | Page code does not call `remoteSource` yet (note above) |
-| `Unknown, expired or unowned page` | The page registered in the Worker expired (core default 1800 s), or the page ID is wrong | Reload the file; the exporter uses the core defaults |
-| `DataCloneError` | `params` contains a value that structured cloning refuses (a function, a DOM node) | Pass plain data |
+| `not_found` (`Unknown Source method`) | `remoteSource` called with a method not marked by `Page.registerSource` | Page code does not call `remoteSource` yet (note above) |
+| `page_expired` (`Unknown, expired or unowned page`) | The page registered in the Worker expired (core default 1800 s), or the page ID is wrong | Reload the file; the exporter uses the core defaults |
 | `Worker transport is disposed` | The instance was disposed, or the Worker crashed (`Worker communication failed`) | Reload; look for the earlier error in the console |
 
 <a id="gs-140-020"></a>

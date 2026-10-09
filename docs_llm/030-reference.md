@@ -40,13 +40,14 @@ In order, each path under `mountPath`:
 | `GET`/`HEAD` | `/themes/<path>` of the core | — | 200, type by extension |
 | `GET`/`HEAD` | key of `assets` | — | 200, its `type` |
 | `GET`/`HEAD` | `*.css`, `*.js` below pages | — | 200 file |
-| `POST` | `/gramlot/main` | `{pageId}` JSON | 200 TYTX Source |
-| `POST` | `/gramlot/source` | `{pageId, method, params?}` | 200 TYTX Source |
+| `POST` | `/gramlot/rpc` | envelope `{id, pageId, contentType, name, params}`, TYTX JSON | 200 `{id, contentType, value}` or `{id, contentType, error: {code, name, message}}` |
 | `POST` | `/gramlot/close` | `{pageId}` | 200 `{"ok":true}` |
 | `GET` | page path, `<path>/index.html` | — | 200 HTML bootstrap, CSP header when configured |
 
 `Cache-Control: no-store` everywhere but the runtime (`X-Content-Type-Options: nosniff`).
-`/gramlot/source`: remote Source requests. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`/gramlot/rpc`: `source`/`main` the page, `source`/other a Source method, `data` an endpoint;
+`page_expired`, `not_found`, `not_authenticated`, `not_authorized`, `application_error` are
+outcomes with status 200. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
 
 <a id="gn-130-020"></a>
 
@@ -54,11 +55,10 @@ In order, each path under `mountPath`:
 
 Block ID: **GN-130-020**.
 
-301 bare prefix → prefix `/`; 400 undecodable path / invalid or missing payload, `pageId`, `method`, `params`;
-404 `Not found` (outside the prefix, unknown page, bad segment, escaping path, non-companion file,
-expired or unowned page); 404 `Unknown Source method`; 405 wrong method; 413
-body > 4096 bytes; 415 not `application/json`; 503 `maxPages`; 500 other
-errors → `onError`.
+301 bare prefix → prefix `/`; 400 undecodable path, `Invalid envelope` (`InvalidRequest` of
+`call`), close body not JSON or without `pageId`; 404 `Not found` (outside the prefix, unknown
+page, bad segment, escaping path, non-companion file); 405 wrong method; 415 not
+`application/json`; 503 `maxPages`; 500 other errors → `onError`.
 
 <a id="gn-130-025"></a>
 

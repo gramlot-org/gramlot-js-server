@@ -19,9 +19,9 @@ Block ID: **GN-120-005**.
 | `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |
 | `assets` | object | `{}` | URL path → `{file, type}`, `GET`/`HEAD` |
 | `contentSecurityPolicy` | string/null | `null` | Header on HTML pages, `{nonce}` replaced |
-| `ownerForRequest` | `async (request) => owner` | `null` | Identity compared on main/source/close |
+| `ownerForRequest` | `async (request) => owner` | `null` | Identity compared on rpc/close |
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
-| `runtimeUrl`, `mainUrl`, `sourceUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/main`, `/gramlot/source`, `/gramlot/close` | `GramlotServer` URLs |
+| `runtimeUrl`, `rpcUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/rpc`, `/gramlot/close` | `GramlotServer` URLs |
 | `rootId` | string | `'gramlot-root'` | Root element id |
 | `pageTtl` | number | `1800` | Seconds a page stays registered |
 | `maxPages` | integer | `1000` | Registry capacity; above: 503 |
@@ -31,7 +31,8 @@ Block ID: **GN-120-005**.
 `GRAMLOT_DEV`: unset → `gramlot.min.js`, page modules imported once; `YES` →
 `gramlot.min.js`, changed page modules re-imported; `DEBUG` → `gramlot.js`,
 re-imported; other values fail the start. Same runtime URL in every mode.
-`sourceUrl`: remote Source endpoint. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`rpcUrl`: every request envelope (main, Source methods, endpoints); `mainUrl`/`sourceUrl`
+removed by core 0.2.14, no `/gramlot/main` or `/gramlot/source` route.
 
 <a id="gn-120-010"></a>
 
@@ -40,7 +41,7 @@ re-imported; other values fail the start. Same runtime URL in every mode.
 Block ID: **GN-120-010**.
 
 `mountPath: '/app'` (slashes trimmed) → bootstrap URLs `/app/assets/gramlot.js`,
-`/app/gramlot/main|source|close`, `/app/index.css`; relative and absolute
+`/app/gramlot/rpc|close`, `/app/index.css`; relative and absolute
 `Page.css` unchanged; never `/app/app/`. Requests carry the prefix: the adapter
 removes it; outside it 404; `/app` → 301 `/app/`. A front server forwards the
 path unchanged ([Deployment](025-deployment.md)). Until 0.2.3 the front server
@@ -80,8 +81,8 @@ client reads any open page. Derive the owner from the application's session.
 
 Block ID: **GN-120-025**.
 
-JSON bodies ≤ 4096 bytes (413), content type `application/json` (415);
-`pageTtl` positive and finite, pruned at openings and main/source; `maxPages`
+No body size limit in the adapter (a front proxy may set one), content type
+`application/json` (415); `pageTtl` positive and finite, pruned at openings and rpc; `maxPages`
 → 503; `close()` clears the registry and stops the server.
 
 <a id="gn-120-030"></a>

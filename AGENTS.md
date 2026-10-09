@@ -41,7 +41,7 @@ The repository is an npm workspace with three packages:
 ## server/
 
 - It connects the core `GramlotServer` (`resolvePage`, `resolveResources`,
-  `openPage`) to HTTP following the server protocol GC-230, checked by
+  `openPage`, `call`) to HTTP following the server protocol GC-230, checked by
   `checkProtocol` in `server/test/server.test.mjs`, and owns only HTTP routing, payload parsing,
   response mapping, request identity, the mount prefix (carried by every request
   path) and the files it serves: runtime, core themes, `assets`, the `.css` and
