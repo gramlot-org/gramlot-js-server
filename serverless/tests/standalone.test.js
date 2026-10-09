@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
+import {fromTytx, toTytx} from '@genrojs/tytx';
 import {Page} from '@gramlot/gramlot/page';
 import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
 import {WorkerTransport} from '../src/worker-transport.js';
@@ -37,6 +38,16 @@ Hello.registerSource('broken');
 
 const document = () => new JSDOM('<div id="gramlot-root"></div>').window.document;
 
+/** The response envelope of one request envelope sent through transport.call. JSON.parse keeps a
+ * fragment document as its TYTX string; decode = fromTytx decodes the value as well. */
+async function call(transport, pageId, contentType, name, params = {}, {signal, decode = JSON.parse} = {}) {
+    const id = crypto.randomUUID();
+    const response = decode(await transport.call(toTytx({id, pageId, contentType, name, params}), signal));
+    assert.equal(response.id, id);
+    assert.equal(response.contentType, contentType);
+    return response;
+}
+
 test('Worker server uses shared main/Source execution, typed Source and normal live rendering', async () => {
     const {transport, server, terminated} = channel(Hello);
     const {pageId} = await transport.open();
@@ -50,14 +61,15 @@ test('Worker server uses shared main/Source execution, typed Source and normal l
     assert.equal(doc.querySelector('#details').textContent, 'From Worker');
     nodes[0].setValue('Live');
     assert.equal(doc.querySelector('h1').textContent, 'Live');
-    await assert.rejects(app.src.remoteSource(nodes[1], 'main'), /Unknown Source method/);
-    await assert.rejects(app.src.remoteSource(nodes[1], 'broken'), {name: 'TypeError', message: 'Page failed'});
+    await assert.rejects(app.src.remoteSource(nodes[1], 'missing'), {name: 'RpcError', code: 'not_found'});
+    await assert.rejects(app.src.remoteSource(nodes[1], 'broken'),
+        {name: 'RpcError', code: 'application_error', remoteName: 'TypeError', message: 'Page failed'});
     assert.equal(server.pages.size, 1);
     app.dispose();
     assert.equal(terminated(), true);
     assert.equal(transport.pending.size, 0);
     assert.equal(doc.querySelector('h1'), null);
-    await assert.rejects(transport.main(pageId), /disposed/);
+    await assert.rejects(call(transport, pageId, 'source', 'main'), /disposed/);
 });
 
 test('aborted Worker request drops its late reply without cancelling another request', async () => {
@@ -69,13 +81,13 @@ test('aborted Worker request drops its late reply without cancelling another req
     const {transport} = channel(Slow);
     const {pageId} = await transport.open();
     const abort = new AbortController();
-    const pending = transport.source(pageId, 'wait', {}, abort.signal);
+    const pending = call(transport, pageId, 'source', 'wait', {}, {signal: abort.signal});
     await new Promise(resolve => setImmediate(resolve));
     abort.abort();
     await assert.rejects(pending, {name: 'AbortError'});
     assert.equal(transport.pending.size, 0);
     release();
-    assert.match(await transport.main(pageId), /Hello Worker/);
+    assert.match((await call(transport, pageId, 'source', 'main')).value, /Hello Worker/);
     transport.dispose();
 });
 
@@ -89,7 +101,7 @@ test('Worker crash rejects pending requests and terminates its owned Worker', as
     await assert.rejects(transport.open(), /disposed/);
 });
 
-test('Worker rejects unsupported operations, pages and malformed CSS', async () => {
+test('Worker rejects unknown messages, invalid envelopes, unsupported pages and malformed CSS', async () => {
     for (const PageClass of [class {}, class extends Hello { static css = ['/external.css', 1]; }]) {
         const {transport} = channel(PageClass);
         await assert.rejects(transport.open(), {name: 'TypeError'});
@@ -100,11 +112,15 @@ test('Worker rejects unsupported operations, pages and malformed CSS', async () 
     assert.deepEqual((await styled.transport.open()).resources, {css: Styled.css, js: []});
     styled.transport.dispose();
     const {transport} = channel(Hello);
-    await assert.rejects(transport.request('fetch', {}), /Unknown Worker operation/);
-    const {pageId} = await transport.open();
-    await assert.rejects(transport.source(pageId, null, {}), /Unknown Source method/);
-    await assert.rejects(transport.source('unknown', 'details', {}), /Unknown, expired or unowned page/);
-    await assert.rejects(transport.source(pageId, 'details', {uncloneable() {}}), {name: 'DataCloneError'});
+    await assert.rejects(transport.request({operation: 'main'}), {name: 'TypeError', message: 'Unknown Worker message'});
+    const {pageId, capabilities} = await transport.open();
+    assert.deepEqual(capabilities, []);
+    await assert.rejects(transport.call('{'), {name: 'InvalidRequest'});
+    await assert.rejects(transport.call(toTytx({id: 'r', pageId, contentType: 'source', name: 'main', params: null})),
+        {name: 'InvalidRequest'});
+    assert.equal((await call(transport, pageId, 'source', 'missing')).error.code, 'not_found');
+    assert.equal((await call(transport, 'unknown', 'source', 'details')).error.code, 'page_expired');
+    await assert.rejects(transport.request({text: 'x', uncloneable() {}}), {name: 'DataCloneError'});
     assert.equal(transport.pending.size, 0);
     transport.dispose();
 });
@@ -223,4 +239,48 @@ test('the Worker returns Page.css then the same-name stylesheet, and no CSS with
     const inline = channel(Styled, {stylesheet: '/assets/styles/index.css', inlineCss: true});
     assert.deepEqual((await inline.transport.open()).resources, {css: [], js: []});
     inline.transport.dispose();
+});
+
+class Contract extends Page {
+    static title = 'Contract fixture';
+    main(root) { root.h1('Contract fixture'); }
+    check_fragment(root, {text = 'check'} = {}) { root.span(text); }
+    check_endpoint({value}) { return value; }
+    check_endpoint_auth() { return 'allowed'; }
+    check_endpoint_raise() { throw new Error('check'); }
+}
+Contract.registerSource('check_fragment');
+Contract.registerEndpoint('check_endpoint');
+Contract.registerEndpoint('check_endpoint_auth', {auth: 'admin'});
+Contract.registerEndpoint('check_endpoint_raise');
+
+test('GC-230 §205: the envelope part of the conformance list (items 10, 12-16) over postMessage', async () => {
+    const {transport, server} = channel(Contract);
+    const {pageId, capabilities} = await transport.open();
+    assert.deepEqual(capabilities, []);
+    // 10 · source/main: an envelope echoing id and contentType, the fragment document as a string.
+    assert.equal(typeof (await call(transport, pageId, 'source', 'main')).value, 'string');
+    // 12 · outcomes of an unknown page, fragment and endpoint, and of data/main.
+    const code = async (...args) => (await call(transport, ...args)).error?.code;
+    assert.equal(await code('0'.repeat(32), 'source', 'main'), 'page_expired');
+    assert.equal(await code(pageId, 'source', 'gramlot_conformance_missing'), 'not_found');
+    assert.equal(await code(pageId, 'data', 'gramlot_conformance_missing'), 'not_found');
+    assert.equal(await code(pageId, 'data', 'main'), 'not_found');
+    // 13 · a fragment with params; an endpoint answering typed values, a date included.
+    assert.match((await call(transport, pageId, 'source', 'check_fragment', {text: 'gramlot-conformance'})).value,
+        /gramlot-conformance/);
+    for (const value of [3, 'x', new Date(Date.UTC(2020, 0, 1))]) {
+        assert.deepEqual((await call(transport, pageId, 'data', 'check_endpoint', {value}, {decode: fromTytx})).value, value);
+    }
+    // 14 · auth is closed without the auth capability; 15 · a raising endpoint is application_error.
+    assert.equal(await code(pageId, 'data', 'check_endpoint_auth'), 'not_authenticated');
+    const {error} = await call(transport, pageId, 'data', 'check_endpoint_raise');
+    assert.deepEqual([error.code, error.name, error.message], ['application_error', 'Error', 'check']);
+    // 16 · the close message {pageId} without id; main of the closed page is page_expired.
+    transport.close(pageId);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(server.pages.size, 0);
+    assert.equal(await code(pageId, 'source', 'main'), 'page_expired');
+    transport.dispose();
+    assert.doesNotThrow(() => transport.close(pageId));
 });

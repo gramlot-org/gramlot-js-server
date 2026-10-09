@@ -39,7 +39,7 @@
     "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout tests/*.test.js"
   },
   "dependencies": {
-    "@gramlot/gramlot": ">=0.2.12",
+    "@gramlot/gramlot": ">=0.2.14",
     "@genrojs/builders": ">=0.4.1",
     "esbuild": "0.28.2"
   },
@@ -55,6 +55,7 @@
     "node": ">=22"
   },
   "devDependencies": {
+    "@genrojs/tytx": ">=0.16.2",
     "@gramlot/gramlot-examples": ">=0.2.9",
     "jsdom": "27.0.1"
   }

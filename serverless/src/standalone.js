@@ -48,9 +48,9 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
     const abort = () => transport.dispose(signal.reason);
     signal?.addEventListener('abort', abort, {once: true});
     try {
-        const {pageId, title, resources} = await transport.open(signal);
+        const {pageId, title, resources, capabilities} = await transport.open(signal);
         document.title = title;
-        const bootstrap = new WorkerBootstrap({document, config: {pageId, element, rootId, transport}, resources: {
+        const bootstrap = new WorkerBootstrap({document, config: {pageId, element, rootId, capabilities, transport}, resources: {
             css: resources.css.map(href => styleUrl(href, root)),
             js: resources.js.map(({url, group}) => {
                 if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone module not provided: ${url}`);
