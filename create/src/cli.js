@@ -21,7 +21,7 @@ function manifest(name, template) {
             'start:bun': 'bun serve.mjs',
         },
         dependencies: {
-            '@gramlot/gramlot': '>=0.2.12',
+            '@gramlot/gramlot': '>=0.2.14',
             '@gramlot/gramlot-js-server': `>=${own.version}`,
             '@gramlot/gramlot-serverless': `>=${own.version}`,
         },

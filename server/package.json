@@ -21,7 +21,7 @@
     "node": ">=22"
   },
   "peerDependencies": {
-    "@gramlot/gramlot": ">=0.2.12",
+    "@gramlot/gramlot": ">=0.2.14",
     "@gramlot/gramlot-examples": ">=0.2.9"
   },
   "peerDependenciesMeta": {
@@ -30,6 +30,7 @@
     }
   },
   "devDependencies": {
+    "@genrojs/tytx": ">=0.16.2",
     "@gramlot/gramlot-examples": ">=0.2.9"
   },
   "exports": {

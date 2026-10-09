@@ -22,18 +22,20 @@ try {
   app.dispose();return {updated,inserted,deleted,remote,records:app.src.renderer.records.size,dom:document.getElementById('gramlot-root').childNodes.length};
  });
  assert.deepEqual(result,{updated:'Updated',inserted:'Added',deleted:true,remote:'Remote HTML',records:0,dom:0});
- await page.waitForFunction(async pageId => (await fetch('/gramlot/main', {
-  method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pageId})
- })).status===404, await page.evaluate(()=>window.gramlot.pageId));
+ await page.waitForFunction(async pageId => (await (await fetch('/gramlot/rpc', {
+  method:'POST',headers:{'content-type':'application/json'},
+  body:JSON.stringify({id:'check',pageId,contentType:'source',name:'main',params:{}})
+ })).json()).error?.code==='page_expired', await page.evaluate(()=>window.gramlot.pageId));
  await page.goto(url);await page.waitForFunction(()=>window.gramlot?.state==='started');
  const pageId=await page.evaluate(()=>window.gramlot.pageId);
  await page.goto('about:blank');
  let closed=false;
  for(let attempt=0;attempt<40;attempt++){
-  const response=await fetch(url+'/gramlot/main',{
-   method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pageId})
+  const response=await fetch(url+'/gramlot/rpc',{
+   method:'POST',headers:{'content-type':'application/json'},
+   body:JSON.stringify({id:'check',pageId,contentType:'source',name:'main',params:{}})
   });
-  if(response.status===404){closed=true;break;}
+  if((await response.json()).error?.code==='page_expired'){closed=true;break;}
   await new Promise(resolve=>setTimeout(resolve,50));
  }
  assert.equal(closed,true,'pagehide beacon closes the server page');
