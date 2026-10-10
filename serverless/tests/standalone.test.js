@@ -245,11 +245,16 @@ class Contract extends Page {
     static title = 'Contract fixture';
     main(root) { root.h1('Contract fixture'); }
     check_fragment(root, {text = 'check'} = {}) { root.span(text); }
+    check_fragment_auth(root) {
+        root.span('check-public');
+        root.div(null, {auth: 'admin'}).span('check-refused');
+    }
     check_endpoint({value}) { return value; }
     check_endpoint_auth() { return 'allowed'; }
     check_endpoint_raise() { throw new Error('check'); }
 }
 Contract.registerSource('check_fragment');
+Contract.registerSource('check_fragment_auth');
 Contract.registerEndpoint('check_endpoint');
 Contract.registerEndpoint('check_endpoint_auth', {auth: 'admin'});
 Contract.registerEndpoint('check_endpoint_raise');
