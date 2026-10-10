@@ -2,7 +2,7 @@
 import {readFile, realpath, stat} from 'node:fs/promises';
 import {dirname, extname, isAbsolute, join, relative, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {GramlotFileServer, PageExpired, PageNotFound, SourceNotFound, ServerCapacity, runtimeAsset} from '@gramlot/gramlot/server';
+import {GramlotFileServer, InvalidRequest, PageNotFound, ServerCapacity, runtimeAsset} from '@gramlot/gramlot/server';
 
 const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8'};
 // Media types of the files of the core themes, by extension; any other extension is binary.
@@ -43,6 +43,9 @@ async function companionFile(pagesDir, path) {
  * assets, companions, pages. A GET of <path>/index.html opens
  * the page <path>, and /index.html the index, as a static host does. contentSecurityPolicy is the
  * application's policy, sent on each HTML page with {nonce} replaced by the bootstrap nonce.
+ * POST of rpcUrl passes the body, the request envelope, to server.call with the owner of
+ * ownerForRequest and answers 200 with the response envelope, 400 on InvalidRequest; POST of
+ * closeUrl takes {pageId}. Both take application/json only (415) and set no size limit.
  */
 export async function createDispatch({pages, server = null, ownerForRequest = async () => null,
                                             mountPath = '', contentSecurityPolicy = null, assets = {}, ...options} = {}) {
@@ -96,38 +99,25 @@ export async function createDispatch({pages, server = null, ownerForRequest = as
         }
         const owner = await ownerForRequest(request);
         try {
-            if (pathname === server.mainUrl || pathname === server.sourceUrl || pathname === server.closeUrl) {
+            if (pathname === server.rpcUrl || pathname === server.closeUrl) {
                 if (request.method !== 'POST') return reply('Method not allowed', 405);
                 if (!request.headers.get('content-type')?.startsWith('application/json')) {
                     return reply('Expected application/json', 415);
                 }
-                let payload;
-                try {
-                    // main accepts just pageId. Bound reads even without Content-Length.
-                    const reader = request.body?.getReader();
-                    if (!reader) return reply('Missing main payload', 400);
-                    const chunks = [];
-                    let size = 0;
-                    while (true) {
-                        const {value, done} = await reader.read();
-                        if (done) break;
-                        size += value.byteLength;
-                        if (size > 4096) { await reader.cancel(); return reply('Payload too large', 413); }
-                        chunks.push(value);
+                const body = await request.text();
+                if (pathname === server.rpcUrl) {
+                    let response;
+                    try { response = await server.call(body, {owner}); } catch (error) {
+                        if (error instanceof InvalidRequest) return reply('Invalid envelope', 400);
+                        throw error;
                     }
-                    payload = JSON.parse(await new Blob(chunks).text());
-                } catch { return reply('Invalid main payload', 400); }
+                    return reply(response, 200, 'application/json');
+                }
+                let payload;
+                try { payload = JSON.parse(body); } catch { return reply('Invalid close request', 400); }
                 if (typeof payload?.pageId !== 'string') return reply('Missing pageId', 400);
-                if (pathname === server.closeUrl) {
-                    server.closePage(payload.pageId, {owner});
-                    return reply(JSON.stringify({ok: true}), 200, 'application/json');
-                }
-                if (pathname === server.sourceUrl) {
-                    if (typeof payload.method !== 'string' || (payload.params != null &&
-                        (typeof payload.params !== 'object' || Array.isArray(payload.params)))) return reply('Invalid Source request', 400);
-                    return reply(await server.source(payload.pageId, payload.method, payload.params ?? {}, {owner}), 200, 'application/json');
-                }
-                return reply(await server.main(payload.pageId, {owner}), 200, 'application/json');
+                server.closePage(payload.pageId, {owner});
+                return reply(JSON.stringify({ok: true}), 200, 'application/json');
             }
             if (request.method !== 'GET') return reply('Method not allowed', 405);
             let path;
@@ -140,8 +130,7 @@ export async function createDispatch({pages, server = null, ownerForRequest = as
                 : {'Content-Security-Policy': contentSecurityPolicy.replaceAll('{nonce}', nonce)};
             return reply(html, 200, 'text/html; charset=utf-8', headers);
         } catch (error) {
-            if (error instanceof SourceNotFound) return reply('Unknown Source method', 404);
-            if (error instanceof PageExpired || error instanceof PageNotFound) return reply('Not found', 404);
+            if (error instanceof PageNotFound) return reply('Not found', 404);
             if (error instanceof ServerCapacity) return reply('Page registry capacity reached', 503);
             // Unexpected application errors remain visible to the owning adapter.
             throw error;

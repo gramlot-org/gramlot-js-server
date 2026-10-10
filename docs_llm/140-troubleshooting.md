@@ -50,12 +50,12 @@ with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
 
 Block ID: **GS-140-015**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
-Messages of the Worker operation `source`:
-`Unknown Source method` (`main`, non-string, or unmarked method; page code does
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Outcomes of the Worker envelope (`RpcError` with `code` in the window):
+`not_found` (`Unknown Source method`: unmarked method; page code does
 not call `remoteSource` yet);
-`Unknown, expired or unowned page` (core default 1800 s expiry → reload);
-`DataCloneError` (uncloneable params → plain data); `Worker transport is disposed`
+`page_expired` (`Unknown, expired or unowned page`: core default 1800 s expiry → reload);
+`Worker transport is disposed`
 / `Worker communication failed` (disposed or crashed → reload, read the earlier
 error).
 

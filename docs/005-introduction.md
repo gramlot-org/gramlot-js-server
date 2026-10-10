@@ -37,22 +37,29 @@ Block ID: **GN-105-010**.
    `orders.js` in the pages folder and registers a page instance with a TTL.
 2. **Bootstrap document.** The answer is a small HTML document: a root `div`, a
    module script with a nonce, the page's resources (the `Page.css` URLs, the
-   page stylesheet, the page logic module) and the URLs of the three endpoints.
+   page stylesheet, the page logic module), the URLs `rpcUrl` and `closeUrl` and the
+   `capabilities` of the server (none: `[]`).
    The page logic module is the page module itself when it exports `Logic`.
    When a Content Security Policy is configured, the header carries the nonce.
 3. **Runtime.** The script imports the Gramlot runtime from `/assets/gramlot.js`,
    served by the adapter from the installed core. An import map of the bootstrap
    resolves `@gramlot/gramlot/page`, imported by the page module, to the same
    runtime.
-4. **Main.** The runtime posts the page ID to `/gramlot/main`. The `GramlotServer` creates the
-   Page instance, runs `main(root)` and answers with the Source as TYTX JSON.
+4. **Main.** The runtime posts the request envelope
+   `{id, pageId, contentType: 'source', name: 'main', params: {}}` to `/gramlot/rpc`.
+   The adapter passes it to `GramlotServer.call`, which creates the Page instance,
+   runs `main(root)` and answers with the response envelope `{id, contentType, value}`:
+   `value` is the Source as TYTX JSON.
 5. **Source to browser.** The runtime renders the DOM from the Source, installs the
    Data declarations and starts the bindings. Typing in a bound field writes the
    Data; formulas and controllers react; the DOM follows.
-6. **Remote Source.** The adapter keeps the route `/gramlot/source`: it
-   receives the page ID, a method name and parameters and answers with a Source
-   branch. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
-   they arrive together with the `remote` grammar attribute and `@endpoint`.
+6. **Other calls.** Every other call is an envelope on the same `/gramlot/rpc`:
+   `contentType: 'source'` builds a Source branch, `contentType: 'data'` runs an
+   endpoint (`Page.registerEndpoint`, called by `dataRpc`). A failure is an outcome
+   inside the response envelope (`page_expired`, `not_found`, `not_authenticated`,
+   `not_authorized`, `application_error`), always with status 200. Source methods
+   (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
+   they arrive together with the `remote` grammar attribute.
 7. **Close.** When the browser leaves the page it posts the page ID to
    `/gramlot/close`; the TTL covers the cases where that request is lost.
 

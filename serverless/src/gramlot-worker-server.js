@@ -32,16 +32,26 @@ export class GramlotWorkerServer extends GramlotServer {
         return {css, js: this.logic === null ? [] : [{url: this.logic, group: null}]};
     }
 
-    async dispatch({id, operation, args}) {
+    /** The Worker realisation of GC-230 (Part C): {id, open: true} answers {id, open} with the
+     * bootstrap data, {id, text} (a request envelope) answers {id, text} with the response
+     * envelope, {pageId} without id closes the page. Failures of the open and InvalidRequest
+     * answer {id, error}; every other failure of a call is an outcome inside the envelope. */
+    async dispatch(message) {
+        const {id} = message;
+        if (id === undefined) {
+            if (typeof message.pageId !== 'string') throw new TypeError('Unknown Worker message');
+            this.closePage(message.pageId);
+            return;
+        }
         try {
-            let result;
-            switch (operation) {
-                case 'open': result = await this.registerPage('/'); break;
-                case 'main': result = await this.main(args.pageId); break;
-                case 'source': result = await this.source(args.pageId, args.method, args.params); break;
-                default: throw new TypeError(`Unknown Worker operation: ${operation}`);
+            if (message.open === true) {
+                const {pageId, title, resources} = await this.registerPage('/');
+                this.scope.postMessage({id, open: {pageId, title, resources, capabilities: this.capabilities}});
+            } else if (typeof message.text === 'string') {
+                this.scope.postMessage({id, text: await this.call(message.text)});
+            } else {
+                throw new TypeError('Unknown Worker message');
             }
-            this.scope.postMessage({id, result});
         } catch (error) {
             this.scope.postMessage({id, error: {name: error.name, message: error.message}});
         }

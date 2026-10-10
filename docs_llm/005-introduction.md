@@ -26,13 +26,16 @@ Block ID: **GN-105-010**.
 
 1. `GET /orders` → `GramlotFileServer` maps to `orders.js`, registers a page with a TTL.
 2. Bootstrap HTML: root `div`, nonce module script, resources (the page module
-   when it exports `Logic`), endpoint URLs; CSP header when configured.
+   when it exports `Logic`), `rpcUrl`, `closeUrl`, `capabilities: []`; CSP header when configured.
 3. Runtime from `/assets/gramlot.js` (installed core); the import map resolves
    `@gramlot/gramlot/page` of the page module to it.
-4. `POST /gramlot/main` with the page ID → `main(root)` → Source as TYTX JSON.
+4. `POST /gramlot/rpc` with the envelope `{id, pageId, contentType: 'source', name: 'main', params: {}}`
+   → `GramlotServer.call` → `main(root)` → `{id, contentType, value}`, `value` the Source as TYTX JSON.
 5. Runtime renders the DOM, installs Data declarations, starts bindings.
-6. `POST /gramlot/source` (page ID, method, params → Source branch) stays in the
-   adapter. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+6. Every other call: an envelope on `/gramlot/rpc`, `contentType` `source` (Source branch)
+   or `data` (endpoint, `Page.registerEndpoint`, `dataRpc`); failures are outcomes in the
+   envelope (`page_expired`, `not_found`, `not_authenticated`, `not_authorized`,
+   `application_error`), status 200. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
 7. Leaving the page → `POST /gramlot/close`; the TTL covers lost closes.
 
 <a id="gn-105-015"></a>

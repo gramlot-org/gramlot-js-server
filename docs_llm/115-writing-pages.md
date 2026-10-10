@@ -65,8 +65,8 @@ Block ID: **GS-115-015**.
 
 Block ID: **GS-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
-The Worker keeps the operation `source` ([Reference](130-reference.md)).
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+The Worker answers them with the envelope `contentType: 'source'` ([Reference](130-reference.md)).
 
 <a id="gs-115-025"></a>
 

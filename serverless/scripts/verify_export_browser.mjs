@@ -44,7 +44,8 @@ try {
         const transport = app.rpc.transport;
         app.dispose();
         let rejected = false;
-        try { await transport.main(app.pageId); } catch { rejected = true; }
+        const envelope = JSON.stringify({id: 'check', pageId: app.pageId, contentType: 'source', name: 'main', params: {}});
+        try { await transport.call(envelope); } catch { rejected = true; }
         return {update, insert, deleted, remote, cleared, state:app.state, rejected, closed:transport.closed,
             pending:transport.pending.size, remaining:app.src.renderer.records.size,
             children:document.querySelector('#gramlot-root').childNodes.length};
