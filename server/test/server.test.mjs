@@ -4,6 +4,7 @@ import {mkdir, mkdtemp, readFile, rm, symlink, writeFile} from 'node:fs/promises
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {toTytx} from '@genrojs/tytx';
 import {GramlotServer, Page, checkProtocol} from '@gramlot/gramlot/server';
 const {startServer} = await import(globalThis.Bun ? '../src/bun.mjs' : '../src/node.mjs');
 
@@ -17,7 +18,7 @@ class TestServer extends GramlotServer {
     async resolveResources() { return {css: [], js: []}; }
 }
 
-test('real listener serves packaged runtime and typed main/remote; errors and shutdown', async () => {
+test('real listener serves packaged runtime and the envelope on rpc; errors and shutdown', async () => {
     const server = new TestServer();
     const failures = [];
     const app = await startServer({server, ownerForRequest: request => request.headers.get('x-owner'),
@@ -27,50 +28,66 @@ test('real listener serves packaged runtime and typed main/remote; errors and sh
         const opened = await fetch(app.url, {headers: {'x-owner': 'alice'}});
         assert.equal(opened.status, 200);
         const html = await opened.text();
-        pageId = bootstrap(html).argument.config.pageId;
+        const {config} = bootstrap(html).argument;
+        pageId = config.pageId;
         assert.ok(!html.includes('<h1>'));
-        assert.equal(bootstrap(html).argument.config.closeUrl, '/gramlot/close');
+        assert.deepEqual(config, {pageId, rpcUrl: '/gramlot/rpc', closeUrl: '/gramlot/close',
+            rootId: 'gramlot-root', capabilities: []});
         const asset = await fetch(app.url + '/assets/gramlot.js');
         assert.equal(asset.status, 200);
         assert.match(asset.headers.get('content-type'), /javascript/);
         assert.ok((await asset.text()).length > 1000);
-        const post = (path, payload, owner = 'alice') => fetch(app.url + path, {
-            method: 'POST', headers: {'content-type': 'application/json', 'x-owner': owner}, body: JSON.stringify(payload),
+        const post = (path, body, owner = 'alice') => fetch(app.url + path, {
+            method: 'POST', headers: {'content-type': 'application/json', 'x-owner': owner}, body,
         });
-        const main = await post('/gramlot/main', {pageId});
-        assert.equal(main.status, 200);
-        assert.match(await main.text(), /Hello World/);
-        const remote = await post('/gramlot/source', {pageId, method: 'details'});
-        assert.equal(remote.status, 200);
-        assert.match(await remote.text(), /Remote HTML/);
-        assert.equal((await post('/gramlot/main', {pageId}, 'bob')).status, 404);
-        for (const method of ['main', 'missing', 'constructor']) {
-            const unknown = await post('/gramlot/source', {pageId, method});
-            assert.equal(unknown.status, 404, method);
-            assert.equal(await unknown.text(), 'Unknown Source method', method);
+        const call = async (contentType, name, {id = pageId, owner = 'alice', params = {}, ...fields} = {}) => {
+            const response = await post('/gramlot/rpc', toTytx({id: 'r1', pageId: id, contentType, name, params, ...fields}), owner);
+            assert.equal(response.status, 200);
+            assert.match(response.headers.get('content-type'), /^application\/json/);
+            // JSON.parse keeps the fragment document as its TYTX string.
+            const envelope = JSON.parse(await response.text());
+            assert.equal(envelope.id, 'r1');
+            assert.equal(envelope.contentType, contentType);
+            return envelope;
+        };
+        assert.match((await call('source', 'main')).value, /Hello World/);
+        assert.match((await call('source', 'details')).value, /Remote HTML/);
+        assert.equal((await call('source', 'main', {owner: 'bob'})).error.code, 'page_expired');
+        for (const name of ['missing', 'constructor']) {
+            assert.equal((await call('source', name)).error.code, 'not_found', name);
         }
-        assert.equal((await post('/gramlot/main', {pageId, excess: 'a'.repeat(5000)})).status, 413);
-        assert.equal((await fetch(app.url + '/gramlot/main')).status, 405);
+        // No size limit: a large envelope is answered like any other.
+        assert.match((await call('source', 'main', {excess: 'a'.repeat(100000)})).value, /Hello World/);
+        assert.equal((await fetch(app.url + '/gramlot/rpc')).status, 405);
         assert.equal((await fetch(app.url + '/missing')).status, 404);
         for (const [body, contentType, status] of [
             ['{', 'application/json', 400], ['{}', 'application/json', 400],
+            [JSON.stringify({id: 'r', pageId, contentType: 'source', name: 'main', params: null}), 'application/json', 400],
             ['{}', 'text/plain', 415],
         ]) {
-            const invalid = await fetch(app.url + '/gramlot/main', {
+            const invalid = await fetch(app.url + '/gramlot/rpc', {
                 method: 'POST', headers: {'content-type': contentType}, body,
             });
-            assert.equal(invalid.status, status);
+            assert.equal(invalid.status, status, body);
         }
-        assert.equal((await post('/gramlot/close', {pageId}, 'bob')).status, 200);
-        assert.equal((await post('/gramlot/main', {pageId})).status, 200);
-        assert.equal((await post('/gramlot/close', {pageId})).status, 200);
-        assert.equal((await post('/gramlot/main', {pageId})).status, 404);
-        assert.equal((await post('/gramlot/close', {pageId})).status, 200);
+        for (const removed of ['/gramlot/main', '/gramlot/source']) {
+            assert.equal((await post(removed, JSON.stringify({pageId}))).status, 405, removed);
+        }
+        const close = (owner = 'alice') => post('/gramlot/close', JSON.stringify({pageId}), owner);
+        assert.equal((await close('bob')).status, 200);
+        assert.match((await call('source', 'main')).value, /Hello World/);
+        const closed = await close();
+        assert.equal(closed.status, 200);
+        assert.deepEqual(await closed.json(), {ok: true});
+        assert.equal((await call('source', 'main')).error.code, 'page_expired');
+        assert.equal((await close()).status, 200);
+        assert.equal((await post('/gramlot/close', '{')).status, 400);
+        assert.equal((await post('/gramlot/close', '{}')).status, 400);
         assert.equal((await fetch(app.url + '/gramlot/close')).status, 405);
         const expiring = await fetch(app.url, {headers: {'x-owner': 'alice'}});
         const expiringId = bootstrap(await expiring.text()).argument.config.pageId;
         server.pages.get(expiringId).expires = 0;
-        assert.equal((await post('/gramlot/main', {pageId: expiringId})).status, 404);
+        assert.equal((await call('source', 'main', {id: expiringId})).error.code, 'page_expired');
         assert.deepEqual(failures, []);
     } finally { await app.close(); }
     assert.equal(server.pages.size, 0);
@@ -116,18 +133,18 @@ test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 
         const {runtime, argument} = bootstrap(html);
         assert.equal(runtime, '/app/assets/gramlot.js');
         assert.equal((await fetch(app.url + runtime)).status, 200);
-        assert.deepEqual(argument.config, {pageId: argument.config.pageId, mainUrl: '/app/gramlot/main',
-            sourceUrl: '/app/gramlot/source', closeUrl: '/app/gramlot/close', rootId: 'gramlot-root'});
+        assert.deepEqual(argument.config, {pageId: argument.config.pageId, rpcUrl: '/app/gramlot/rpc',
+            closeUrl: '/app/gramlot/close', rootId: 'gramlot-root', capabilities: []});
         assert.deepEqual(argument.resources, {
             css: ['/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css', '/app/assets/app.css', '/app/index.css'],
             js: [{url: '/app/index_aux.js', group: null}],
         });
         assert.ok(!html.includes('<link'));
         assert.ok(!html.includes('/app/app/'));
-        const main = await fetch(app.url + argument.config.mainUrl, {method: 'POST',
-            headers: {'content-type': 'application/json'}, body: JSON.stringify({pageId: argument.config.pageId})});
-        assert.match(await main.text(), /Hello/);
-        for (const path of ['/', '/assets/gramlot.js', '/gramlot/main', '/index.css', '/application/', '/appx']) {
+        const main = await fetch(app.url + argument.config.rpcUrl, {method: 'POST', headers: {'content-type': 'application/json'},
+            body: toTytx({id: 'r1', pageId: argument.config.pageId, contentType: 'source', name: 'main', params: {}})});
+        assert.match(JSON.parse(await main.text()).value, /Hello/);
+        for (const path of ['/', '/assets/gramlot.js', '/gramlot/rpc', '/index.css', '/application/', '/appx']) {
             assert.equal((await fetch(app.url + path)).status, 404, path);
         }
         const bare = await fetch(app.url + '/app?x=1', {redirect: 'manual'});
@@ -259,8 +276,8 @@ test('/themes/* comes from the core under the prefix, before assets; a pages fol
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
 
-test('GC-230: checkProtocol passes on the quick-start pages, with and without a mount prefix and a policy', async () => {
-    const pages = fileURLToPath(new URL('./fixtures/quickstart/', import.meta.url));
+test('GC-230: checkProtocol passes on the conformance page, with and without a mount prefix and a policy', async () => {
+    const pages = fileURLToPath(new URL('./fixtures/conformance/', import.meta.url));
     for (const options of [{}, {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]) {
         const app = await startServer({pages, ...options});
         try { await checkProtocol(app.url + (options.mountPath ?? ''), '/'); }

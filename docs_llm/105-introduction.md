@@ -29,11 +29,11 @@ Block ID: **GS-105-010**.
 
 Build: the page module is imported (as `GramlotFileServer`) for `Page.css` and `Logic`;
 `main` does not run; the page is bundled for the Worker, its logic for the window.
-Run: `mount` creates the Worker and sends `open`; `GramlotWorkerServer` returns the title,
+Run: `mount` creates the Worker and sends `{id, open: true}`; `GramlotWorkerServer` returns the page ID, the title, `capabilities: []`,
 the stylesheet URLs (none in the single file) and the logic URL; `PageBootstrap`
 writes the CSS links, imports the logic, registers `Logic`, creates
 `window.gramlot`, starts; `main` runs in the Worker; the window renders and binds;
-`dispose()` ends the Worker. The Worker keeps the operation `source`.
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+`dispose()` ends the Worker. Calls are the request/response envelopes of the server
+protocol (`source` for Source, `data` for endpoints). Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
 Logic: `Logic` of the page module, else `<page>_aux.js`; window only; imports
 `@gramlot/gramlot/page` from the core of the window ([Configuration](120-configuration.md)).

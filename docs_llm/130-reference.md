@@ -15,7 +15,7 @@ Block ID: **GS-130-005**.
 `mount` (window); `/gramlot-worker-server` → `GramlotWorkerServer` (Worker); `/directory` also
 `folderPages`. Command `gramlot-serverless` (`node serverless/src/cli.js`): `build
 PAGE.js -o OUTPUT.html`, `build FOLDER -o OUTPUT`, `gallery OUTPUT [--catalog …]`.
-Dependencies `@gramlot/gramlot >=0.2.12`, `@genrojs/builders >=0.4.1`, `esbuild`;
+Dependencies `@gramlot/gramlot >=0.2.14`, `@genrojs/builders >=0.4.1`, `esbuild`;
 optional peer `@gramlot/gramlot-examples >=0.2.9` (gallery).
 
 <a id="gs-130-010"></a>
@@ -42,11 +42,14 @@ Block ID: **GS-130-015**.
 `mount(options) → Gramlot` ([GS-120-020](120-configuration.md));
 `globalThis.gramlot`. `Gramlot`: `state` (`'started'`), `src.source`, `data`,
 `src.remoteSource(node, method, params)`, `dispose()` (terminates the Worker),
-`rpc.transport`. `WorkerTransport`: `open`, `main`, `source`, `dispose(error)`,
+`rpc.transport`. `WorkerTransport`: `open(signal)` → `{pageId, title, resources, capabilities}`,
+`call(text, signal)` → response envelope text (as `HttpTransport`), `close(pageId)`, `dispose(error)`,
 `pending`, `closed`; Worker `error`/`messageerror` dispose it. `GramlotWorkerServer`:
-extends core `GramlotServer`; `open`, `main`, `source` over `postMessage`; `Unknown Worker
-operation: <name>`; errors cross as `{name, message}`.
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+extends core `GramlotServer`, GC-230 Part C over `postMessage`: `{id, open: true}` →
+`{id, open: {pageId, title, resources, capabilities: []}}`; `{id, text}` → `{id, text}` (envelopes
+of `call`); `{pageId}` without `id` closes. Outcomes inside the envelope; failed open,
+`InvalidRequest`, `Unknown Worker message` → `{id, error: {name, message}}`. Owner null.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
 
 <a id="gs-130-020"></a>
 

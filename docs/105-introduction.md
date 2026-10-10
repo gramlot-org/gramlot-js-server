@@ -47,17 +47,20 @@ browser:
 
 1. The runtime script of the exported document calls `mount`. `mount` creates the
    Worker from the bundled script and sends it the `open` request.
-2. In the Worker, `GramlotWorkerServer` registers the Page and answers with the page ID,
-   the title and the resources: the stylesheet URLs (none in the single file,
+2. The window sends `{id, open: true}`. In the Worker, `GramlotWorkerServer` registers
+   the Page and answers with the page ID, the title, `capabilities: []` and the resources: the stylesheet URLs (none in the single file,
    which holds the stylesheets) and the URL that names the page logic module.
 3. In the window, the core `PageBootstrap` writes the stylesheet links, imports
    the logic module and registers its `Logic` class, creates the `Gramlot`
    instance (`window.gramlot`) and starts the page.
-4. The start sends `main` to the Worker. The Worker runs `Page.main`, builds the
-   Source and returns it. The window renders the DOM and binds the Data.
-5. The Worker also answers the operation `source`, which builds a Source branch
-   by message instead of HTTP. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
-   they arrive together with the `remote` grammar attribute and `@endpoint`.
+4. The start sends the request envelope of `main` to the Worker, the same envelope a
+   server receives on `/gramlot/rpc`. The Worker passes it to `GramlotServer.call`,
+   which runs `Page.main` and answers with the response envelope holding the Source.
+   The window renders the DOM and binds the Data.
+5. Every other call is an envelope as well: `contentType: 'source'` builds a Source
+   branch, `contentType: 'data'` runs an endpoint (`Page.registerEndpoint`), by
+   message instead of HTTP. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
+   they arrive together with the `remote` grammar attribute.
 6. `window.gramlot.dispose()` terminates the Worker; a dedicated Worker also
    ends with its document. Nothing is sent anywhere.
 

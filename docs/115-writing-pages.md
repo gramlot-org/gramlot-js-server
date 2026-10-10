@@ -91,9 +91,9 @@ A URL that points outside the export is not served by anything.
 
 Block ID: **GS-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
-The Worker keeps the operation `source`; the [Reference](130-reference.md)
-lists it.
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+The Worker answers them with the envelope `contentType: 'source'`; the
+[Reference](130-reference.md) lists the messages.
 
 <a id="gs-115-025"></a>
 

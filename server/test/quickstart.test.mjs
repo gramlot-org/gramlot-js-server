@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
+import {toTytx} from '@genrojs/tytx';
 const {startServer} = await import(globalThis.Bun ? '../src/bun.mjs' : '../src/node.mjs');
 
 const pages = fileURLToPath(new URL('./fixtures/quickstart/', import.meta.url));
@@ -15,10 +16,10 @@ test('quick start: the Hello page opens, its Source binds the field and the form
         assert.match(html, /<title>Hello<\/title>/);
         const {config, resources} = JSON.parse(html.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
         assert.deepEqual(resources, {css: ['/index.css'], js: [{url: '/index.js', group: null}]});
-        const main = await fetch(app.url + config.mainUrl, {method: 'POST',
-            headers: {'content-type': 'application/json'}, body: JSON.stringify({pageId: config.pageId})});
+        const main = await fetch(app.url + config.rpcUrl, {method: 'POST', headers: {'content-type': 'application/json'},
+            body: toTytx({id: 'r1', pageId: config.pageId, contentType: 'source', name: 'main', params: {}})});
         assert.equal(main.status, 200);
-        const rows = JSON.parse((await main.text()).replace(/::X$/, '')).rows;
+        const rows = JSON.parse(JSON.parse(await main.text()).value.replace(/::X$/, '')).rows;
         const byTag = Object.fromEntries(rows.map(([, , tag, value, attributes]) => [tag, {value, attributes}]));
         assert.equal(byTag.div.attributes.datapath, 'person');
         assert.equal(byTag.label.value, 'Name');

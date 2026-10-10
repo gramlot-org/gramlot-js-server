@@ -26,7 +26,7 @@ location /app/ {
 ```
 
 `proxy_pass` without a URI forwards the path unchanged. The browser requests
-`/app/`, `/app/assets/gramlot.js`, `/app/gramlot/main` and `/app/index.css`, and
+`/app/`, `/app/assets/gramlot.js`, `/app/gramlot/rpc` and `/app/index.css`, and
 the adapter receives the same paths. Until 0.2.3 the adapter expected the paths
 without the prefix and the example wrote `proxy_pass http://127.0.0.1:8080/;`,
 with the slash that makes nginx remove `/app/`: with 0.2.4 that configuration
@@ -78,7 +78,8 @@ Block ID: **GN-125-015**.
 - **Request identity.** With the default `ownerForRequest`, any client that
   learns a page ID can request its Source. Derive the owner from the
   application's session when pages carry user data.
-- **Payloads.** JSON bodies above 4096 bytes answer 413; `pageTtl` and
+- **Payloads.** The adapter sets no body size limit; set one in the proxy in
+  front (nginx `client_max_body_size`, which answers 413). `pageTtl` and
   `maxPages` bound the registry.
 - **Errors.** Unexpected errors answer 500 with a fixed text and reach
   `onError`; the message is not sent to the browser.

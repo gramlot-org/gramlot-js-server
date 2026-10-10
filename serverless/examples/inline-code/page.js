@@ -1,4 +1,4 @@
-// CI fixture for the Worker `source` operation, not an example of the page-writing API.
+// CI fixture for Source methods answered by the Worker (envelope `contentType: 'source'`), not an example of the page-writing API.
 import {Page as BasePage} from '@gramlot/gramlot/page';
 export class Page extends BasePage {
     static title = 'Inline Code';

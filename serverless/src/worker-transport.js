@@ -1,4 +1,4 @@
-/** Dedicated Worker transport. Owns the Worker and its outstanding requests. */
+/** Dedicated Worker transport (GC-230 Part C). Owns the Worker and its outstanding requests. */
 export class WorkerTransport {
     constructor(worker) {
         this.worker = worker;
@@ -9,7 +9,7 @@ export class WorkerTransport {
             const request = this.pending.get(data.id);
             if (!request) return;
             if (data.error) request.reject(Object.assign(new Error(data.error.message), {name: data.error.name}));
-            else request.resolve(data.result);
+            else request.resolve('text' in data ? data.text : data.open);
         };
         this.failed = event => this.dispose(new Error(event.message || 'Worker communication failed'));
         worker.addEventListener('message', this.receive);
@@ -17,11 +17,17 @@ export class WorkerTransport {
         worker.addEventListener('messageerror', this.failed);
     }
 
-    open(signal) { return this.request('open', {}, signal); }
-    main(pageId, signal) { return this.request('main', {pageId}, signal); }
-    source(pageId, method, params, signal) { return this.request('source', {pageId, method, params}, signal); }
+    /** The bootstrap data {pageId, title, resources, capabilities} of a new page. */
+    open(signal) { return this.request({open: true}, signal); }
+    /** Send the request envelope text; resolves with the response envelope text, as HttpTransport. */
+    call(text, signal) { return this.request({text}, signal); }
+    /** The close message {pageId}, sent without waiting for an answer. */
+    close(pageId) {
+        if (this.closed) return;
+        this.worker.postMessage({pageId});
+    }
 
-    request(operation, args, signal) {
+    request(message, signal) {
         if (this.closed) return Promise.reject(new Error('Worker transport is disposed'));
         if (signal?.aborted) return Promise.reject(signal.reason);
         return new Promise((resolve, reject) => {
@@ -35,7 +41,7 @@ export class WorkerTransport {
             const abort = () => request.reject(signal.reason);
             this.pending.set(id, request);
             signal?.addEventListener('abort', abort, {once: true});
-            try { this.worker.postMessage({id, operation, args}); }
+            try { this.worker.postMessage({id, ...message}); }
             catch (error) { request.reject(error); }
         });
     }

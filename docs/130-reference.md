@@ -23,7 +23,7 @@ or later:
 Command `gramlot-serverless` (`bin` of the package; from the checkout,
 `node serverless/src/cli.js`): `build PAGE.js -o OUTPUT.html`, `build FOLDER -o
 OUTPUT`, `gallery OUTPUT [--catalog CATALOG.json PAGES]...`
-([GS-120-005](120-configuration.md)). Dependencies: `@gramlot/gramlot >=0.2.12`,
+([GS-120-005](120-configuration.md)). Dependencies: `@gramlot/gramlot >=0.2.14`,
 `@genrojs/builders >=0.4.1`, `esbuild`; `@gramlot/gramlot-examples >=0.2.9` is an
 optional peer dependency, needed by `gallery` only.
 
@@ -64,16 +64,29 @@ Block ID: **GS-130-015**.
 - `Gramlot` instance (core): `state` (`'started'` once the page runs), `src.source`,
   `data`, `src.remoteSource(node, method, params)`, `dispose()`. In the export,
   `rpc.transport` is the `WorkerTransport` and `dispose()` terminates the Worker.
-- `WorkerTransport` (`serverless/src/worker-transport.js`): `open(signal)`,
-  `main(pageId, signal)`, `source(pageId, method, params, signal)`,
-  `dispose(error)`; `pending` (outstanding requests), `closed`. A Worker `error`
-  or `messageerror` event disposes it and rejects every pending request.
-- `GramlotWorkerServer` (`serverless/src/gramlot-worker-server.js`): extends the core `GramlotServer`; operations
-  `open`, `main`, `source` over `postMessage`; an unknown operation answers
-  `Unknown Worker operation: <name>`. Errors cross the channel as
-  `{name, message}`.
+- `WorkerTransport` (`serverless/src/worker-transport.js`): `open(signal)` resolves
+  with `{pageId, title, resources, capabilities}`; `call(text, signal)` sends a
+  request envelope (TYTX text) and resolves with the response envelope text, as the
+  core `HttpTransport`; `close(pageId)` sends the close message; `dispose(error)`;
+  `pending` (outstanding requests), `closed`. A Worker `error` or `messageerror`
+  event disposes it and rejects every pending request.
+- `GramlotWorkerServer` (`serverless/src/gramlot-worker-server.js`): extends the core
+  `GramlotServer` and realises the server protocol in a Worker (GC-230 Part C) over
+  `postMessage`:
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute and `@endpoint`.
+  | Window sends | Worker answers |
+  | --- | --- |
+  | `{id, open: true}` | `{id, open: {pageId, title, resources, capabilities: []}}` |
+  | `{id, text}`, `text` the request envelope | `{id, text}`, `text` the response envelope of `call` |
+  | `{pageId}`, no `id` | nothing; the page is closed |
+
+  Outcomes (`page_expired`, `not_found`, `not_authenticated`, `not_authorized`,
+  `application_error`) travel inside the response envelope. A failed open, an
+  envelope that `call` refuses (`InvalidRequest`) and an unknown message
+  (`Unknown Worker message`) answer `{id, error: {name, message}}`. The owner is
+  null; `auth` rules answer `not_authenticated`.
+
+Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
 
 <a id="gs-130-020"></a>
 
