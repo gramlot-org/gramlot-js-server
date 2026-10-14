@@ -34,6 +34,8 @@ the stylesheet URLs (none in the single file) and the logic URL; `PageBootstrap`
 writes the CSS links, imports the logic, registers `Logic`, creates
 `window.gramlot`, starts; `main` runs in the Worker; the window renders and binds;
 `dispose()` ends the Worker. Calls are the request/response envelopes of the server
-protocol (`source` for Source, `data` for endpoints). Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+protocol (`source` for Source, `data` for endpoints). Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 Logic: `Logic` of the page module, else `<page>_aux.js`; window only; imports
 `@gramlot/gramlot/page` from the core of the window ([Configuration](120-configuration.md)).

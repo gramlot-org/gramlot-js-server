@@ -14,7 +14,7 @@ for the core and the other repositories.
 ## What this repository is
 
 This repository runs JavaScript Gramlot pages. It holds three npm packages; the
-current release is 0.2.8, the same version for the three:
+current release is 0.2.9, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
@@ -141,6 +141,9 @@ npx gramlot node gallery                 # http://127.0.0.1:8080/, on Node.js
 npx gramlot bun gallery --mount /js      # http://127.0.0.1:8080/js/, on Bun
 npx gramlot-serverless gallery gallery   # a folder that opens from disk: gallery/index.html
 ```
+
+Setup quick starts stay in this README and the server tutorials, outside the
+gallery. The standalone gallery also includes the Registration form application.
 
 ## Next steps
 

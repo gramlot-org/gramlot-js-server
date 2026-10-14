@@ -69,7 +69,16 @@ for the page, `'source'` with another name for a Source method, `'data'` for an 
 (`Page.registerEndpoint`). An unknown, expired or unowned page, an unknown name, an `auth`
 rule and an exception of the method are outcomes in the envelope (`page_expired`,
 `not_found`, `not_authenticated`, `not_authorized`, `application_error`), with status 200.
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+
+RPC and close require the exact media type `application/json`, compared without
+case sensitivity and with semicolon parameters allowed (`Application/JSON` and
+`application/json; charset=utf-8` are accepted). Missing/empty types and lookalikes
+such as `application/jsonp` answer 415. Both bodies are decoded as strict UTF-8:
+invalid bytes answer 400 `Request body is not UTF-8` before endpoint execution or
+page closure. Rejected requests leave the page usable.
 
 <a id="gn-130-020"></a>
 
@@ -81,6 +90,7 @@ Block ID: **GN-130-020**.
 | --- | --- | --- |
 | 301 | — | The mount prefix without its final slash; `Location` is the prefix with `/` |
 | 400 | `Invalid path` | A path that does not decode |
+| 400 | `Request body is not UTF-8` | Invalid UTF-8 bytes in an rpc or close body |
 | 400 | `Invalid envelope` | An rpc body that `GramlotServer.call` refuses with `InvalidRequest`: not TYTX JSON, not an object, `id`, `pageId`, `contentType` or `name` not a string, `contentType` neither `source` nor `data`, `params` not an object |
 | 400 | `Invalid close request`, `Missing pageId` | A close body that is not JSON or has no string `pageId` |
 | 404 | `Not found` | A path outside the mount prefix, unknown page path, invalid segment, path leaving the folder, file not a companion |
@@ -103,8 +113,7 @@ gramlot bun gallery  [same options]
 ```
 
 `gallery` serves the gallery of `@gramlot/gramlot-examples` on Node.js or Bun:
-the common families (`e01`–`e13`, `b01`–`b11`, `c01`–`c08`), the family of the
-runtime of this package (`node-01` or `bun-01`, the quick start of the README) and
+the common families (`e01`–`e13`, `b01`–`b11`, `c01`–`c17`) and
 the families of each `--catalog`, a pair of an environment `catalog.json` and its
 pages folder (GE-010 of gramlot-examples).
 
@@ -133,3 +142,32 @@ and a `<key>_aux.js` that re-exports `Logic` from the example's page module, ser
 as JavaScript (GE-010 §025 of gramlot-examples). The test
 `server/test/verify_gallery_browser.mjs` opens every example under `/js` in a real
 browser.
+
+Setup quick starts remain in the server README and tutorials; the gallery does
+not include their sections or routes. Registration form remains an application
+example in the standalone gallery.
+
+
+<a id="gn-130-030"></a>
+
+## 030 · Root manifest and reusable index
+
+Block ID: **GN-130-030**. Development addition.
+
+A root Page with `static installable = true`, `static title` and
+`static appIcon = '/app-icon.png'` advertises `<prefix>/app.webmanifest`.
+Supply that square 512×512 PNG in the existing asset map. The gallery command
+already includes its app icon. GET/HEAD return `application/manifest+json`, without
+a page session or RPC envelope; other verbs return 405. A disabled root answers
+404. Child pages never advertise their own manifest.
+
+Override `manifest({baseUrl = './'} = {})` to extend the object returned by
+`super.manifest({baseUrl})`. Default scope, identity, launch and icon URLs use the
+mount prefix. Keep the metadata public; no endpoint registration is needed.
+
+`IndexPage` and `IndexLogic` are exported from `@gramlot/gramlot/page` for grouped
+navigation, iframe tabs and a customizable footer. See the
+[core authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-110).
+Install using HTTPS or localhost and keep the Node server running. The gallery
+footer explains browser installation and exposes the native prompt when offered.
+Safari on macOS Sonoma or later uses File → Add to Dock. No offline cache is added.

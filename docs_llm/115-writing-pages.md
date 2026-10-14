@@ -65,7 +65,9 @@ Block ID: **GS-115-015**.
 
 Block ID: **GS-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 The Worker answers them with the envelope `contentType: 'source'` ([Reference](130-reference.md)).
 
 <a id="gs-115-025"></a>
@@ -76,5 +78,16 @@ Block ID: **GS-115-025**.
 
 Contains: runtime, `GramlotWorkerServer` with the page, the page logic, the stylesheets,
 runtime notices as inert JSON (file) or `assets/runtime-notices.json` (directory).
-Not: unimported code, server, database, `dataRpc`, server resolvers. All public:
+Not: unimported code, an external application server or database.
+`dataRpc`, `remote` and `dataRemote` execute bundled Page methods in the Worker;
+they provide neither a Python server nor persistent server state. All public:
 no secrets in pages or their modules.
+
+**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
+environment's setup. Revisit examples when a later release simplifies the code;
+prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
+separate project; Page runs on the host and Logic in the browser (the standalone
+host is a JavaScript Worker). Reload/reopen after saving; development reload is
+not automatic hot reload. The sequence explains inline and named Logic in their
+release context; use named Logic for reusable behavior. Inline examples require the
+documented CSP profile. Common examples do not cover every advanced case.

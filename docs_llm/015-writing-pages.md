@@ -63,7 +63,9 @@ logic runs under the strict CSP; inline code needs the permissive profile
 
 Block ID: **GN-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 The adapter answers them on `POST /gramlot/rpc`, `contentType: 'source'` ([Reference](030-reference.md)).
 
 <a id="gn-115-025"></a>
@@ -77,3 +79,12 @@ Block ID: **GN-115-025**.
 other extensions, escaping symlinks, encoded `..`: 404. `POST` on a companion:
 405. Undecodable path: 400. Also: runtime `/assets/gramlot.js` and every file of
 `/themes/` from the installed core, files of `assets`. Nothing else ([Deployment](025-deployment.md)).
+
+**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
+environment's setup. Revisit examples when a later release simplifies the code;
+prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
+separate project; Page runs on the host and Logic in the browser (the standalone
+host is a JavaScript Worker). Reload/reopen after saving; development reload is
+not automatic hot reload. The sequence explains inline and named Logic in their
+release context; use named Logic for reusable behavior. Inline examples require the
+documented CSP profile. Common examples do not cover every advanced case.

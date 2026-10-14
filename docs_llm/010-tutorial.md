@@ -108,3 +108,12 @@ The page shows `Name`, a field with `Ada` and `Hello, Ada` in sans-serif. Typing
 `Grace` gives `Hello, Grace` at every keystroke: field → `person.name` → formula
 → `person.greeting` → paragraph. Verified 2026-10-04, Playwright Chromium 153,
 Node and Bun, no console errors.
+
+**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
+environment's setup. Revisit examples when a later release simplifies the code;
+prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
+separate project; Page runs on the host and Logic in the browser (the standalone
+host is a JavaScript Worker). Reload/reopen after saving; development reload is
+not automatic hot reload. The sequence explains inline and named Logic in their
+release context; use named Logic for reusable behavior. Inline examples require the
+documented CSP profile. Common examples do not cover every advanced case.

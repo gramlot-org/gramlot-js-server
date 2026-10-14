@@ -65,6 +65,16 @@ export async function createDispatch({pages, server = null, ownerForRequest = as
         if (prefix && url.pathname === prefix) return reply(null, 301, undefined, {Location: `${prefix}/${url.search}`});
         if (prefix && !url.pathname.startsWith(`${prefix}/`)) return reply('Not found', 404);
         const pathname = url.pathname.slice(prefix.length);
+        if (pathname === '/app.webmanifest') {
+            if (!['GET', 'HEAD'].includes(request.method)) return reply('Method not allowed', 405, undefined, {Allow: 'GET, HEAD'});
+            try {
+                const manifest = await server.pageManifest({prefix});
+                return reply(request.method === 'HEAD' ? null : JSON.stringify(manifest), 200, 'application/manifest+json');
+            } catch (error) {
+                if (error instanceof PageNotFound) return reply('Not found', 404);
+                throw error;
+            }
+        }
         if (pathname === server.runtimeUrl) {
             if (!['GET', 'HEAD'].includes(request.method)) return new Response('Method not allowed', {status: 405});
             return new Response(request.method === 'HEAD' ? null : runtime, {
@@ -101,10 +111,13 @@ export async function createDispatch({pages, server = null, ownerForRequest = as
         try {
             if (pathname === server.rpcUrl || pathname === server.closeUrl) {
                 if (request.method !== 'POST') return reply('Method not allowed', 405);
-                if (!request.headers.get('content-type')?.startsWith('application/json')) {
+                if ((request.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase() !== 'application/json') {
                     return reply('Expected application/json', 415);
                 }
-                const body = await request.text();
+                const bytes = await request.arrayBuffer();
+                let body;
+                try { body = new TextDecoder('utf-8', {fatal: true}).decode(bytes); }
+                catch { return reply('Request body is not UTF-8', 400); }
                 if (pathname === server.rpcUrl) {
                     let response;
                     try { response = await server.call(body, {owner}); } catch (error) {

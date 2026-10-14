@@ -6,13 +6,6 @@
       "title": "No server",
       "examples": [
         {
-          "key": "serverless-01",
-          "title": "Quick start",
-          "folder": "01_quick_start",
-          "description": "The page of the README quick start, exported by @gramlot/gramlot-serverless.",
-          "explanation": "One module: Page builds the page in a Web Worker of the browser, Logic holds the greeting, which runs in the window."
-        },
-        {
           "key": "serverless-02",
           "title": "Registration form",
           "folder": "02_registration",

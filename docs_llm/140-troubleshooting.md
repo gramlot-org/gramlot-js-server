@@ -50,7 +50,9 @@ with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
 
 Block ID: **GS-140-015**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 Outcomes of the Worker envelope (`RpcError` with `code` in the window):
 `not_found` (`Unknown Source method`: unmarked method; page code does
 not call `remoteSource` yet);

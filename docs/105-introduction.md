@@ -59,8 +59,9 @@ browser:
    The window renders the DOM and binds the Data.
 5. Every other call is an envelope as well: `contentType: 'source'` builds a Source
    branch, `contentType: 'data'` runs an endpoint (`Page.registerEndpoint`), by
-   message instead of HTTP. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
-   they arrive together with the `remote` grammar attribute.
+   message instead of HTTP. Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 6. `window.gramlot.dispose()` terminates the Worker; a dedicated Worker also
    ends with its document. Nothing is sent anywhere.
 

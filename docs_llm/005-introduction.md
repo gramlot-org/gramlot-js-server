@@ -35,7 +35,9 @@ Block ID: **GN-105-010**.
 6. Every other call: an envelope on `/gramlot/rpc`, `contentType` `source` (Source branch)
    or `data` (endpoint, `Page.registerEndpoint`, `dataRpc`); failures are outcomes in the
    envelope (`page_expired`, `not_found`, `not_authenticated`, `not_authorized`,
-   `application_error`), status 200. Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+   `application_error`), status 200. Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 7. Leaving the page → `POST /gramlot/close`; the TTL covers lost closes.
 
 <a id="gn-105-015"></a>

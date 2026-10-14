@@ -57,9 +57,9 @@ Block ID: **GN-105-010**.
    `contentType: 'source'` builds a Source branch, `contentType: 'data'` runs an
    endpoint (`Page.registerEndpoint`, called by `dataRpc`). A failure is an outcome
    inside the response envelope (`page_expired`, `not_found`, `not_authenticated`,
-   `not_authorized`, `application_error`), always with status 200. Source methods
-   (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API:
-   they arrive together with the `remote` grammar attribute.
+   `not_authorized`, `application_error`), always with status 200. Declare Source fragments with `Page.registerSource` and mount them with
+   `remote`; `dataRemote` loads endpoint values on demand. See the
+   [shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-105).
 7. **Close.** When the browser leaves the page it posts the page ID to
    `/gramlot/close`; the TTL covers the cases where that request is lost.
 

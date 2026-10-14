@@ -91,7 +91,9 @@ A URL that points outside the export is not served by anything.
 
 Block ID: **GS-115-020**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 The Worker answers them with the envelope `contentType: 'source'`; the
 [Reference](130-reference.md) lists the messages.
 
@@ -105,7 +107,18 @@ Block ID: **GS-115-025**.
   the stylesheets, the runtime license notices as inert JSON (`<script
   type="application/json" id="gramlot-runtime-notices">` in the file,
   `assets/runtime-notices.json` in the directory).
-- Not contained: anything the page does not import, a server, a database,
-  `dataRpc` or server resolvers.
+- Not contained: anything the page does not import, an external application
+  server or database service. `dataRpc`, `remote` and
+  `dataRemote` use the bundled Page methods in the Worker; they do not provide
+  access to a Python server or persistent server state.
 - Public: everything in the export is readable by whoever opens it, the page
   logic included. Keep secrets out of pages and their modules.
+
+**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
+environment's setup. Revisit examples when a later release simplifies the code;
+prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
+separate project; Page runs on the host and Logic in the browser (the standalone
+host is a JavaScript Worker). Reload/reopen after saving; development reload is
+not automatic hot reload. The sequence explains inline and named Logic in their
+release context; use named Logic for reusable behavior. Inline examples require the
+documented CSP profile. Common examples do not cover every advanced case.

@@ -51,13 +51,15 @@ policy of its own.
 
 Block ID: **GS-140-015**.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 The outcomes below come from the Worker answering an envelope; in the window
 `remoteSource` rejects with an `RpcError` carrying the `code`.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `not_found` (`Unknown Source method`) | `remoteSource` called with a method not marked by `Page.registerSource` | Page code does not call `remoteSource` yet (note above) |
+| `not_found` (`Unknown Source method`) | `remoteSource` called with a method not marked by `Page.registerSource` | Declare the fragment with `Page.registerSource` and use its exact name in `remote` |
 | `page_expired` (`Unknown, expired or unowned page`) | The page registered in the Worker expired (core default 1800 s), or the page ID is wrong | Reload the file; the exporter uses the core defaults |
 | `Worker transport is disposed` | The instance was disposed, or the Worker crashed (`Worker communication failed`) | Reload; look for the earlier error in the console |
 

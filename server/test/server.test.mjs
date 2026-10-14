@@ -284,3 +284,64 @@ test('GC-230: checkProtocol passes on the conformance page, with and without a m
         finally { await app.close(); }
     }
 });
+
+for (const [label, contentType, status] of [
+    ['jsonp', 'application/jsonp', 415],
+    ['JSON suffix', 'application/json-extra', 415],
+    ['missing media type', null, 415],
+    ['empty media type', '', 415],
+    ['invalid UTF-8', 'application/json', 400],
+    ['UTF-8 text', 'application/json', 200],
+    ['mixed-case JSON', 'Application/JSON', 200],
+    ['charset parameter', 'application/json; charset=utf-8', 200],
+    ['media-type whitespace', 'application/json ; charset=UTF-8', 200],
+]) {
+    for (const path of ['/gramlot/rpc', '/gramlot/close']) {
+        test(`HTTP input boundary: ${label} on ${path}, before page execution`, async () => {
+            const calls = [];
+            const failures = [];
+            class InputPage extends HtmlPage {
+                echo({value}) { calls.push(value); return value; }
+            }
+            InputPage.registerEndpoint('echo');
+            class InputServer extends TestServer {
+                async resolvePage() { return InputPage; }
+            }
+            const app = await startServer({server: new InputServer(), onError: error => failures.push(error)});
+            try {
+                const opened = await fetch(app.url);
+                const {pageId} = bootstrap(await opened.text()).argument.config;
+                const value = label === 'UTF-8 text' ? 'caffè ☕ 漢字' : 'invalid-byte';
+                const payload = path === '/gramlot/rpc'
+                    ? {id: 'boundary', pageId, contentType: 'data', name: 'echo', params: {value}}
+                    : {pageId, value};
+                const body = Buffer.from(JSON.stringify(payload));
+                if (label === 'invalid UTF-8') body[body.indexOf('invalid-byte')] = 0xff;
+                const headers = contentType === null ? {} : {'content-type': contentType};
+                const response = await fetch(app.url + path, {method: 'POST', headers, body});
+                assert.equal(response.status, status);
+                if (status === 200) {
+                    assert.match(response.headers.get('content-type'), /^application\/json/);
+                    const answer = await response.json();
+                    if (path === '/gramlot/rpc') assert.equal(answer.value, value);
+                    else assert.deepEqual(answer, {ok: true});
+                } else {
+                    assert.match(response.headers.get('content-type'), /^text\/plain/);
+                    assert.equal(await response.text(), status === 415 ? 'Expected application/json' : 'Request body is not UTF-8');
+                }
+                assert.deepEqual(calls, path === '/gramlot/rpc' && status === 200 ? [value] : []);
+                const after = await fetch(app.url + '/gramlot/rpc', {
+                    method: 'POST', headers: {'content-type': 'application/json'},
+                    body: toTytx({id: 'alive', pageId, contentType: 'source', name: 'main', params: {}}),
+                });
+                assert.equal(after.status, 200);
+                const answer = await after.json();
+                if (path === '/gramlot/close' && status === 200) assert.equal(answer.error.code, 'page_expired');
+                else assert.match(answer.value, /Hello World/);
+                assert.deepEqual(failures, []);
+            } finally {
+                await app.close();
+            }
+        });
+    }
+}

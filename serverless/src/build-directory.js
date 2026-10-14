@@ -50,7 +50,7 @@ function validate({pages, output, assets}) {
     }
     if (!Array.isArray(assets)) throw new TypeError('assets must be an array');
     const generated = [
-        'index.html', 'assets/standalone.js', 'assets/runtime-notices.json',
+        'index.html', 'app.webmanifest', 'assets/standalone.js', 'assets/runtime-notices.json',
         ...entries.map(([route]) => `assets/workers/${route}.js`),
         ...entries.filter(([route]) => route !== 'index').map(([route]) => `${route}/index.html`),
     ];
@@ -91,14 +91,15 @@ async function missing(path) {
     }
 }
 
-function documentFor(route) {
+function documentFor(route, PageClass) {
     const relativeRoot = route === 'index' ? './' : '../';
     const document = new HtmlBuilder();
     const html = document.root.html({lang: 'en'});
     const head = html.head();
     head.meta({charset: 'utf-8'});
     head.meta({name: 'viewport', content: 'width=device-width,initial-scale=1'});
-    head.title(route);
+    head.title(PageClass.title);
+    if (route === 'index' && PageClass.installable === true) head.link({rel: 'manifest', href: './app.webmanifest'});
     const body = html.body();
     body.div({id: 'gramlot-root'});
     body.script(null, {src: `${relativeRoot}assets/standalone.js`});
@@ -194,6 +195,11 @@ export async function buildDirectory({pages, output, assets = []}) {
         await writeFile(join(stage, 'assets/standalone.js'), runtime.outputFiles[0].text);
         await writeFile(join(stage, 'assets/runtime-notices.json'),
             JSON.stringify(await runtimeNotices(core.runtime), null, 2) + '\n');
+        if (loaded.index.module.Page.installable === true) {
+            const manifest = await new loaded.index.module.Page().manifest({baseUrl: './'});
+            if (!manifest || Object.getPrototypeOf(manifest) !== Object.prototype) throw new TypeError('Page.manifest must return a JSON object');
+            await writeFile(join(stage, 'app.webmanifest'), JSON.stringify(manifest, null, 2) + '\n');
+        }
         for (const [route, page] of entries) {
             const {logic, stylesheet} = loaded[route];
             if (stylesheet) {
@@ -206,7 +212,7 @@ export async function buildDirectory({pages, output, assets = []}) {
             await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});
-            await writeFile(htmlPath, documentFor(route));
+            await writeFile(htmlPath, documentFor(route, loaded[route].module.Page));
         }
         for (const {source, target} of copies) {
             const path = join(stage, target);

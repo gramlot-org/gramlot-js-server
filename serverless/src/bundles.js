@@ -14,7 +14,7 @@ const windowCore = {
     setup(build) {
         build.onResolve({filter: /^@gramlot\/gramlot\/page$/}, () => ({path: 'page', namespace: 'gramlot-window-core'}));
         build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, () => ({
-            contents: 'export const {Page} = globalThis.GramlotStandalone;', loader: 'js',
+            contents: 'export const {Page, IndexPage, IndexLogic, mountIndexPage} = globalThis.GramlotStandalone;', loader: 'js',
         }));
     },
 };

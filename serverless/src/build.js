@@ -31,6 +31,7 @@ export async function build({page, output}) {
     if (!['.html', '.htm'].includes(extname(destination))) throw new TypeError('Output must be an HTML file');
     checkPage(input);
     const module = await loadPage(input);
+    if (module.Page.installable === true) throw new Error('Installable root pages require a directory export');
     const logic = await logicModule(input, module);
     const styles = await Promise.all((await inlineStylesheets(input, module.Page)).map(file => readFile(file, 'utf8')));
     const worker = (await workerBundle(input, options, {logic: logic?.url ?? null, inlineCss: true})).text;
@@ -38,7 +39,7 @@ export async function build({page, output}) {
     const runtime = (await bundle({...options, globalName: 'GramlotStandalone', stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
-export {Page} from './src/standalone.js';
+export {Page, IndexPage, IndexLogic, mountIndexPage} from './src/standalone.js';
 const blob = text => URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
 const workerUrl = blob(${JSON.stringify(worker)});
 const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));

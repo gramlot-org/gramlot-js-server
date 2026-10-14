@@ -86,7 +86,9 @@ Block ID: **GS-130-015**.
   (`Unknown Worker message`) answer `{id, error: {name, message}}`. The owner is
   null; `auth` rules answer `not_authenticated`.
 
-Source methods (`Page.registerSource`, `remoteSource`) are not yet part of the page-writing API: they arrive together with the `remote` grammar attribute.
+Declare Source fragments with `Page.registerSource` and mount them with `remote`;
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
+[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
 
 <a id="gs-130-020"></a>
 
@@ -137,8 +139,8 @@ gramlot-serverless gallery OUTPUT [--catalog CATALOG.json PAGES]...
 writes the gallery of `@gramlot/gramlot-examples` as a directory that opens from
 disk: `OUTPUT/index.html` is the gallery page, each example is the route
 `<key>/` (`OUTPUT/c03/index.html`). It holds every common family (`e01`–`e13`,
-`b01`–`b11`, `c01`–`c08`), the family of this package (`serverless-01`, the quick
-start; `serverless-02`, the page of `npm create @gramlot page`) and the families of
+`b01`–`b11`, `c01`–`c17`), the registration-form example (`serverless-02`, the page
+of `npm create @gramlot page`) and the families of
 each `--catalog`. The command prints `Built <output>: the gallery and <n> examples;
 open index.html`.
 
@@ -149,3 +151,33 @@ rules of `buildDirectory`: a previous gallery at `OUTPUT` is replaced. With 35
 routes it takes about 30 MB, since every route holds its Worker. Without
 `@gramlot/gramlot-examples` the command answers `The gallery needs
 @gramlot/gramlot-examples: npm install @gramlot/gramlot-examples`.
+
+Setup quick starts remain in the server README and tutorials; the gallery does
+not include their sections or routes. Registration form remains an application
+example in the standalone gallery.
+
+
+<a id="gs-130-035"></a>
+
+## 035 · Install a directory export
+
+Block ID: **GS-130-035**. Development addition.
+
+`buildDirectory` reads the root Page's `installable` flag. When true, it writes
+`app.webmanifest` from `new Page().manifest({baseUrl: './'})` and adds a manifest
+link only to `index.html`. The output reserves the name `app.webmanifest`; an
+asset with that name is rejected. Copy the icon named by `appIcon` through the
+build's asset map. The default manifest declares a square 512×512 PNG. The gallery
+export includes that asset automatically. Child Page flags do not create manifests.
+A single-file `build` rejects an installable root; use directory export instead.
+
+Serve the directory over HTTPS or localhost for browser installation. The app
+still executes in the browser Worker; a static server only serves its files.
+Opening `index.html` directly remains supported for execution, but is not the
+installation path. No service worker or offline cache is added. Safari on macOS
+Sonoma or later uses File → Add to Dock; Chromium can offer its installation prompt.
+
+The reusable `IndexPage` and `IndexLogic` are available through the existing Page
+entry in both Worker and window bundles. Use concrete exported URLs such as
+`hello/index.html` in navigation. See the
+[core index guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-110).

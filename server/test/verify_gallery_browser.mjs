@@ -19,8 +19,7 @@ if (!['node', 'bun'].includes(runtime) || !playwrightEntry) {
 }
 const MOUNT = '/js';
 const catalog = createRequire(import.meta.url).resolve('@gramlot/gramlot-examples/catalog.json');
-const runtimeCatalog = fileURLToPath(new URL(`../gallery/${runtime}/catalog.json`, import.meta.url));
-const keys = [catalog, runtimeCatalog].flatMap(file => JSON.parse(readFileSync(file, 'utf8')).families
+const keys = [catalog].flatMap(file => JSON.parse(readFileSync(file, 'utf8')).families
     .flatMap(family => family.examples.map(({key}) => key)));
 
 // One behaviour per page with named logic, from scripts/verify_pages_browser.mjs of gramlot-examples.
@@ -83,8 +82,8 @@ try {
     browser = await engine.launch({headless: true});
 
     const {page, errors} = await open(browser, gallery);
-    await page.waitForFunction(() => document.querySelector('.gallery-logo')?.complete);
-    assert.ok(await page.evaluate(() => document.querySelector('.gallery-logo').naturalWidth > 0), 'logo');
+    await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
+    assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
     await page.evaluate(() => { document.getElementById('open-c03').closest('details').open = true; });
     await page.click('#open-c03');
@@ -92,7 +91,7 @@ try {
     await frame.locator('#final').waitFor();
     assert.equal(await page.getAttribute('#frame-c03', 'src'), 'c03');
     assert.equal(await page.evaluate(() => document.getElementById('frame-c03').contentWindow.location.pathname), `${MOUNT}/c03`);
-    await page.selectOption('#gallery-theme', 'dark');
+    await page.selectOption('#index-theme', 'dark');
     await page.waitForFunction(() => document.getElementById('frame-c03').contentDocument.documentElement.getAttribute('data-theme') === 'dark');
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();

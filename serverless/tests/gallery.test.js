@@ -16,8 +16,15 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     const output = join(folder, 'gallery');
     const result = await buildStaticGallery({output});
     const keys = JSON.parse(await readFile(catalog, 'utf8')).families.flatMap(family => family.examples.map(({key}) => key));
-    assert.deepEqual(result.routes, ['index', ...keys, 'serverless-01', 'serverless-02'].sort());
+    assert.deepEqual(result.routes, ['index', ...keys, 'serverless-02'].sort());
+    await assert.rejects(stat(join(output, 'serverless-01/index.html')), {code: 'ENOENT'});
     assert.ok((await stat(join(output, 'assets/styles/serverless-02.css'))).isFile());
+    const manifest = JSON.parse(await readFile(join(output, 'app.webmanifest'), 'utf8'));
+    assert.equal(manifest.start_url, './');
+    assert.equal(manifest.icons[0].src, './assets/branding/app-icon.png');
+    assert.match(await readFile(join(output, 'index.html'), 'utf8'), /rel="manifest"/);
+    assert.doesNotMatch(await readFile(join(output, 'e01/index.html'), 'utf8'), /rel="manifest"/);
+    assert.ok((await stat(join(output, 'assets/branding/app-icon.png'))).isFile());
     const index = await readFile(join(output, 'assets/workers/index.js'), 'utf8');
     for (const text of ['c03/index.html', 'assets/branding/gramlot-logo-dark.svg', 'gallery/dist/gallery.js']) {
         assert.ok(index.includes(text), text);
@@ -44,10 +51,9 @@ test('the command: gallery needs one output; --catalog needs two values', () => 
     }
 });
 
-test('the pages of the serverless catalogue are the README quick start and the page template', async () => {
+test('the registration example remains the page template', async () => {
     const pages = join(root, 'gallery/pages/serverless_pages');
-    for (const [page, source] of [['01_quick_start.js', 'examples/quickstart/page.js'],
-        ['02_registration.js', '../create/templates/page/index.js'], ['02_registration.css', '../create/templates/page/index.css']]) {
+    for (const [page, source] of [['02_registration.js', '../create/templates/page/index.js'], ['02_registration.css', '../create/templates/page/index.css']]) {
         assert.equal(await readFile(join(pages, page), 'utf8'), await readFile(join(root, source), 'utf8'), page);
     }
 });

@@ -93,3 +93,17 @@ test('the companion is embedded for the window and a *_aux page is refused', asy
     await assert.rejects(build({page: join(root, 'tests/fixtures/companion/page_aux.js'), output}),
         /page companion, not a page/);
 });
+
+test('an installable root requires directory export and preserves existing output', async t => {
+    const {folder, output} = await fixture(t);
+    const page = join(folder, 'installable.js');
+    await writeFile(output, 'previous');
+    await writeFile(page, `import {Page as BasePage} from '@gramlot/gramlot/page';
+export class Page extends BasePage {
+    static installable = true;
+    static appIcon = '/app-icon.png';
+    main(root) { root.p('Installable root'); }
+}`);
+    await assert.rejects(build({page, output}), /Installable root pages require a directory export/);
+    assert.equal(await readFile(output, 'utf8'), 'previous');
+});
