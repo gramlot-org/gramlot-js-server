@@ -91,8 +91,8 @@ Block ID: **GS-130-030**.
 `gramlot-serverless gallery OUTPUT [--catalog CATALOG.json PAGES]...`: the
 gramlot-examples gallery as a directory from disk; `index.html` + `<key>/index.html`;
 common families + `serverless-02` (`npm create @gramlot page`) + each `--catalog`. Prints `Built <output>: the gallery and <n> examples; open
-index.html`. Rules of `buildDirectory` (a previous gallery is replaced); about 30 MB
-for 35 routes (one Worker each). Missing examples package → `The gallery needs
+index.html`. Rules of `buildDirectory` (a previous gallery is replaced); export size depends
+on the installed examples and runtime, with one Worker per route. Missing examples package → `The gallery needs
 @gramlot/gramlot-examples: …`.
 
 Setup quick starts remain in the server README and tutorials; the gallery does
@@ -104,7 +104,7 @@ example in the standalone gallery.
 
 ## 035 · Install a directory export
 
-Block ID: **GS-130-035**. Development addition.
+Block ID: **GS-130-035**.
 
 `buildDirectory` reads the root Page's `installable` flag. When true, it writes
 `app.webmanifest` from `new Page().manifest({baseUrl: './'})` and adds a manifest

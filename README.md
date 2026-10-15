@@ -147,6 +147,9 @@ gallery. The standalone gallery also includes the Registration form application.
 
 ## Next steps
 
+- [Examples and learning sequence](https://gramlot-examples.readthedocs.io/en/latest/):
+  the shared lessons, Python/JavaScript source and gallery guide.
+
 - The guides on Read the Docs, sources in [docs/](docs/) and the concise view
   in [docs_llm/](docs_llm/):
   - no server: [Introduction](https://gramlot-js-server.readthedocs.io/en/latest/105-introduction.html),
@@ -173,7 +176,7 @@ gallery. The standalone gallery also includes the Registration form application.
 
 | | Verified |
 | --- | --- |
-| Gramlot | `@gramlot/gramlot` 0.2.14; `@gramlot/gramlot-examples` 0.2.9; `@genrojs/builders` 0.4.2 |
+| Gramlot | `@gramlot/gramlot` 0.2.17; `@gramlot/gramlot-examples` 0.2.12; `@genrojs/builders` 0.5.2 |
 | Runtimes | Node.js 22 (CI) and 23.11; Bun 1.3.14 (server and gallery) |
 | Browsers | Chromium 153 and WebKit 26.6 (pages, gallery, exports); Firefox 155 for the core qualification of 0.2.0. WebKit is not Safari; Safari is not verified. |
 

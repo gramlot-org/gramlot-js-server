@@ -147,8 +147,8 @@ open index.html`.
 The gallery page is the browser-safe `GalleryPage` of gramlot-examples with its
 texts as data; each example extends its page with the gallery frame script, links
 its stylesheet and takes the `Logic` of its page module. The directory follows the
-rules of `buildDirectory`: a previous gallery at `OUTPUT` is replaced. With 35
-routes it takes about 30 MB, since every route holds its Worker. Without
+rules of `buildDirectory`: a previous gallery at `OUTPUT` is replaced. The export includes the common catalogue and Registration form; its size
+depends on the installed examples and runtime, since every route holds its Worker. Without
 `@gramlot/gramlot-examples` the command answers `The gallery needs
 @gramlot/gramlot-examples: npm install @gramlot/gramlot-examples`.
 
@@ -161,7 +161,7 @@ example in the standalone gallery.
 
 ## 035 · Install a directory export
 
-Block ID: **GS-130-035**. Development addition.
+Block ID: **GS-130-035**.
 
 `buildDirectory` reads the root Page's `installable` flag. When true, it writes
 `app.webmanifest` from `new Page().manifest({baseUrl: './'})` and adds a manifest

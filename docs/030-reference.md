@@ -152,7 +152,7 @@ example in the standalone gallery.
 
 ## 030 · Root manifest and reusable index
 
-Block ID: **GN-130-030**. Development addition.
+Block ID: **GN-130-030**.
 
 A root Page with `static installable = true`, `static title` and
 `static appIcon = '/app-icon.png'` advertises `<prefix>/app.webmanifest`.
