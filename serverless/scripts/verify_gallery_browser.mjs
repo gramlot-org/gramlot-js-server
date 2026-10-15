@@ -74,8 +74,8 @@ try {
     await context.route(/^https?:/, route => { external.push(route.request().url()); return route.abort(); });
 
     const {page, errors} = await open(context, pathToFileURL(join(output, 'index.html')).href);
-    await page.waitForFunction(() => document.querySelector('.gallery-logo')?.complete);
-    assert.ok(await page.evaluate(() => document.querySelector('.gallery-logo').naturalWidth > 0), 'logo');
+    await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
+    assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
     await page.evaluate(() => { document.getElementById('open-c03').closest('details').open = true; });
     await page.click('#open-c03');
@@ -83,7 +83,7 @@ try {
     await frame.locator('#final').waitFor();
     assert.equal(await frame.locator('#final').textContent(), '80');
     assert.equal(await page.getAttribute('#frame-c03', 'src'), 'c03/index.html');
-    await page.selectOption('#gallery-theme', 'dark');
+    await page.selectOption('#index-theme', 'dark');
     await frame.locator('html[data-theme="dark"]').waitFor({state: 'attached'});
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();
