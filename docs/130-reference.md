@@ -23,8 +23,8 @@ or later:
 Command `gramlot-serverless` (`bin` of the package; from the checkout,
 `node serverless/src/cli.js`): `build PAGE.js -o OUTPUT.html`, `build FOLDER -o
 OUTPUT`, `gallery OUTPUT [--catalog CATALOG.json PAGES]...`
-([GS-120-005](120-configuration.md)). Dependencies: `@gramlot/gramlot >=0.2.14`,
-`@genrojs/builders >=0.4.1`, `esbuild`; `@gramlot/gramlot-examples >=0.2.9` is an
+([GS-120-005](120-configuration.md)). Dependencies: `@gramlot/gramlot >=0.2.17`,
+`@genrojs/builders >=0.5.2`, `esbuild`; `@gramlot/gramlot-examples >=0.2.12` is an
 optional peer dependency, needed by `gallery` only.
 
 <a id="gs-130-010"></a>
