@@ -289,3 +289,24 @@ test('GC-230 §205: the envelope part of the conformance list (items 10, 12-16) 
     transport.dispose();
     assert.doesNotThrow(() => transport.close(pageId));
 });
+
+
+test('page locale and timezone cross the Worker boundary and drive formatted display', async t => {
+    class Localized extends Hello {
+        static locale = 'it-IT';
+        static timeZone = 'Europe/Rome';
+        main(root) {
+            root.dataSetter({destination_path: 'amount', value: 1234.5});
+            root.p('^amount', {id: 'amount', format: '0.00', mask: 'Total: {}'});
+        }
+    }
+    workers(t, Localized);
+    const doc = document();
+    const app = await mount({workerUrl: 'page-worker.js', document: doc});
+    t.after(() => app.dispose());
+    assert.equal(app.locale, 'it-IT');
+    assert.equal(app.timeZone, 'Europe/Rome');
+    assert.equal(doc.querySelector('#amount').textContent, 'Total: 1234,50');
+    app.data.setItem('amount', 5);
+    assert.equal(doc.querySelector('#amount').textContent, 'Total: 5,00');
+});

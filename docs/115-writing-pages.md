@@ -122,3 +122,18 @@ host is a JavaScript Worker). Reload/reopen after saving; development reload is
 not automatic hot reload. The sequence explains inline and named Logic in their
 release context; use named Logic for reusable behavior. Inline examples require the
 documented CSP profile. Common examples do not cover every advanced case.
+
+<a id="gs-115-035"></a>
+## 035 · Page formatting context
+
+Block ID: **GS-115-035**.
+
+Development support: declare `static locale = 'it-IT'` and
+`static timeZone = 'Europe/Rome'` on Page. The Worker transports this metadata
+to the browser instance; it does not format with the Worker's environment.
+`gramlot.format` and live HTML text declared with `format` use this context.
+Call or node options override the page. Omitted page settings use the browser
+locale/timezone at startup. Masks use `{}`; migrate legacy `%s`.
+Example: `root.p('^amount', {format: '0.00', mask: 'Total: {}'})`.
+See the core's [formatting contract](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html#gc-095-125)
+for supported patterns, explicit dtype and current static-rendering limits.

@@ -45,8 +45,8 @@ export class GramlotWorkerServer extends GramlotServer {
         }
         try {
             if (message.open === true) {
-                const {pageId, title, resources} = await this.registerPage('/');
-                this.scope.postMessage({id, open: {pageId, title, resources, capabilities: this.capabilities}});
+                const registered = await this.registerPage('/');
+                this.scope.postMessage({id, open: {...registered, capabilities: this.capabilities}});
             } else if (typeof message.text === 'string') {
                 this.scope.postMessage({id, text: await this.call(message.text)});
             } else {
