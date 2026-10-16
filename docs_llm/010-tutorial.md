@@ -117,3 +117,50 @@ host is a JavaScript Worker). Reload/reopen after saving; development reload is
 not automatic hot reload. The sequence explains inline and named Logic in their
 release context; use named Logic for reusable behavior. Inline examples require the
 documented CSP profile. Common examples do not cover every advanced case.
+
+<a id="gn-110-035"></a>
+
+## 035 · Update packaged galleries and exports
+
+Block ID: **GN-110-035**.
+
+Stop the gallery. In the consumer project containing the `package.json` and
+`node_modules` used to run it, update core, examples and host together:
+
+```sh
+npm install --package-lock=false --save-prefix='>=' @gramlot/gramlot@latest @gramlot/gramlot-examples@latest @gramlot/gramlot-js-server@latest
+npm ls @gramlot/gramlot @gramlot/gramlot-examples @gramlot/gramlot-js-server --all
+node --input-type=module -e "console.log(import.meta.resolve('@gramlot/gramlot/page')); console.log(import.meta.resolve('@gramlot/gramlot-examples'));"
+npx gramlot node gallery --port 8080
+```
+
+Use `bun` instead of `node` for the Bun host and retain your previous port/mount
+options. `npm ls` should report no invalid dependencies. `deduped` is normal;
+local links pointing at different core copies need the checkout procedure below.
+
+For a **serverless gallery**, use this package set in its build project:
+
+```sh
+npm install --package-lock=false --save-prefix='>=' @gramlot/gramlot@latest @gramlot/gramlot-examples@latest @gramlot/gramlot-serverless@latest
+npm ls @gramlot/gramlot @gramlot/gramlot-examples @gramlot/gramlot-serverless --all
+npx gramlot-serverless gallery gallery-updated
+```
+
+Choose a new output directory and open `gallery-updated/index.html`. Updating npm
+packages does not modify an old exported folder or ZIP. Distribute the complete
+new folder. For an installed app pointing at a hosted export, replace the served
+export through the site's normal deployment procedure, then reopen the app.
+
+These commands explicitly request the registry's latest packages and save minimum
+requirements without upper bounds. `--package-lock=false` ignores an existing
+package lock for this installation and does not write one; do not later replay a
+stale lock with `npm ci`. Review any application lock/constraint policy that would
+freeze first-party packages. See [npm install](https://docs.npmjs.com/cli/v11/commands/npm-install/).
+A plain `npm install` or rerunning `npx gramlot` is not proof of an update.
+
+Published packages already contain their browser bundles. **Do not run a source
+build in a registry consumer.** If you use local links or repository checkouts,
+follow the [source update procedure](https://github.com/gramlot-org/gramlot-examples/blob/main/docs/010-gallery.md#ge-010-050),
+which rebuilds the inspector/gallery and keeps the server and examples on the
+same physical core package. Then run the
+[browser checklist](https://github.com/gramlot-org/gramlot/blob/main/docs/public/018-quickstart.md#gc-018-025).

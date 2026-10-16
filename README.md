@@ -145,6 +145,10 @@ npx gramlot-serverless gallery gallery   # a folder that opens from disk: galler
 Setup quick starts stay in this README and the server tutorials, outside the
 gallery. The standalone gallery also includes the Registration form application.
 
+## Updating
+
+Follow [Update packaged galleries and exports](docs/010-tutorial.md#gn-110-035) for explicit npm commands, dependency checks, restart and serverless regeneration. Local checkout builds have a separate linked procedure.
+
 ## Next steps
 
 - [Examples and learning sequence](https://gramlot-examples.readthedocs.io/en/latest/):
