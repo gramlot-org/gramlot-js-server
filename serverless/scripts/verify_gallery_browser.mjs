@@ -83,7 +83,9 @@ try {
     await frame.locator('#final').waitFor();
     assert.equal(await frame.locator('#final').textContent(), '80');
     assert.equal(await page.getAttribute('#frame-c03', 'src'), 'c03/index.html');
+    await page.click('#gallery-settings-toggle');
     await page.selectOption('#index-theme', 'dark');
+    await page.getByRole('button', {name: 'Close settings', exact: true}).click();
     await frame.locator('html[data-theme="dark"]').waitFor({state: 'attached'});
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();

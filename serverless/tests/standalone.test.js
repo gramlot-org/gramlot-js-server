@@ -293,6 +293,7 @@ test('GC-230 §205: the envelope part of the conformance list (items 10, 12-16) 
 
 test('page locale and timezone cross the Worker boundary and drive formatted display', async t => {
     class Localized extends Hello {
+        static devices = ['desktop', 'phone'];
         static locale = 'it-IT';
         static timeZone = 'Europe/Rome';
         main(root) {
@@ -304,6 +305,7 @@ test('page locale and timezone cross the Worker boundary and drive formatted dis
     const doc = document();
     const app = await mount({workerUrl: 'page-worker.js', document: doc});
     t.after(() => app.dispose());
+    assert.deepEqual(app.devices, ['desktop', 'phone']);
     assert.equal(app.locale, 'it-IT');
     assert.equal(app.timeZone, 'Europe/Rome');
     assert.equal(doc.querySelector('#amount').textContent, 'Total: 1234,50');

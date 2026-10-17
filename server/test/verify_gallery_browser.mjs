@@ -91,7 +91,9 @@ try {
     await frame.locator('#final').waitFor();
     assert.equal(await page.getAttribute('#frame-c03', 'src'), 'c03');
     assert.equal(await page.evaluate(() => document.getElementById('frame-c03').contentWindow.location.pathname), `${MOUNT}/c03`);
+    await page.click('#gallery-settings-toggle');
     await page.selectOption('#index-theme', 'dark');
+    await page.getByRole('button', {name: 'Close settings', exact: true}).click();
     await page.waitForFunction(() => document.getElementById('frame-c03').contentDocument.documentElement.getAttribute('data-theme') === 'dark');
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();

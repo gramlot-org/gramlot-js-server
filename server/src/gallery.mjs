@@ -73,7 +73,8 @@ export async function startGallery({runtime = 'node', catalogs = [], mountPath =
     const pages = await mkdtemp(join(tmpdir(), 'gramlot-gallery-'));
     try {
         const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix);
-        const app = await startServer({...options, pages, mountPath: prefix, assets});
+        const {collections} = examples.buildGallery();
+        const app = await startServer({...options, pages, mountPath: prefix, assets, collections});
         return {...app, pages, url: app.url, galleryUrl: `${app.url}${prefix}/`,
             async close() { await app.close(); await rm(pages, {recursive: true, force: true}); }};
     } catch (error) {

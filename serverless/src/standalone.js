@@ -48,10 +48,14 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
     const abort = () => transport.dispose(signal.reason);
     signal?.addEventListener('abort', abort, {once: true});
     try {
-        const {pageId, title, resources, capabilities, locale, timeZone} = await transport.open(signal);
+        const {pageId, title, resources, capabilities, locale, timeZone, devices} = await transport.open(signal);
         document.title = title;
-        const bootstrap = new WorkerBootstrap({document, config: {pageId, element, rootId, capabilities, transport, locale, timeZone}, resources: {
+        const bootstrap = new WorkerBootstrap({document, config: {pageId, element, rootId, capabilities, transport, locale, timeZone, devices}, resources: {
             css: resources.css.map(href => styleUrl(href, root)),
+            collections: (resources.collections ?? []).map(url => {
+                if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone collection not provided: ${url}`);
+                return modules[url];
+            }),
             js: resources.js.map(({url, group}) => {
                 if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone module not provided: ${url}`);
                 return {url: modules[url], group};

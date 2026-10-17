@@ -92,3 +92,12 @@ the Worker; `logic` was `aux` until 0.2.3 (old name not accepted). The exporter
 writes the entry itself; options matter for custom Worker bundles. Other core `GramlotServer`
 options are server URLs. One page (`/`); `resolveResources` returns `Page.css`, the
 page stylesheet (none with `inlineCss`) and the logic URL.
+
+<a id="gs-120-090"></a>
+## 090 · Application component collections (development)
+
+Block ID: **GS-120-090**.
+
+`buildDirectory({pages, output, assets, collections})` accepts application collections. Each entry contains `grammar` and a root-relative `module` URL. Include a bundled ES module asset at the matching target (without the leading slash). The exporter embeds its text with the page modules and passes the grammar to the Worker server. The gallery declares inputs and includes the asset itself; rebuild the directory to update it. The single-file build API is unchanged.
+
+This is the initial 0.3 development increment; no new package release is implied.

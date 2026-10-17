@@ -182,3 +182,18 @@ Block ID: **GS-110-030**.
   and `mount`, and the Content Security Policy of the export.
 - The core guide [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html)
   for pointers, setters, formulas, controllers and events.
+
+
+<a id="gs-110-035"></a>
+## 035 · Device suitability and touch previews
+
+Block ID: **GS-110-035**.
+
+A Page may declare `static devices = ['desktop', 'tablet', 'phone']`; the empty
+default is unspecified. The Worker bootstrap preserves this metadata as
+`gramlot.devices`. With Base CSS, coarse-pointer devices use touch sizing;
+`gramlot.dom.setTouchMode('on')` forces touch sizing; use `'off'` for ordinary
+density or `'auto'` to restore automatic detection.
+The exported gallery's Normale/Mobile controls resize the existing iframe and
+retain its Data and drafts. Regenerate an existing export to include updated
+runtime, theme and gallery assets. The preview does not emulate a real device.

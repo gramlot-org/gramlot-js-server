@@ -42,7 +42,7 @@ function coreModules() {
 export async function buildStaticGallery({output, catalogs = []}) {
     const {buildGallery, gallery} = await examplesPackage();
     const all = [...packageCatalog(), ...catalogs];
-    const {families, routes, assets} = buildGallery({catalogs: all});
+    const {families, routes, assets, collections} = buildGallery({catalogs: all});
     const stage = await mkdtemp(join(tmpdir(), 'gramlot-static-gallery-'));
     try {
         await symlink(coreModules(), join(stage, 'node_modules'), 'dir');
@@ -83,7 +83,7 @@ export class Page extends Example {
         const copied = Object.entries(assets)
             .filter(([url]) => url === '/gallery/gallery.css' || url.startsWith('/gallery/dist/') || url.startsWith('/assets/branding/'))
             .map(([url, {file}]) => ({source: file, target: url.slice(1)}));
-        return await buildDirectory({pages, output, assets: copied});
+        return await buildDirectory({pages, output, assets: copied, collections});
     } finally {
         await rm(stage, {recursive: true, force: true});
     }

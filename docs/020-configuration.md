@@ -138,3 +138,12 @@ the headers; another method answers 405. A key that does not start with `/`, or 
 entry without `file` and `type`, is an error at start. The file is read at each
 request. Order of the rules: runtime, core themes (`/themes/`, when the core has
 the file), assets, companions below the pages folder, pages.
+
+<a id="gn-120-035"></a>
+## 035 · Application component collections (development)
+
+Block ID: **GN-120-035**.
+
+The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.
+
+This is the initial 0.3 development increment; no new package release is implied.

@@ -97,12 +97,12 @@ export async function inlineStylesheets(page, PageClass) {
 }
 
 /** The Worker script: GramlotWorkerServer and the Page. The logic module runs in the window. */
-export async function workerBundle(page, options, {logic = null, stylesheet = null, inlineCss = false} = {}) {
+export async function workerBundle(page, options, {logic = null, stylesheet = null, inlineCss = false, collections = []} = {}) {
     const result = await bundle({...options, metafile: true, stdin: {
         resolveDir: dirname(page),
         contents: `import {GramlotWorkerServer} from ${JSON.stringify(workerServer)};
 import {Page} from ${JSON.stringify(page)};
-new GramlotWorkerServer(Page, ${JSON.stringify({logic, stylesheet, inlineCss})});`,
+new GramlotWorkerServer(Page, ${JSON.stringify({logic, stylesheet, inlineCss, collections})});`,
     }});
     return {text: result.outputFiles[0].text, metafile: result.metafile};
 }

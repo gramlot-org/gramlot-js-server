@@ -95,3 +95,12 @@ Block ID: **GN-120-030**.
 with that type; `HEAD` headers only; other methods 405. Key without `/`, or no
 `file`/`type`: error at start; read at each request. Order: runtime, core themes
 (when the core has the file), assets, companions, pages.
+
+<a id="gn-120-035"></a>
+## 035 · Application component collections (development)
+
+Block ID: **GN-120-035**.
+
+The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.
+
+This is the initial 0.3 development increment; no new package release is implied.

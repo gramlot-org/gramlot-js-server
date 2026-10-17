@@ -2,7 +2,7 @@ import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {checkPage, loadPage, logicBundle, logicModule, pageStylesheet, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
-import {copyFile, mkdir, readdir, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
+import {copyFile, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const fromBrowser = createRequire(import.meta.url);
@@ -151,7 +151,7 @@ export async function folderPages(folder) {
  * previous export at output (a directory with assets/standalone.js). The same-name
  * stylesheet foo.css of a page is written to assets/styles/<route>.css; a Page.css URL under
  * /themes/ is copied from the @gramlot/gramlot package unless an asset already has its path. */
-export async function buildDirectory({pages, output, assets = []}) {
+export async function buildDirectory({pages, output, assets = [], collections = []}) {
     const {entries, destination} = validate({pages, output, assets});
     await previousExport(destination);
 
@@ -207,8 +207,13 @@ export async function buildDirectory({pages, output, assets = []}) {
                 await copyFile(stylesheet, join(stage, 'assets/styles', `${route}.css`));
             }
             const worker = (await workerBundle(page, workerOptions, {logic: logic?.url ?? null,
-                stylesheet: stylesheet ? `/assets/styles/${route}.css` : null})).text;
+                stylesheet: stylesheet ? `/assets/styles/${route}.css` : null, collections})).text;
             const modules = logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {};
+            for (const {module} of collections) {
+                const asset = copies.find(item => '/' + item.target === module);
+                if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
+                modules[module] = await readFile(asset.source, 'utf8');
+            }
             await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});
