@@ -180,7 +180,7 @@ Follow [Update packaged galleries and exports](docs/010-tutorial.md#gn-110-035) 
 
 | | Verified |
 | --- | --- |
-| Gramlot | `@gramlot/gramlot` 0.2.17; `@gramlot/gramlot-examples` 0.2.12; `@genrojs/builders` 0.5.2 |
+| Gramlot | `@gramlot/gramlot` 0.3.0; `@gramlot/gramlot-examples` 0.3.0; `@genrojs/builders` 0.6.0 |
 | Runtimes | Node.js 22 (CI) and 23.11; Bun 1.3.14 (server and gallery) |
 | Browsers | Chromium 153 and WebKit 26.6 (pages, gallery, exports); Firefox 155 for the core qualification of 0.2.0. WebKit is not Safari; Safari is not verified. |
 
