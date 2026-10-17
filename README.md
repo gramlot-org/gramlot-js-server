@@ -200,3 +200,11 @@ against the core's `main` checkout, and builds the documentation; coverage goes
 to Codecov. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
 The internal notes, including the history of the earlier PoC server, are in
 [docs/internal/](docs/internal/).
+
+## Hosted gallery updates
+
+After a successful `Publish release`, the separate `Update hosted galleries`
+workflow updates both public galleries and their serverless ZIP. It can also be
+run manually on main to retry a failed deployment. See the
+[deployment runbook](https://github.com/gramlot-org/gramlot-examples/blob/main/deploy/galleries/README.md)
+for credentials, verification and rollback.
