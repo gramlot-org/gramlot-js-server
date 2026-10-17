@@ -164,3 +164,22 @@ follow the [source update procedure](https://github.com/gramlot-org/gramlot-exam
 which rebuilds the inspector/gallery and keeps the server and examples on the
 same physical core package. Then run the
 [browser checklist](https://github.com/gramlot-org/gramlot/blob/main/docs/public/018-quickstart.md#gc-018-025).
+
+
+<a id="gn-110-040"></a>
+## 040 · Hosted gallery download
+
+Block ID: **GN-110-040**.
+
+Hosted Python and Node galleries can display a footer link to a serverless ZIP.
+Pass `--serverless-download /downloads/gramlot-gallery-serverless.zip` to
+`gramlot uvicorn gallery` or `gramlot node gallery`. The deployment serves that
+static file; the gallery does not generate an archive per request. Omit the option
+when no archive is available. Custom gallery subclasses use
+`serverless_download_url` (Python) or `serverlessDownloadUrl` (JavaScript).
+
+Build the archive with `gramlot-serverless gallery OUTPUT`, include the complete
+output directory, and tell users to unzip it and open `index.html`. Both hosted
+galleries may serve the same artifact: Python server execution is not embedded in
+the download; the serverless gallery uses the JavaScript equivalents and browser
+Workers. Its named endpoints execute locally, without a Python or Node server.

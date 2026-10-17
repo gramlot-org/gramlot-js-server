@@ -31,12 +31,13 @@ function runtimeCatalog(runtime) {
 /** Stage one page module per route in folder: the gallery for index, and for each example a
  * subclass that appends frame.js, its stylesheet <key>.css and <key>_aux.js, which re-exports
  * Logic from the URL of the logic module. Returns the assets, with each logic module as JavaScript. */
-async function stage(folder, {buildGallery, galleryPage}, catalogs, prefix) {
+async function stage(folder, {buildGallery, galleryPage}, catalogs, prefix, serverlessDownloadUrl) {
     const {routes, assets} = buildGallery({catalogs});
     const urlOf = Object.fromEntries(Object.entries(assets).map(([url, {file}]) => [file, url]));
     await writeFile(join(folder, 'index.js'), `import {Page as Gallery} from ${JSON.stringify(pathToFileURL(galleryPage).href)};
 export class Page extends Gallery {
     static catalogs = ${JSON.stringify(catalogs)};
+    static serverlessDownloadUrl = ${JSON.stringify(serverlessDownloadUrl)};
     static logoUrl = ${JSON.stringify(`${prefix}/assets/branding/gramlot-logo-dark.svg`)};
     static galleryScript = ${JSON.stringify(`${prefix}/gallery/dist/gallery.js`)};
 }
@@ -64,7 +65,7 @@ export class Page extends Example {
 
 /** Serve the gallery: the common families, the catalogue of this package for the runtime and
  * catalogs ([catalog.json, pages folder] pairs). mountPath is the prefix of every URL. */
-export async function startGallery({runtime = 'node', catalogs = [], mountPath = '', ...options} = {}) {
+export async function startGallery({runtime = 'node', catalogs = [], mountPath = '', serverlessDownloadUrl = null, ...options} = {}) {
     if (!Object.hasOwn(RUNTIMES, runtime)) throw new TypeError(`Unknown runtime: ${runtime}`);
     const examples = await examplesPackage();
     const {startServer} = await import(RUNTIMES[runtime]);
@@ -72,7 +73,7 @@ export async function startGallery({runtime = 'node', catalogs = [], mountPath =
     const prefix = trimmed ? `/${trimmed}` : '';
     const pages = await mkdtemp(join(tmpdir(), 'gramlot-gallery-'));
     try {
-        const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix);
+        const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix, serverlessDownloadUrl);
         const {collections} = examples.buildGallery();
         const app = await startServer({...options, pages, mountPath: prefix, assets, collections});
         return {...app, pages, url: app.url, galleryUrl: `${app.url}${prefix}/`,

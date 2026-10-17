@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn, spawnSync} from 'node:child_process';
-import {existsSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import {createInterface} from 'node:readline';
 import {fileURLToPath} from 'node:url';
 import {startGallery} from '../src/gallery.mjs';
@@ -11,10 +11,11 @@ const runtime = globalThis.Bun ? 'bun' : 'node';
 const cli = fileURLToPath(new URL('../src/cli.mjs', import.meta.url));
 
 test('the gallery stages one route per example under the mount prefix', async () => {
-    const app = await startGallery({runtime, port: 0, mountPath: '/js/'});
+    const app = await startGallery({runtime, port: 0, mountPath: '/js/', serverlessDownloadUrl: '/downloads/gallery.zip'});
     const get = path => fetch(app.url + path);
     try {
         assert.equal(app.galleryUrl, `${app.url}/js/`);
+        assert.match(readFileSync(`${app.pages}/index.js`, 'utf8'), /serverlessDownloadUrl = "\/downloads\/gallery.zip"/);
         const index = await get('/js/');
         assert.equal(index.status, 200);
         assert.match(await index.text(), /<title>Gramlot examples<\/title>/);

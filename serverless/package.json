@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/gramlot-serverless",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "No server: Gramlot pages open from one HTML file or a static directory; the page runs in a Web Worker of the browser.",
   "license": "Apache-2.0",
   "repository": {
@@ -44,7 +44,7 @@
     "esbuild": "0.28.2"
   },
   "peerDependencies": {
-    "@gramlot/gramlot-examples": ">=0.3.0"
+    "@gramlot/gramlot-examples": ">=0.3.1"
   },
   "peerDependenciesMeta": {
     "@gramlot/gramlot-examples": {
@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@genrojs/tytx": ">=0.16.2",
-    "@gramlot/gramlot-examples": ">=0.3.0",
+    "@gramlot/gramlot-examples": ">=0.3.1",
     "jsdom": "27.0.1"
   }
 }
