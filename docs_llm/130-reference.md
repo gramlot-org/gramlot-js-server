@@ -100,6 +100,8 @@ not include their sections or routes. Registration form remains an application
 example in the standalone gallery.
 
 
+The staged gallery keeps lesson descriptions and supplies galleryUrls mapping route keys to relative HTML files. The carousel uses this map for lazy full-size and thumbnail frames, both from disk and under a static-host prefix.
+
 <a id="gs-130-035"></a>
 
 ## 035 · Install a directory export

@@ -29,6 +29,9 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     for (const text of ['c03/index.html', 'assets/branding/gramlot-logo-dark.svg', 'gallery/dist/gallery.js']) {
         assert.ok(index.includes(text), text);
     }
+    const carousel = await readFile(join(output, 'assets/workers/l08.js'), 'utf8');
+    assert.ok(carousel.includes('../l07/index.html'), 'nested gallery frames use file routes');
+    assert.ok(index.includes('galleryGuidePanel'), 'the guided lesson is bundled');
     const c03 = await readFile(join(output, 'assets/workers/c03.js'), 'utf8');
     assert.ok(c03.includes('"/c03_aux.js":'));
     assert.ok(c03.includes('../gallery/dist/frame.js'));

@@ -50,10 +50,10 @@ export async function buildStaticGallery({output, catalogs = []}) {
         const content = [];
         for (const {key, title, path, examples} of families) {
             content.push({key, title, readme: await read(join(path, 'README.md')), examples: await Promise.all(
-                examples.map(async ({key, title, folder}) => {
+                examples.map(async ({key, title, description, folder}) => {
                     const {page, logic} = routes[key];
                     // The page module shows its own Logic; only a companion NN_name_aux.js is shown apart.
-                    return {key, title, folder, frameUrl: `${key}/index.html`, readme: await read(join(path, `${folder}.md`)),
+                    return {key, title, description, folder, frameUrl: `${key}/index.html`, readme: await read(join(path, `${folder}.md`)),
                         source: await read(page), logic: logic && logic !== page ? await read(logic) : null};
                 }))});
         }
@@ -65,10 +65,13 @@ export class Page extends GalleryPage {
 }
 `);
         const pages = {index: join(stage, 'index.js')};
+        const galleryUrls = Object.fromEntries(Object.keys(routes).filter(key => key !== 'index')
+            .map(key => [key, `../${key}/index.html`]));
         for (const [key, {page, stylesheet, logic}] of Object.entries(routes)) {
             if (key === 'index') continue;
             await writeFile(join(stage, `${key}.js`), `import {Page as Example} from ${JSON.stringify(page)};
 export class Page extends Example {
+    static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
         await super.main(root, ...args);
         root.script({src: '../gallery/dist/frame.js'});
