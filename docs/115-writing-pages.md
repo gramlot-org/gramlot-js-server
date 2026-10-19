@@ -5,8 +5,10 @@ Document ID: **GS-115**.
 [Paired view](../docs_llm/115-writing-pages.md).
 
 The binding itself (pointers, setters, formulas, controllers, events) is the
-core's: read [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
-This guide covers what is specific to the export without a server.
+core's: read [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html); the structure
+of a page is [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html). This guide covers what is
+specific to the export without a server. The messages between the window and the
+Worker are Part C of the public [server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html).
 
 <a id="gs-115-005"></a>
 
@@ -47,8 +49,9 @@ the folder on disk, on a static host and with `@gramlot/gramlot-js-server`.
 Block ID: **GS-115-010**.
 
 The page logic is the `Logic` export of the page module; else the module
-`<name>_aux.js` beside `<name>.js`, which exports `Logic`. A page with both is an
-error at build: `Two logic modules for one page`. The methods of `Logic` are the
+`<name>_aux.js` beside `<name>.js`, which exports `Logic`; a page with neither has
+no logic methods. A page with both is an error at build: `Two logic modules for one
+page`. The methods of `Logic` are the
 root logic group of the page: `func: 'greeting'` names `Logic.prototype.greeting`.
 A formula method is called as `method(kwargs)` and returns the value; a controller
 method as `method(node, kwargs)`.
@@ -92,10 +95,13 @@ A URL that points outside the export is not served by anything.
 Block ID: **GS-115-020**.
 
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 The Worker answers them with the envelope `contentType: 'source'`; the
-[Reference](130-reference.md) lists the messages.
+[Reference](130-reference.md) lists the messages. The Worker transport has no
+synchronous call: a `dataRemote` with `sync` (the default) reads asynchronously
+here, and `gramlot.rpc.callSync` throws; over HTTP the same declaration reads
+synchronously ([Remote content and lazy Data](https://gramlot.readthedocs.io/en/latest/docs/public/099-remote-content.html)).
 
 <a id="gs-115-025"></a>
 
@@ -113,15 +119,6 @@ Block ID: **GS-115-025**.
   access to a Python server or persistent server state.
 - Public: everything in the export is readable by whoever opens it, the page
   logic included. Keep secrets out of pages and their modules.
-
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.
 
 <a id="gs-115-035"></a>
 ## 035 · Page formatting context

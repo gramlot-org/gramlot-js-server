@@ -23,16 +23,18 @@ Block ID: **GN-120-005**.
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
 | `runtimeUrl`, `rpcUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/rpc`, `/gramlot/close` | `GramlotServer` URLs |
 | `rootId` | string | `'gramlot-root'` | Root element id |
-| `pageTtl` | number | `1800` | Seconds a page stays registered |
+| `pageTtl` | number | `1800` | Seconds a page stays registered without a call (opening and each call start the period again) |
 | `maxPages` | integer | `1000` | Registry capacity; above: 503 |
+| `cssTheme` | string or `false` | `'gramlot-base'` | Base theme of every page (core themes folder); `false` none; a page replaces it with `static css_theme` |
+| `collections` | array | `[]` | Component collections (section 035) |
 | `reload` | boolean or `null` | `null` | `GramlotFileServer`: re-import a changed page module; `null` → from `GRAMLOT_DEV` |
 
 `GramlotServer` options and `reload` reach `GramlotFileServer` only when the adapter builds it.
 `GRAMLOT_DEV`: unset → `gramlot.min.js`, page modules imported once; `YES` →
 `gramlot.min.js`, changed page modules re-imported; `DEBUG` → `gramlot.js`,
 re-imported; other values fail the start. Same runtime URL in every mode.
-`rpcUrl`: every request envelope (main, Source methods, endpoints); `mainUrl`/`sourceUrl`
-removed by core 0.2.14, no `/gramlot/main` or `/gramlot/source` route.
+`rpcUrl`: every request envelope (main, Source methods, endpoints); there is no
+`/gramlot/main` or `/gramlot/source` route.
 
 <a id="gn-120-010"></a>
 
@@ -44,8 +46,7 @@ Block ID: **GN-120-010**.
 `/app/gramlot/rpc|close`, `/app/index.css`; relative and absolute
 `Page.css` unchanged; never `/app/app/`. Requests carry the prefix: the adapter
 removes it; outside it 404; `/app` → 301 `/app/`. A front server forwards the
-path unchanged ([Deployment](025-deployment.md)). Until 0.2.3 the front server
-removed it.
+path unchanged ([Deployment](025-deployment.md)).
 
 <a id="gn-120-015"></a>
 
@@ -83,9 +84,11 @@ derive the owner from the application's session.
 
 Block ID: **GN-120-025**.
 
-No body size limit in the adapter (a front proxy may set one), content type
-`application/json` (415); `pageTtl` positive and finite, pruned at openings and rpc; `maxPages`
-→ 503; `close()` clears the registry and stops the server.
+No body size limit in the adapter (a front proxy may set one), media type
+`application/json` (415; `charset` accepted), body UTF-8 (a leading byte order mark is
+removed, invalid bytes 400); `pageTtl` positive and finite, a page expires `pageTtl` seconds
+after its last use, pruned at openings and rpc; `maxPages` → 503; `close()` clears the
+registry and stops the server.
 
 <a id="gn-120-030"></a>
 
@@ -99,10 +102,8 @@ with that type; `HEAD` headers only; other methods 405. Key without `/`, or no
 (when the core has the file), assets, companions, pages.
 
 <a id="gn-120-035"></a>
-## 035 · Application component collections (development)
+## 035 · Application component collections
 
 Block ID: **GN-120-035**.
 
-The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.
-
-This is the initial 0.3 development increment; no new package release is implied.
+The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`; the core guide [Components](https://gramlot.readthedocs.io/en/latest/docs/public/105-components.html) describes an entry. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.

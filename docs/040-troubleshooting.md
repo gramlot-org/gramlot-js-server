@@ -14,9 +14,8 @@ Block ID: **GN-140-005**.
 **Causes.** The file is not below the pages folder: it is a symlink to another
 place, or the path contains `..`. Or the file does not share the page's name
 (`index.css` for `index.js`). Or the request path does not carry the mount
-prefix: a front server configured for 0.2.3 removes it
-(`proxy_pass http://127.0.0.1:8080/;`), and since 0.2.4 the adapter answers 404
-outside `mountPath`.
+prefix: a front server that removes it (`proxy_pass http://127.0.0.1:8080/;`)
+makes the adapter answer 404, because it answers 404 outside `mountPath`.
 
 **Fix.** Place the file beside the page with the page's name; configure the front
 server to forward the path unchanged (`proxy_pass` without URI,
@@ -53,7 +52,8 @@ Block ID: **GN-140-015**.
 **Symptom.** `POST /gramlot/rpc` answers 200 with the outcome `page_expired`
 (`RpcError` with `code: 'page_expired'` in the browser) for a page that was open.
 
-**Causes.** More than `pageTtl` seconds (default 1800) passed since the opening;
+**Causes.** More than `pageTtl` seconds (default 1800) passed without a call to the
+page (opening it and every call start the period again);
 the page was closed; the server restarted and its registry is empty; the
 request's owner differs from the owner at opening (another browser, or a browser
 that cleared its `gramlot_owner` cookie).
@@ -98,6 +98,9 @@ Block ID: **GN-140-025**.
   page's `Logic`.
 - **`Two logic modules for one page`.** The page module exports `Logic` and an
   `_aux.js` beside it exports another: keep one.
+- **`named logic '…' not found`.** A `func` names a method that the page logic does
+  not have: the page module exports no `Logic`, the export is misspelt (`logic`) or
+  the method has another name.
 - **The browser cannot import the page module** (`Failed to resolve module
   specifier`). The page module imports a package that exists only on the server:
   move that import to a module the page module does not import, or keep the logic

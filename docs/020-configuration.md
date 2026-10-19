@@ -26,8 +26,10 @@ Block ID: **GN-120-005**.
 | `rpcUrl` | string | `'/gramlot/rpc'` | `GramlotServer` option: URL that receives every request envelope |
 | `closeUrl` | string | `'/gramlot/close'` | `GramlotServer` option: URL of the close endpoint |
 | `rootId` | string | `'gramlot-root'` | `GramlotServer` option: id of the root element |
-| `pageTtl` | number | `1800` | `GramlotServer` option: seconds a registered page stays open without a close |
+| `pageTtl` | number | `1800` | `GramlotServer` option: seconds a registered page stays open without a call; opening it and every call to it start the period again |
 | `maxPages` | integer | `1000` | `GramlotServer` option: registered pages at most; above it, 503 |
+| `cssTheme` | string or `false` | `'gramlot-base'` | `GramlotServer` option: the base theme of every page, the name of a folder of the core themes; `false` loads none. A page replaces it with `static css_theme` |
+| `collections` | array | `[]` | `GramlotServer` option: the component collections of the application; see section 035 |
 | `reload` | boolean or `null` | `null` | `GramlotFileServer` option: import a page module again when its file changes; `null` takes the value from `GRAMLOT_DEV` |
 
 The `GramlotServer` options and `reload` reach `GramlotFileServer` only when the adapter builds it. A custom `server`
@@ -41,8 +43,7 @@ again as `YES`. Any other value fails the start. The runtime URL is `runtimeUrl`
 every mode.
 
 `rpcUrl` receives the request envelopes of `main`, of the Source methods and of the
-endpoints. Core 0.2.14 removed `mainUrl` and `sourceUrl`; the adapter has no route
-`/gramlot/main` or `/gramlot/source`.
+endpoints; the adapter has no route `/gramlot/main` or `/gramlot/source`.
 
 <a id="gn-120-010"></a>
 
@@ -60,8 +61,7 @@ Request paths carry the prefix: `GET /app/orders` opens the page `orders`. The
 adapter removes the prefix before serving runtime, themes, assets, companions,
 endpoints and pages; a path outside the prefix answers 404, and the prefix
 without its final slash (`/app`) answers 301 to `/app/`. A front server forwards
-the path unchanged ([Deployment](025-deployment.md)). Until 0.2.3 request paths
-arrived without the prefix and the front server removed it.
+the path unchanged ([Deployment](025-deployment.md)).
 
 <a id="gn-120-015"></a>
 
@@ -118,9 +118,12 @@ header.
 Block ID: **GN-120-025**.
 
 - The bodies of rpc and close have no size limit in the adapter; a proxy in front
-  may set one. The content type must start with `application/json`, else 415.
-- Pages expire `pageTtl` seconds after opening; expired pages are pruned at each
-  opening and each rpc request. `pageTtl` must be positive and finite.
+  may set one. The media type must be `application/json` (parameters such as
+  `charset` are accepted), else 415. A body is read as UTF-8; a leading byte
+  order mark is removed and invalid bytes answer 400.
+- A page expires `pageTtl` seconds after its last use: opening it and every call
+  that names it for its owner start the period again. Expired pages are pruned at
+  each opening and each rpc request. `pageTtl` must be positive and finite.
 - `maxPages` registered pages at most; `ServerCapacity` answers 503.
 - `close()` on the returned application clears every registered page and stops
   the server.
@@ -146,10 +149,8 @@ request. Order of the rules: runtime, core themes (`/themes/`, when the core has
 the file), assets, companions below the pages folder, pages.
 
 <a id="gn-120-035"></a>
-## 035 · Application component collections (development)
+## 035 · Application component collections
 
 Block ID: **GN-120-035**.
 
-The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.
-
-This is the initial 0.3 development increment; no new package release is implied.
+The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`; the core guide [Components](https://gramlot.readthedocs.io/en/latest/docs/public/105-components.html) describes an entry. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.

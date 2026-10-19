@@ -22,11 +22,12 @@ current release is 0.2.13, the same version for the three:
 | `@gramlot/gramlot-serverless` | [`serverless/`](serverless/) | the pages open without a server: one HTML file or one static directory |
 | `@gramlot/gramlot-js-server` | [`server/`](server/) | you serve the pages from a Node.js 22 or Bun process |
 
-A page is one JavaScript module that exports two classes: `Page`, which builds the
-page, and `Logic`, the methods the page calls in the browser. The same page runs
-in both packages. Without a server it runs in a Web Worker of the browser; with
-the server, `main` runs on the server. Pages in Python are served by
-[gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server).
+A page is one JavaScript module that exports `Page`, which builds the page, and,
+when the page has named logic, `Logic`, the methods the page calls in the browser.
+The same page runs in both packages. Without a server it runs in a Web Worker of
+the browser; with the server, `main` runs on the server. The server follows the
+public [server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html) of the core. Pages in Python
+are served by [gramlot-py-server](https://github.com/gramlot-org/gramlot-py-server).
 
 ## Start here: a new project
 
@@ -173,8 +174,12 @@ Follow [Update packaged galleries and exports](docs/010-tutorial.md#gn-110-035) 
     [Troubleshooting](https://gramlot-js-server.readthedocs.io/en/latest/040-troubleshooting.html).
 - The core: [The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html),
   [Classes, repository and server adapters](https://gramlot.readthedocs.io/en/latest/docs/public/090-classes-and-hosts.html)
-  (the shared adapter contract: mount prefix, page logic, CSP profiles),
-  [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
+  (mount prefix, page logic, CSP profiles),
+  [Server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html) (what every server answers),
+  [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html),
+  [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html),
+  [Calling the server](https://gramlot.readthedocs.io/en/latest/docs/public/098-server-calls.html) and
+  [Remote content and lazy Data](https://gramlot.readthedocs.io/en/latest/docs/public/099-remote-content.html).
 
 ## Compatibility
 

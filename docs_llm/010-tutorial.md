@@ -52,7 +52,7 @@ export class Logic {
 
 `^.name` binds both ways under `person`; `live: true` writes per keystroke;
 `dataFormula` calls the named method `greeting`, `_init` once before the DOM;
-`dataSetter` sets `Ada`. Details: [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
+`dataSetter` sets `Ada`. Details: [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html), [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html).
 
 <a id="gn-110-015"></a>
 
@@ -62,8 +62,8 @@ Block ID: **GN-110-015**.
 
 `Logic` runs in the browser, `main` on the server. The browser imports the page
 module for its `Logic`: public, imports must resolve in the browser
-(`@gramlot/gramlot/page` through the import map). `index_aux.js` still admitted;
-both → error.
+(`@gramlot/gramlot/page` through the import map). `index_aux.js` also admitted;
+both → error. `Logic` is optional: no named logic, no class.
 
 <a id="gn-110-020"></a>
 
@@ -77,8 +77,9 @@ Block ID: **GN-110-020**.
 body { font-family: sans-serif; margin: 2rem; }
 ```
 
-Shared: `static css = ['/site.css']` below `pages/`; core theme
-`/themes/gramlot-base/theme.css`, served from the installed core.
+Shared: `static css = ['/site.css']` below `pages/`. The base theme `gramlot-base` needs
+no line: the server loads it before the stylesheets of every page and the adapter serves it
+from the installed core.
 
 <a id="gn-110-025"></a>
 
@@ -109,14 +110,13 @@ The page shows `Name`, a field with `Ada` and `Hello, Ada` in sans-serif. Typing
 → `person.greeting` → paragraph. Verified 2026-10-04, Playwright Chromium 153,
 Node and Bun, no console errors.
 
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.
+**Learning path.** After this environment's setup, follow
+[Learn by topic](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015)
+of the core. The gallery is a source viewer, not a file editor: edit a separate
+project. `Page` runs on the host, `Logic` in the browser. Reload or reopen the
+page after saving; development reload is not automatic hot reload. Use named
+`Logic` for reusable behavior; inline examples need the permissive CSP profile.
+The common examples do not cover every advanced case.
 
 <a id="gn-110-035"></a>
 

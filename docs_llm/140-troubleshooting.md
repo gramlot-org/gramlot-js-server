@@ -18,8 +18,8 @@ Block ID: **GS-140-005**.
   installations linked) → import `@gramlot/gramlot/page`, one installation.
 - `Standalone module not provided: /<name>.js`: custom `mount` without
   `modules` → pass the logic module URL.
-- `/<name>.js: import failed: <reason>`: the logic module throws or has no valid
-  `Logic` → fix it.
+- `/<name>.js: import failed: <reason>`: the logic module throws or its `Logic` export
+  is not a valid class → fix it.
 - `Standalone Page.css must be an array of strings` → `static css = ['/x.css']`.
 - `Standalone CSS with assetRoot must be root-relative without traversal`,
   `Standalone CSS must remain under assetRoot` → `/inside/export.css`, the file in
@@ -40,9 +40,7 @@ changed or node inserted after the start: write it in `main` or a
 `Logic` method with `func`); `'<attribute>' is inline code and cannot be the pointer '<pointer>'; inline code
 is never read from Data` (pass data as parameters); `… has the form of a native event
 handler …` (use `connect_onclick`); `… holds a javascript: URL …` in `href`, `src`,
-`formaction`, `xlink:href` (use `connect_onclick` or a button `action`). A file built
-with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
-'unsafe-eval') …`: rebuild with 0.2.3 or later. The directory export sets no policy of its own.
+`formaction`, `xlink:href` (use `connect_onclick` or a button `action`). The directory export sets no policy of its own.
 
 <a id="gs-140-015"></a>
 
@@ -51,12 +49,12 @@ with 0.2.2 has no `'unsafe-eval'` and fails with the core `EvalError … (no
 Block ID: **GS-140-015**.
 
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 Outcomes of the Worker envelope (`RpcError` with `code` in the window):
 `not_found` (`Unknown Source method`: unmarked method; page code does
 not call `remoteSource` yet);
-`page_expired` (`Unknown, expired or unowned page`: core default 1800 s expiry → reload);
+`page_expired` (`Unknown, expired or unowned page`: no call for 1800 s, the core default → reload);
 `Worker transport is disposed`
 / `Worker communication failed` (disposed or crashed → reload, read the earlier
 error).

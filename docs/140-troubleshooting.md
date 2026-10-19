@@ -18,7 +18,7 @@ Block ID: **GS-140-005**.
 | --- | --- | --- |
 | `Page modules must export a subclass of Page` | The module exports no `Page`, or its `Page` extends a second copy of the core: the page imports the core under a retired package name (`@genro/gramlot`, `@gramlot/native-html`) instead of `@gramlot/gramlot`, as the exporter does, or two installations are linked | Import `@gramlot/gramlot/page` in the page; keep one core installation in `node_modules` |
 | `Standalone module not provided: /<name>.js` | A custom shell called `mount` without the logic module in `modules` | Pass `modules: {'/<name>.js': url}`; the exported documents do this themselves |
-| `/<name>.js: import failed: <reason>` | The logic module throws at import, or has no valid `Logic` class | Fix the module; it must `export class Logic` with plain methods |
+| `/<name>.js: import failed: <reason>` | The logic module throws at import, or its `Logic` export is not a valid class | Fix the module; an export `Logic` must be a class with plain methods |
 | `Standalone Page.css must be an array of strings` | `static css` is not an array of strings | Declare `static css = ['/theme.css']` or leave it out |
 | `Standalone CSS with assetRoot must be root-relative without traversal`, `Standalone CSS must remain under assetRoot` | A directory export with a relative, protocol-relative or `..` stylesheet URL | Use `/path/inside/export.css` with the file in the folder of the pages (or in `assets`) |
 | Nothing happens, the console shows a `script-src` violation | The file was edited after the build: the hash in the policy no longer matches the script | Rebuild; never edit the exported script |
@@ -40,10 +40,7 @@ refuses these cases, naming the node and the attribute:
 | `'<attribute>' has the form of a native event handler, run by the browser outside Gramlot; write connect_<attribute> for an event, or rename the attribute` | An attribute such as `onclick` | Use `connect_onclick` |
 | `'<attribute>' holds a javascript: URL, run by the browser as code; write connect_onclick or the action of a button instead` | `href`, `src`, `formaction` or `xlink:href` starts with `javascript:` | Use `connect_onclick` or a button `action` |
 
-A file built with gramlot-js-server 0.2.2 has no `'unsafe-eval'`: its inline code
-fails with `EvalError: … inline code blocked by the Content Security Policy of the
-page (no 'unsafe-eval') …`. Rebuild it with 0.2.3 or later. The directory export carries no
-policy of its own.
+The directory export carries no policy of its own.
 
 <a id="gs-140-015"></a>
 
@@ -52,15 +49,15 @@ policy of its own.
 Block ID: **GS-140-015**.
 
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 The outcomes below come from the Worker answering an envelope; in the window
 `remoteSource` rejects with an `RpcError` carrying the `code`.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
 | `not_found` (`Unknown Source method`) | `remoteSource` called with a method not marked by `Page.registerSource` | Declare the fragment with `Page.registerSource` and use its exact name in `remote` |
-| `page_expired` (`Unknown, expired or unowned page`) | The page registered in the Worker expired (core default 1800 s), or the page ID is wrong | Reload the file; the exporter uses the core defaults |
+| `page_expired` (`Unknown, expired or unowned page`) | The page registered in the Worker expired (no call for 1800 s, the core default), or the page ID is wrong | Reload the file; the exporter uses the core defaults |
 | `Worker transport is disposed` | The instance was disposed, or the Worker crashed (`Worker communication failed`) | Reload; look for the earlier error in the console |
 
 <a id="gs-140-020"></a>

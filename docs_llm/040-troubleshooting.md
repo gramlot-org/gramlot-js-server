@@ -10,7 +10,7 @@ Block ID: **GN-140-005**.
 
 `/index.css` or `/index.js` 404: the file is a symlink or path leaving the pages
 folder, does not share the page's name, or the request path lacks the mount
-prefix (a 0.2.3 front that removes it). Place it beside the page by name; forward
+prefix (a front that removes it, `proxy_pass …/;`). Place it beside the page by name; forward
 the path unchanged (`proxy_pass` without URI). Only `.css` and `.js` below the
 pages folder are served.
 
@@ -31,7 +31,7 @@ Block ID: **GN-140-010**.
 
 Block ID: **GN-140-015**.
 
-rpc answers the outcome `page_expired` (`RpcError`) for an open page: `pageTtl` (1800 s) elapsed, page closed,
+rpc answers the outcome `page_expired` (`RpcError`) for an open page: `pageTtl` (1800 s) elapsed without a call, page closed,
 server restarted, or a different owner (another browser, cleared `gramlot_owner` cookie). Reload; raise
 `pageTtl`; keep `ownerForRequest` stable.
 
@@ -60,6 +60,8 @@ Block ID: **GN-140-025**.
 - 413: from the proxy in front, the adapter sets no limit; raise the proxy limit.
 - A changed page not visible: restart the server.
 - `Two logic modules for one page`: `Logic` in the module and in `_aux.js`; keep one.
+- `named logic '…' not found`: the page logic has no such method (no `Logic`, misspelt
+  export `logic`, or another method name).
 - Browser cannot resolve an import of the page module: a server-only import; move
   it out or use `_aux.js`.
 - `The gallery needs @gramlot/gramlot-examples`: install it.

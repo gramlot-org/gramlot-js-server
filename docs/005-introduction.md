@@ -20,11 +20,19 @@ The package also installs the command `gramlot`: `gramlot node gallery` and
 `gramlot bun gallery` serve the gallery of `@gramlot/gramlot-examples`
 ([Reference](030-reference.md)).
 
-The adapter owns the HTTP side: routing, bounded payload parsing, the response
-and error mapping, the request identity, the mount prefix and the Content
+The adapter owns the HTTP side: routing, payload parsing, the response
+and error mapping, the owner of each request, the mount prefix and the Content
 Security Policy header. The core's `GramlotServer` owns the pages: it finds the Page class,
 builds the bootstrap document, runs `main` and the remote Source methods, and
 closes the page. No database and no Python process are involved.
+
+What the adapter answers over HTTP is the public
+[server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html) of the core: Part A is the
+contract that `GramlotServer` implements, Part B the HTTP rules that the adapter
+implements (methods and `Allow`, status codes, the owner cookie, headers,
+companion and theme files). The adapter calls the common API of the core
+(`decodeBody`, `call`, `close`, `companionFile`, `themeFile`, `openPage`) and
+adds only HTTP.
 
 <a id="gn-105-010"></a>
 
@@ -36,11 +44,15 @@ Block ID: **GN-105-010**.
    the `GramlotServer` to open the page: `GramlotFileServer` maps the path to `index.js` or
    `orders.js` in the pages folder and registers a page instance with a TTL.
 2. **Bootstrap document.** The answer is a small HTML document: a root `div`, a
-   module script with a nonce, the page's resources (the `Page.css` URLs, the
-   page stylesheet, the page logic module), the URLs `rpcUrl` and `closeUrl` and the
-   `capabilities` of the server (none: `[]`).
-   The page logic module is the page module itself when it exports `Logic`.
-   When a Content Security Policy is configured, the header carries the nonce.
+   module script with a nonce, the page's resources (the base theme, the
+   `Page.css` URLs, the page stylesheet and, when the page has named logic, the page
+   logic module), the URLs `rpcUrl` and `closeUrl`, the `capabilities` of the server
+   (none: `[]`) and the `nameSyntax` of method names.
+   The page logic module is the page module itself when it exports `Logic`, else
+   `<name>_aux.js`.
+   When a Content Security Policy is configured, the header carries the nonce. The
+   response sets the owner cookie `gramlot_owner`, unless the application gives
+   `ownerForRequest`.
 3. **Runtime.** The script imports the Gramlot runtime from `/assets/gramlot.js`,
    served by the adapter from the installed core. An import map of the bootstrap
    resolves `@gramlot/gramlot/page`, imported by the page module, to the same
@@ -57,11 +69,15 @@ Block ID: **GN-105-010**.
    `contentType: 'source'` builds a Source branch, `contentType: 'data'` runs an
    endpoint (`Page.registerEndpoint`, called by `dataRpc`). A failure is an outcome
    inside the response envelope (`page_expired`, `not_found`, `not_authenticated`,
-   `not_authorized`, `application_error`), always with status 200. Declare Source fragments with `Page.registerSource` and mount them with
-   `remote`; `dataRemote` loads endpoint values on demand. See the
-   [shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-105).
+   `not_authorized`, `application_error`), always with status 200. Declare Source
+   fragments with `Page.registerSource` and mount them with `remote`; `dataRemote`
+   loads endpoint values on demand. See
+   [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+   and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 7. **Close.** When the browser leaves the page it posts the page ID to
-   `/gramlot/close`; the TTL covers the cases where that request is lost.
+   `/gramlot/close`. A page that no call names for `pageTtl` seconds expires, which
+   covers the cases where that request is lost; every call to a page that has
+   not expired starts the period again.
 
 <a id="gn-105-015"></a>
 
@@ -76,5 +92,7 @@ Block ID: **GN-105-015**.
   core themes under `/themes/`, the `.css` and `.js` files below the pages folder and the
   files listed in `assets` ([Configuration](020-configuration.md)); a front server
   serves the rest ([Deployment](025-deployment.md)).
-- Authentication: the adapter passes a request identity to the `GramlotServer` through
-  `ownerForRequest`; it does not implement sessions or logins.
+- Authentication: the adapter gives each browser an owner, through the cookie
+  `gramlot_owner` or the owner that `ownerForRequest` returns; it does not implement
+  sessions or logins and passes no identity to the `GramlotServer`: an `auth` rule
+  answers `not_authenticated`.

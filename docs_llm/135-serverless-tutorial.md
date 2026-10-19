@@ -15,7 +15,7 @@ both projects in CI (`create/test/create.test.js`).
 Block ID: **GS-135-005**.
 
 Node.js 22+ with npm to build; a browser to open. Each page: one module, `Page`
-(builds) and `Logic` (methods called while it runs).
+(builds) and, when the page has methods, `Logic` (methods called while it runs).
 
 <a id="gs-135-010"></a>
 
@@ -95,11 +95,10 @@ for development (page template: the project folder, `node_modules` included;
 [Deployment](025-deployment.md)).
 [Introduction](005-introduction.md).
 
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.
+**Learning path.** After this environment's setup, follow
+[Learn by topic](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015)
+of the core. The gallery is a source viewer, not a file editor: edit a separate
+project and build again after saving. `Page` runs in a Web Worker, `Logic` in the window.
+Use named `Logic` for reusable behavior; inline code runs in the single file (its policy
+allows `'unsafe-eval'`) and in a directory export without a policy. The common examples do
+not cover every advanced case.

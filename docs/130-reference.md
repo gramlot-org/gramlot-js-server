@@ -69,9 +69,16 @@ Block ID: **GS-130-015**.
   request envelope (TYTX text) and resolves with the response envelope text, as the
   core `HttpTransport`; `close(pageId)` sends the close message; `dispose(error)`;
   `pending` (outstanding requests), `closed`. A Worker `error` or `messageerror`
-  event disposes it and rejects every pending request.
+  event disposes it and rejects every pending request. It declares no
+  `supportsCallSync`: `gramlot.rpc.callSync` throws and a `dataRemote` with `sync`
+  reads asynchronously.
+- `WorkerServerAdapter` (`serverless/src/worker-server-adapter.js`, not a package
+  entry): the core `ServerAdapter` of a page whose server runs in a Worker. Its
+  `createTransport()` returns the `WorkerTransport` that opened the page; the
+  exported documents give it to `PageBootstrap`.
 - `GramlotWorkerServer` (`serverless/src/gramlot-worker-server.js`): extends the core
-  `GramlotServer` and realises the server protocol in a Worker (GC-230 Part C) over
+  `GramlotServer` and realises the server protocol in a Worker (Part C of the
+  public [server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html)) over
   `postMessage`:
 
   | Window sends | Worker answers |
@@ -87,8 +94,8 @@ Block ID: **GS-130-015**.
   null; `auth` rules answer `not_authenticated`.
 
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 
 <a id="gs-130-020"></a>
 
@@ -117,9 +124,9 @@ Block ID: **GS-130-025**.
 
 | Script | Checks |
 | --- | --- |
-| `npm test` | 32 tests: exporter output and failure handling, stylesheets, page logic, directory and folder export, gallery, bundles, `GramlotWorkerServer` and transport, `mount`, the quick start with typing (jsdom) |
+| `npm test` | Exporter output and failure handling, stylesheets, page logic, directory and folder export, gallery, bundles, `GramlotWorkerServer` and transport, `mount`, the quick start with typing (jsdom) |
 | `serverless/scripts/verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` | A page with `Page` and `Logic` in one module, a core theme, `Page.css` and its stylesheet, as one file and as a directory |
-| `serverless/scripts/verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` | `gramlot-serverless gallery` from disk: the gallery page, frames and theme, every example, the `Logic` of b08, c03 and c08 |
+| `serverless/scripts/verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` | `gramlot-serverless gallery` from disk: the gallery page, frames and theme, every example, the `Logic` of the examples that call its methods |
 | `serverless/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |
 | `serverless/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |
 | `serverless/scripts/verify_inline_browser.mjs HTML PLAYWRIGHT [EXECUTABLE] [ENGINE]` | An exported file with inline code (`examples/inline-code`): formula, controller, `==`, `_if`/`_else`, `action`, `connect_onclick` and a remote Source, no CSP violation, no HTTP(S) |
@@ -138,8 +145,8 @@ gramlot-serverless gallery OUTPUT [--catalog CATALOG.json PAGES]...
 
 writes the gallery of `@gramlot/gramlot-examples` as a directory that opens from
 disk: `OUTPUT/index.html` is the gallery page, each example is the route
-`<key>/` (`OUTPUT/c03/index.html`). It holds every common family (`e01`–`e13`,
-`b01`–`b11`, `c01`–`c17`), the registration-form example (`serverless-02`, the page
+`<key>/` (`OUTPUT/<key>/index.html`). It holds every family of the common
+`catalog.json` of the installed examples package, the registration-form example (`serverless-02`, the page
 of `npm create @gramlot page`) and the families of
 each `--catalog`. The command prints `Built <output>: the gallery and <n> examples;
 open index.html`.

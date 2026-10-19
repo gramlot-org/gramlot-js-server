@@ -48,11 +48,17 @@ browser:
 1. The runtime script of the exported document calls `mount`. `mount` creates the
    Worker from the bundled script and sends it the `open` request.
 2. The window sends `{id, open: true}`. In the Worker, `GramlotWorkerServer` registers
-   the Page and answers with the page ID, the title, `capabilities: []` and the resources: the stylesheet URLs (none in the single file,
-   which holds the stylesheets) and the URL that names the page logic module.
+   the Page and answers with the page ID, the title, `capabilities: []`, the
+   `nameSyntax` of method names and the resources: the stylesheet URLs (none in the
+   single file, which holds the stylesheets and the theme) and, when the page has
+   named logic, the URL that names the page logic module.
 3. In the window, the core `PageBootstrap` writes the stylesheet links, imports
    the logic module and registers its `Logic` class, creates the `Gramlot`
-   instance (`window.gramlot`) and starts the page.
+   instance (`window.gramlot`) and starts the page. The server adapter of the page
+   is a `WorkerServerAdapter`, a core `ServerAdapter` that hands the Worker
+   transport to the core: over `postMessage` there is no synchronous call, so
+   `gramlot.rpc.callSync` throws and a `dataRemote` with `sync` reads
+   asynchronously. Over HTTP it reads synchronously.
 4. The start sends the request envelope of `main` to the Worker, the same envelope a
    server receives on `/gramlot/rpc`. The Worker passes it to `GramlotServer.call`,
    which runs `Page.main` and answers with the response envelope holding the Source.
@@ -60,13 +66,14 @@ browser:
 5. Every other call is an envelope as well: `contentType: 'source'` builds a Source
    branch, `contentType: 'data'` runs an endpoint (`Page.registerEndpoint`), by
    message instead of HTTP. Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 6. `window.gramlot.dispose()` terminates the Worker; a dedicated Worker also
    ends with its document. Nothing is sent anywhere.
 
 The page logic is the `Logic` export of the page module, else the module
-`<page>_aux.js` beside it. It runs in the window only, and imports
+`<page>_aux.js` beside it; a page with neither has no logic methods. It runs in
+the window only, and imports
 `@gramlot/gramlot/page` from the core of the window: one core instance in the
 window. Inline code of the Source runs in the window as well
 ([Configuration](120-configuration.md)).

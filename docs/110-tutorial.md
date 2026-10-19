@@ -24,8 +24,8 @@ npm install
 cd serverless
 ```
 
-A page is one JavaScript module that exports `Page` and `Logic`. The tutorial uses
-`serverless/examples/quickstart/`:
+A page is one JavaScript module that exports `Page` and, when the page has named
+logic, `Logic`. The tutorial uses `serverless/examples/quickstart/`:
 
 ```text
 examples/quickstart/
@@ -79,8 +79,9 @@ Block ID: **GS-110-015**.
 `func: 'greeting'` in the page names the method `greeting` of `Logic`; a formula
 method receives the resolved parameters and returns the value. `main` runs in the
 Worker; `Logic` runs in the window. The exporter takes the `Logic` export of the
-page module; a module `page_aux.js` beside `page.js` that exports `Logic` is still
-admitted, and both at once are an error. For a short computation, inline code in
+page module; a module `page_aux.js` beside `page.js` that exports `Logic` is also
+admitted, and both at once are an error. A page without named logic needs no
+`Logic`. For a short computation, inline code in
 the page (`formula: 'a * 2'`) runs as well ([Configuration](120-configuration.md)).
 
 <a id="gs-110-020"></a>
@@ -180,8 +181,9 @@ Block ID: **GS-110-030**.
   `Page.css`, what the bundle accepts.
 - [Configuration](120-configuration.md): every option of `build`, `buildDirectory`
   and `mount`, and the Content Security Policy of the export.
-- The core guide [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html)
-  for pointers, setters, formulas, controllers and events.
+- The core guides [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html) for
+  pointers, setters, formulas, controllers and events, and
+  [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html) for the structure of a page.
 
 
 <a id="gs-110-035"></a>

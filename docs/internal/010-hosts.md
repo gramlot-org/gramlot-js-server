@@ -4,13 +4,14 @@ orphan: true
 
 # 010 · Node and Bun hosts
 
-> **Historical record (2026-09-24 to 2026-10-03):** describes the Node and Bun adapter
-> from the 0.1.0 profile to 0.2.3; not the current state. Current: the server guides
-> GN-105 to GN-140 ([Introduction](https://gramlot-js-server.readthedocs.io/en/latest/005-introduction.html),
+> **Internal note.** How the Node and Bun adapter is built and verified. For use, read
+> the server guides GN-105 to GN-140 ([Introduction](https://gramlot-js-server.readthedocs.io/en/latest/005-introduction.html),
 > [Configuration](https://gramlot-js-server.readthedocs.io/en/latest/020-configuration.html), [Reference](https://gramlot-js-server.readthedocs.io/en/latest/030-reference.html))
-> and [CONTRIBUTING.md](../../CONTRIBUTING.md) for the checks.
+> and [CONTRIBUTING.md](../../CONTRIBUTING.md) for the checks. The earlier names of this
+> note (`Host`, `FileHost`, the minimal Host contract of the 0.1.0 and 0.2.0 profiles) are
+> `GramlotServer` and `GramlotFileServer` of the core.
 
-Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract, published on npm as `@gramlot/gramlot-js-server`.
+Document ID: **GN-010**. Adapter between the core `GramlotServer` and HTTP, published on npm as `@gramlot/gramlot-js-server`.
 
 <a id="gn-010-005"></a>
 
@@ -19,34 +20,41 @@ Document ID: **GN-010**. Adapter for the Gramlot 0.2.0 minimal Host contract, pu
 Block ID: **GN-010-005**.
 
 `@gramlot/gramlot-js-server` exports `/node` (Node) and `/bun` (Bun), declared in
-`server/package.json`. Each exports `startServer({pages, hostname, port})`.
+`server/package.json`. Each exports `startServer({pages, hostname, port, …})`.
 `pages` is the installed application's trusted JS pages directory; `port: 0` selects
-an available port. The result exposes `url`, `host`, `server` and asynchronous
-`close()`, which closes sockets and clears page registrations.
+an available port. The result exposes `url`, `gramlotServer`, `server` and asynchronous
+`close()`, which clears the page registrations and closes sockets.
 
-Gramlot 0.2.0 minimal Host contract: `resolvePage(path)` returns the Page class,
+The core `GramlotServer` contract: `resolvePage(path)` returns the Page class,
 `resolveResources(path, PageClass)` returns `{css: [url], js: [{url, group}]}` and
-`openPage(path, {owner, prefix})` returns `{pageId, html, nonce}`. Without `host`, the
-adapter builds `new FileHost(pages, options)`; `options` are the Host URL, TTL and
-capacity options. A custom `host` implements the two resolve methods.
+`openPage(path, {owner, prefix})` returns `{pageId, html, nonce}`. Without `server`, the
+adapter builds `new GramlotFileServer(pages, options)`; `options` are the
+`GramlotServer` options (URLs, `pageTtl`, `maxPages`, `cssTheme`, `collections`) and
+`reload`. A custom `server` implements the two resolve methods.
 
 - `mountPath` (default `""`) is passed to `openPage` as the mount prefix at each
-  opening. Request paths arrive without it: at the root, or behind a server that
-  strips the mount before dispatch, as in `gramlot-uvicorn`.
+  opening and carried by every request path: the adapter removes it, answers 404
+  outside it and 301 for the prefix without its final slash. A front server forwards
+  the path unchanged.
 - `contentSecurityPolicy` (default `null`) is the application's policy. The adapter
   sends it as the `Content-Security-Policy` header of each HTML page, with `{nonce}`
   replaced by the bootstrap nonce of that opening. Strict profile:
   `script-src 'nonce-{nonce}'; object-src 'none'; base-uri 'none'`, named logic only.
   Permissive profile: the same with `'unsafe-eval'`, inline code active.
-- GET and HEAD serve a `.css` or `_aux.js` file whose real path is below the pages
-  folder (`host.pagesDir`): the FileHost companions and `Page.css` files placed there.
-  Every other file of the folder, and every path whose real path leaves it, is 404;
-  another method is 405. `Page.css` URLs outside the folder are application assets.
+- GET and HEAD serve a `.css` or `.js` file whose real path is below the pages
+  folder (`server.companionFile`): the page modules, the companions and `Page.css`
+  files placed there; and a file of the core themes under `/themes/`
+  (`server.themeFile`). Every other file of the folder, and every path whose real path
+  leaves it, is 404. Any other method answers 405 with an `Allow` header.
+  `Page.css` URLs outside the folder are application assets.
+- Each browser is its own owner through the cookie `gramlot_owner`, which the page
+  response sets (`Path` of the mount prefix, `HttpOnly`, `SameSite=Lax`, a session
+  cookie). `ownerForRequest(request)`, when given, replaces the cookie.
 
-`@gramlot/gramlot` (>=0.2.1) is a peer dependency: the adapter must use the same
-package instance as the application's pages, or `instanceof Page` fails. To work
-against an unreleased core, link a local core checkout without saving a path in
-`package.json`:
+`@gramlot/gramlot` is a peer dependency, at the version of `server/package.json`:
+the adapter must use the same package instance as the application's pages, or
+`instanceof Page` fails. To work against an unreleased core, link a local core
+checkout without saving a path in `package.json`:
 
 ```sh
 npm install --no-save ../gramlot/js
@@ -54,18 +62,18 @@ npm install --no-save ../gramlot/js
 
 A later plain `npm install` removes the link; repeat the command.
 
-Both bridges use `@gramlot/gramlot/server` and serve the packaged
-`@gramlot/gramlot/runtime` asset. Node translates HTTP streams to Fetch requests;
-Bun uses native Fetch requests. Shared `server/src/fetch.mjs` owns HTTP routing,
-bounded payload parsing, response/error mapping and request identity extraction.
-Neutral Host owns page execution, page registrations, ownership checks and TTL.
-The adapter also accepts JSON `POST /gramlot/close`, extracts owner identity and
-passes the page ID to `Host.closePage`. Browser `dispose()` sends a best-effort close
-request; non-persisted `pagehide` sends a beacon. TTL covers failed delivery.
-An optional `host` supplies page execution; the adapter's `ownerForRequest(request)`
-callback supplies identity without adding HTTP methods to Host; the default anonymous profile is intended for local Hello World.
-No database or Python worker is loaded. Unexpected errors produce HTTP 500 and
-are delivered to the configurable `onError` callback.
+Both bridges use `@gramlot/gramlot/server` and serve the packaged runtime asset
+(`runtimeAsset()`). Node translates HTTP streams to Fetch requests; Bun uses native
+Fetch requests. Shared `server/src/fetch.mjs` owns HTTP routing, payload parsing,
+the response and error mapping and the owner of each request; it calls the common API
+of the core (`decodeBody`, `call`, `close`, `companionFile`, `themeFile`, `openPage`);
+`closeAll` runs on shutdown. `GramlotServer` owns page execution, page registrations,
+ownership checks and the TTL. The adapter accepts JSON `POST /gramlot/close`, reads
+the owner and passes the text to `GramlotServer.close`. Browser `dispose()` sends a
+best-effort close request; non-persisted `pagehide` sends a beacon. The TTL covers
+failed delivery. The adapter passes no identity to `GramlotServer.call`: an `auth` rule
+answers `not_authenticated`. No database or Python worker is loaded. Unexpected errors
+produce HTTP 500 and are delivered to the configurable `onError` callback.
 
 The earlier sibling-PoC server was removed on 2026-10-01; GN-005 records it.
 
@@ -76,10 +84,11 @@ The earlier sibling-PoC server was removed on 2026-10-01; GN-005 records it.
 Block ID: **GN-010-010**.
 
 Run `npm test -w server` for the real Node listener contract
-(`server/test/server.test.mjs` and `quickstart.test.mjs`) and, in `server/`,
-`bun test test/server.test.mjs test/quickstart.test.mjs` for Bun. The browser harness
-`server/test/browser.mjs` starts `browser-host.mjs` with the given runtime and accepts
-an installed Playwright module and Chromium executable; run it in `server/`:
+(`server/test/server.test.mjs`, `quickstart.test.mjs` and `gallery.test.mjs`) and, in
+`server/`, `bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs`
+for Bun. The browser harness `server/test/browser.mjs` starts `browser-host.mjs` with the
+given runtime and accepts an installed Playwright module and Chromium executable; run it
+in `server/`:
 
 ```sh
 node test/browser.mjs node /path/to/playwright/index.mjs /path/to/chromium
@@ -89,18 +98,15 @@ node test/browser.mjs bun /path/to/playwright/index.mjs /path/to/chromium
 The browser check covers initial main, typed Source insert/delete/update, a remote
 HTML block, disposal and JavaScript errors. It then opens the core's `avvio` page
 (`js/tests/fixtures/logic/avvio.js` with `avvio_aux.js`, from the linked core checkout)
-with mount prefix `/app` behind a stripping front, under the strict and the permissive
-CSP. Named logic starts under both; an inline page starts under the permissive profile
-and fails under the strict one with the core's error naming the node. Framework fixtures may manipulate Source;
-application pages only declare their elements. Hello World launchers live in
-`gramlot-examples/apps/hello-world`, as `npm run start:node` and `npm run start:bun`.
+with mount prefix `/app`, under the strict and the permissive CSP. Named logic starts under
+both; an inline page starts under the permissive profile and fails under the strict one with
+the core's error naming the node. Framework fixtures may manipulate Source; application pages
+only declare their elements.
 
-The core `@gramlot/gramlot` 0.2.3 is published on npm and JSR; this adapter is
-published on npm as `@gramlot/gramlot-js-server` 0.2.3. The CI workflow
-`.github/workflows/tests.yml` runs the Node and Bun contract tests in the required job
-`published core`, against the core from the registry, and in the informational job
-`core main`, against the core's `main` checkout.
-
+The core `@gramlot/gramlot` is published on npm and JSR; this adapter is published on npm as
+`@gramlot/gramlot-js-server`. The CI workflow `.github/workflows/tests.yml` runs the Node and
+Bun contract tests in the required job `published core`, against the core from the registry,
+and in the informational job `core main`, against the core's `main` checkout.
 
 <a id="gn-010-015"></a>
 
@@ -114,20 +120,19 @@ Gramlot is the primary reference for framework concepts, APIs and the shared
 teaching examples. Start with its documentation on Read the Docs and its source
 repository. Then choose an integration, read its environment-specific guide and
 clone that integration repository to configure and run the examples in that host.
-Read the Docs is the documentation delivery target; this policy does not claim
-that every integration site is already connected or published.
 
-The integration repositories are downstream consumers of Gramlot. Gramlot owns
-the example pages, their READMEs, the runner, logo and shared theme. Integrations
-own adapters, environment configuration, launch commands and hosting instructions.
-They must consume the shared material from the Gramlot dependency rather than
-maintain copied teaching suites. Generated installation or export assets are
-reproducible outputs, not independently maintained sources.
+The integration repositories are downstream consumers of Gramlot. The example
+pages, their explanations and the gallery belong to `gramlot-examples`; the logo and
+the shared theme to the core. Integrations own adapters, environment configuration,
+launch commands and hosting instructions. They must consume the shared material from
+the dependency rather than maintain copied teaching suites. Generated installation or
+export assets are reproducible outputs, not independently maintained sources.
 
-Python examples run inside Flask, FastAPI, Django, Kajenn or Minimal's Uvicorn
-profile. JavaScript examples run inside Node.js/Bun or Minimal's browser Worker
-standalone profile. The integration selects the execution language; the shared
-runner does not ask users to switch between Python and JavaScript.
+Python examples run inside the adapters of gramlot-py-server (Uvicorn, Django,
+Flask, FastAPI, Kajenn). JavaScript examples run inside Node.js/Bun (this package) or
+in the browser Worker of `@gramlot/gramlot-serverless`. The integration selects the
+execution language; the shared gallery does not ask users to switch between Python and
+JavaScript.
 
 To receive changed examples, update the Gramlot dependency following the chosen
 integration's setup instructions, then restart the host or rebuild the standalone
@@ -135,11 +140,8 @@ export. An existing installation or exported folder does not update itself when
 upstream changes. First-party dependencies remain unpinned; the published 0.1.x and 0.2.0
 releases remain immutable.
 
-This is the agreed distribution model. The teaching sources already live in
-Gramlot under `examples/html_svg`, the runner under `examples/00-runner`, and the
-theme under `themes/gramlot-base`. Uniform dependency packaging and example launch
-commands across all six integrations still need implementation and verification.
-Existing Hello World smoke launchers and historical demos do not establish that
-this shared teaching-suite workflow is already available in every integration.
+The gallery commands of this repository are `gramlot node gallery`, `gramlot bun
+gallery` and `gramlot-serverless gallery`
+([GN-130 section 025](../030-reference.md), [GS-130 section 030](../130-reference.md)).
 
 See the [Gramlot guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-020) for the authoritative shared policy. Public documentation follows `main`; unpublished development changes are not yet part of that public reference.

@@ -19,8 +19,8 @@ location /app/ {
 ```
 
 Browser and adapter see the same paths (`/app/`, `/app/assets/gramlot.js`, …).
-Until 0.2.3 the front removed `/app/` (`proxy_pass …:8080/;`): with 0.2.4 that
-answers 404. `server/test/browser-host.mjs` serves `/app` with no front.
+`proxy_pass …:8080/;` (with a URI) removes `/app/` and answers 404 on every request.
+`server/test/browser-host.mjs` serves `/app` with no front.
 No front: bind `hostname`.
 
 <a id="gn-125-010"></a>
@@ -30,7 +30,7 @@ No front: bind `hostname`.
 Block ID: **GN-125-010**.
 
 Served by the adapter: the runtime (read once from the core's `dist/gramlot.js`),
-every file of `/themes/` of the installed core, `.css` and `.js` below the pages folder,
+every file of `/themes/` of the installed core (the base theme of every page), `.css` and `.js` below the pages folder,
 the files of `assets`, the bootstrap HTML. Everything else: front server or
 application. A `Page.css` URL outside these gets the prefix and is requested
 from the front.

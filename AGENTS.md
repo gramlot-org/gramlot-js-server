@@ -41,7 +41,8 @@ The repository is an npm workspace with three packages:
 ## server/
 
 - It connects the core `GramlotServer` (`resolvePage`, `resolveResources`,
-  `openPage`, `call`) to HTTP following the server protocol GC-230, checked by
+  `openPage`, `call`, `decodeBody`, `close`, `companionFile`, `themeFile`) to HTTP following
+  the server protocol GC-101 (public, derived from the internal GC-230), checked by
   `checkProtocol` in `server/test/server.test.mjs`, and owns only HTTP routing, payload parsing,
   response mapping, request identity, the mount prefix (carried by every request
   path) and the files it serves: runtime, core themes, `assets`, the `.css` and
@@ -62,7 +63,9 @@ The repository is an npm workspace with three packages:
 ## serverless/
 
 - It owns JS bundling, HTML and directory packaging, `GramlotWorkerServer`,
-  `WorkerTransport` and the standalone startup. It does not own Gramlot Source,
+  `WorkerTransport`, `WorkerServerAdapter` (the core `ServerAdapter` that hands the
+  Worker transport to the page; the transport has no synchronous call) and the
+  standalone startup. It does not own Gramlot Source,
   Data Bags, `GramlotServer` or the browser runtime; `GramlotWorkerServer` delegates
   Page execution to the core `GramlotServer` through `@gramlot/gramlot/gramlot-server`.
 - Never ship a substitute runtime, a manual application DOM, an eval bootstrap
@@ -73,7 +76,7 @@ The repository is an npm workspace with three packages:
   `'unsafe-eval'`, `connect-src *`, styles inline only, no `'unsafe-inline'` for
   scripts); the directory profile writes no CSP.
 - The page logic is the `Logic` export of the page module, else `<name>_aux.js`;
-  both are an error. It is bundled for the window and takes
+  both are an error, neither means a page without logic methods. It is bundled for the window and takes
   `@gramlot/gramlot/page` from the window runtime (`GramlotStandalone`). A `*_aux`
   file is never a page. The build imports the page module (as `GramlotFileServer`) to read
   `Page.css` and `Logic`; `main` runs only in the Worker.
