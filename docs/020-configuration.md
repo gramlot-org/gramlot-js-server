@@ -14,7 +14,7 @@ Block ID: **GN-120-005**.
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `pages` | string | — | Path of the pages folder; builds `new GramlotFileServer(pages, options)` when `server` is not given |
-| `server` | `GramlotServer` | `null` | A custom `GramlotServer` implementing `resolvePage` and `resolveResources`; `pages` is then ignored. The core themes and the files below the pages folder are served only for a `GramlotFileServer` |
+| `server` | `GramlotServer` | `null` | A custom `GramlotServer` implementing `resolvePage` and `resolveResources`; `pages` is then ignored. The core themes under `/themes/` are served for any `GramlotServer`; the files below the pages folder only for a `GramlotFileServer` |
 | `hostname` | string | `'127.0.0.1'` | Listening address |
 | `port` | number | `0` | Listening port; `0` selects a free port, reported in `app.url` |
 | `mountPath` | string | `''` | Mount prefix: added once to the root-relative bootstrap URLs and carried by every request path |

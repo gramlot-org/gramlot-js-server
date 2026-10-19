@@ -5,7 +5,6 @@ import {Page as BasePage} from '@gramlot/gramlot/page';
  * the buttons of gramlot.utl.inout. */
 export class Page extends BasePage {
     static title = 'Registration';
-    static css = ['/themes/gramlot-base/theme.css'];
 
     main(root) {
         root.h1('Registration');

@@ -13,7 +13,7 @@ Block ID: **GN-120-005**.
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `pages` | string | — | Pages folder → `new GramlotFileServer(pages, options)` unless `server` |
-| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`); themes and pages-folder files only for a `GramlotFileServer` |
+| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`); core themes for any server, pages-folder files only for a `GramlotFileServer` |
 | `hostname` | string | `'127.0.0.1'` | Address |
 | `port` | number | `0` | Port; `0` = free port, see `app.url` |
 | `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |

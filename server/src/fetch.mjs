@@ -20,11 +20,11 @@ const cookieOwner = request => (request.headers.get('cookie') ?? '').split(';').
 
 /** mountPath is the mount prefix: openPage adds it to the browser URLs and every request
  * path carries it; the adapter removes it, answers 404 outside it and redirects the prefix
- * without its final slash. When the server is a GramlotFileServer, GET and HEAD serve the file of its
- * companionFile (a .css or .js file whose real path is below server.pagesDir: the page modules, whose
- * Logic reaches the browser, the companions and Page.css files placed there) and of its themeFile
+ * without its final slash. For any GramlotServer, GET and HEAD serve the file of its themeFile
  * (/themes/<path>: a file of the core themes, with the media type of its extension; when the core has
- * no such file the request goes on). assets maps a URL path (without the prefix) to {file, type}:
+ * no such file the request goes on). When the server is a GramlotFileServer, they also serve the file of
+ * its companionFile (a .css or .js file whose real path is below server.pagesDir: the page modules, whose
+ * Logic reaches the browser, the companions and Page.css files placed there). assets maps a URL path (without the prefix) to {file, type}:
  * application files served by GET and HEAD. Order: runtime, themes, assets, companions, pages. A GET of
  * <path>/index.html opens the page <path>, and /index.html the index, as a static host does (openPage).
  * contentSecurityPolicy is the application's policy, sent on each HTML page with {nonce} replaced by the
@@ -76,7 +76,7 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
             return reply(request.method === 'HEAD' ? null : runtime, 200, COMPANION_TYPES['.js'],
                 {'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff'});
         }
-        if (files && path.startsWith('/themes/')) {
+        if (path.startsWith('/themes/')) {
             const filename = await server.themeFile(path);
             if (filename) {
                 if (!reading) return refuse('GET, HEAD');

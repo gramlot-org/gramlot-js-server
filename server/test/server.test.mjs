@@ -284,6 +284,24 @@ test('/themes/* comes from the core under the prefix, before assets; a pages fol
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
 
+test('/themes/* is served by a plain GramlotServer too, under the prefix; the page opens with the base theme', async () => {
+    const app = await startServer({server: new TestServer(), mountPath: '/app'});
+    try {
+        const core = await readFile(new URL(import.meta.resolve('@gramlot/gramlot/themes/gramlot-base/theme.css')), 'utf8');
+        const response = await fetch(app.url + '/app/themes/gramlot-base/theme.css');
+        assert.equal(response.status, 200);
+        assert.ok(response.headers.get('content-type').startsWith('text/css'));
+        assert.equal(await response.text(), core);
+        assert.equal(await (await fetch(app.url + '/app/themes/gramlot-base/theme.css', {method: 'HEAD'})).text(), '');
+        assert.equal((await fetch(app.url + '/app/themes/gramlot-base/theme.css', {method: 'POST'})).status, 405);
+        for (const path of ['/themes/gramlot-base/theme.css', '/app/themes/%2e%2e/package.json', '/app/themes/missing.css']) {
+            assert.equal((await fetch(app.url + path)).status, 404, path);
+        }
+        const opened = await (await fetch(app.url + '/app/')).text();
+        assert.deepEqual(bootstrap(opened).argument.resources.css, ['/app/themes/gramlot-base/theme.css']);
+    } finally { await app.close(); }
+});
+
 // The check of the renewal of a page (item 18) takes 2.5 times the pageTtl of the server.
 for (const [label, options] of [['without a mount prefix', {}],
     ['with a mount prefix and a policy', {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]]) {
