@@ -153,7 +153,7 @@ open index.html`.
 
 The gallery page is the browser-safe `GalleryPage` of gramlot-examples with its
 texts and descriptions as data; each example extends its page with the gallery frame script, links
-its stylesheet and takes the `Logic` of its page module. The staged example class also receives galleryUrls, a map from route keys to relative HTML files. The carousel uses this map for its nested frames, so the same selection works from disk and under a static-host prefix. The directory follows the
+its stylesheet and takes the `Logic` of its page module when it exports one; an example without `Logic` has no companion. The staged example class also receives galleryUrls, a map from route keys to relative HTML files. The carousel uses this map for its nested frames, so the same selection works from disk and under a static-host prefix. The directory follows the
 rules of `buildDirectory`: a previous gallery at `OUTPUT` is replaced. The export includes the common catalogue and Registration form; its size
 depends on the installed examples and runtime, since every route holds its Worker. Without
 `@gramlot/gramlot-examples` the command answers `The gallery needs

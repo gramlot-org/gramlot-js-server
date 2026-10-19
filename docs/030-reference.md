@@ -146,7 +146,8 @@ project's `node_modules/.bin`, the Python command inside its virtual environment
 
 The gallery stages one page module per example in a temporary folder, removed on
 stop: a subclass of the example that adds the gallery frame script, its stylesheet
-and a `<key>_aux.js` that re-exports `Logic` from the example's page module, served
+and a `<key>_aux.js` that re-exports every name of the example's page module
+(`export *`: `Logic` when the module exports it, no `Logic` when it does not), served
 as JavaScript (GE-010 §025 of gramlot-examples). The test
 `server/test/verify_gallery_browser.mjs` opens every example under `/js` in a real
 browser.
