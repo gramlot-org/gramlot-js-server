@@ -68,7 +68,24 @@ test('one file inlines /themes/ from the core package, other URLs from the page 
         await assert.rejects(inlineStylesheets(join(path, 'page.js'), styled(css)), message);
     }
     await writeFile(join(path, 'a.css'), 'a');
-    assert.deepEqual(await inlineStylesheets(join(path, 'page.js'), styled(['/a.css', 'a.css'])), [join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(join(path, 'page.js'), styled(['/a.css', 'a.css'])), [theme, join(path, 'a.css')]);
+});
+
+test('the theme of the page comes first: the base theme, css_theme, none, and the base theme listed in Page.css once', async t => {
+    const require = createRequire(import.meta.url);
+    const theme = name => require.resolve(`@gramlot/gramlot/themes/${name}/theme.css`);
+    const path = await folder(t);
+    await writeFile(join(path, 'a.css'), 'a');
+    const file = join(path, 'page.js');
+    const themed = (css, css_theme) => class { static css = css; static css_theme = css_theme; };
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css'])), [theme('gramlot-base'), join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css'], 'gramlot-compact')), [theme('gramlot-compact'), join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css'], false)), [join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/themes/gramlot-base/theme.css', '/a.css'])),
+        [theme('gramlot-base'), join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css', '/themes/gramlot-base/theme.css'])),
+        [join(path, 'a.css'), theme('gramlot-base')]);
+    await assert.rejects(inlineStylesheets(file, themed([], '../x')), {name: 'InvalidResourceName'});
 });
 
 test('inline.js is not reachable from the GramlotWorkerServer bundle', async () => {

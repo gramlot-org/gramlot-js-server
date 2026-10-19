@@ -44,7 +44,9 @@ In order, each path under `mountPath`:
 | `POST` | `/gramlot/close` | `{pageId}` | 200 `{"ok":true}` |
 | `GET` | page path, `<path>/index.html` | — | 200 HTML bootstrap, CSP header when configured |
 
-`Cache-Control: no-store` everywhere but the runtime (`X-Content-Type-Options: nosniff`).
+`Cache-Control: no-store` everywhere but the runtime (`no-cache`, `X-Content-Type-Options: nosniff`).
+A page response sets the cookie `gramlot_owner`. Every 405 has `Allow`: `GET, HEAD` runtime, themes,
+assets, companions; `POST` rpc, close; `GET` page.
 `/gramlot/rpc`: `source`/`main` the page, `source`/other a Source method, `data` an endpoint;
 `page_expired`, `not_found`, `not_authenticated`, `not_authorized`, `application_error` are
 outcomes with status 200. Declare Source fragments with `Page.registerSource` and mount them with `remote`;

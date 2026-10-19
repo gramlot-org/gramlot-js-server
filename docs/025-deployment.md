@@ -75,9 +75,10 @@ Block ID: **GN-125-015**.
 - **Content Security Policy.** Choose the strict profile when every page uses
   named logic; the permissive profile when a page still has inline code
   ([Configuration](020-configuration.md)).
-- **Request identity.** With the default `ownerForRequest`, any client that
-  learns a page ID can request its Source. Derive the owner from the
-  application's session when pages carry user data.
+- **Request identity.** Each browser owns its pages through the session cookie
+  `gramlot_owner`: a client that learns a page ID cannot request its Source from
+  another browser. Derive the owner from the application's session with
+  `ownerForRequest` when pages carry user data.
 - **Payloads.** The adapter sets no body size limit; set one in the proxy in
   front (nginx `client_max_body_size`, which answers 413). `pageTtl` and
   `maxPages` bound the registry.

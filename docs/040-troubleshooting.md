@@ -55,7 +55,8 @@ Block ID: **GN-140-015**.
 
 **Causes.** More than `pageTtl` seconds (default 1800) passed since the opening;
 the page was closed; the server restarted and its registry is empty; the
-request's owner differs from the owner at opening.
+request's owner differs from the owner at opening (another browser, or a browser
+that cleared its `gramlot_owner` cookie).
 
 **Fix.** Reload the page: a new opening registers a new page ID. Raise `pageTtl`
 for long-lived pages. Keep `ownerForRequest` stable for the same client.

@@ -39,8 +39,8 @@ renamed; `assets` `{source: absolute file, target: relative path
 One core installation for pages and exporter (`… must resolve the same Gramlot core
 installation`). Returns `{output, routes}`. Writes `index.html`,
 `<route>/index.html`, `assets/standalone.js`, `assets/runtime-notices.json`,
-`assets/workers/<route>.js`, `assets/styles/<route>.css` (`<name>.css`); `/themes/`
-URLs of `Page.css` copied from the core; `folderPages(folder)` gives `{pages,
+`assets/workers/<route>.js`, `assets/styles/<route>.css` (`<name>.css`); the theme of each page
+and the `/themes/` URLs of `Page.css` copied from the core; `folderPages(folder)` gives `{pages,
 assets}` of a folder; relative script paths; `assetRoot` = the document's
 directory; no Content Security Policy in the documents.
 

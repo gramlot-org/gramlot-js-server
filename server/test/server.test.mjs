@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {toTytx} from '@genrojs/tytx';
-import {GramlotServer, Page, checkProtocol} from '@gramlot/gramlot/server';
+import {GramlotServer, NAME_SYNTAX, Page, checkProtocol} from '@gramlot/gramlot/server';
 const {startServer} = await import(globalThis.Bun ? '../src/bun.mjs' : '../src/node.mjs');
 
 class HtmlPage extends Page {
@@ -32,7 +32,9 @@ test('real listener serves packaged runtime and the envelope on rpc; errors and 
         pageId = config.pageId;
         assert.ok(!html.includes('<h1>'));
         assert.deepEqual(config, {pageId, rpcUrl: '/gramlot/rpc', closeUrl: '/gramlot/close',
-            rootId: 'gramlot-root', capabilities: []});
+            rootId: 'gramlot-root', capabilities: [], nameSyntax: NAME_SYNTAX.toJSON()});
+        // The application's own identity system replaces the owner cookie.
+        assert.deepEqual(opened.headers.getSetCookie(), []);
         const asset = await fetch(app.url + '/assets/gramlot.js');
         assert.equal(asset.status, 200);
         assert.match(asset.headers.get('content-type'), /javascript/);
@@ -105,6 +107,9 @@ function bootstrap(html) {
     return {nonce, runtime, argument: JSON.parse(body.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1])};
 }
 
+/** The `name=value` cookie that a page response sets, to send back as the browser does. */
+const ownerCookie = response => response.headers.getSetCookie()[0].split(';')[0];
+
 /** A pages folder with index.js, companions, a README, a theme and an escaping symlink. */
 async function pagesFolder() {
     const folder = await mkdtemp(join(tmpdir(), 'gramlot-js-server-'));
@@ -129,19 +134,22 @@ test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 
     const {folder, pages} = await pagesFolder();
     const app = await startServer({pages, mountPath: '/app/'});
     try {
-        const html = await (await fetch(app.url + '/app/')).text();
+        const opened = await fetch(app.url + '/app/');
+        const html = await opened.text();
         const {runtime, argument} = bootstrap(html);
         assert.equal(runtime, '/app/assets/gramlot.js');
         assert.equal((await fetch(app.url + runtime)).status, 200);
         assert.deepEqual(argument.config, {pageId: argument.config.pageId, rpcUrl: '/app/gramlot/rpc',
-            closeUrl: '/app/gramlot/close', rootId: 'gramlot-root', capabilities: []});
+            closeUrl: '/app/gramlot/close', rootId: 'gramlot-root', capabilities: [], nameSyntax: NAME_SYNTAX.toJSON()});
         assert.deepEqual(argument.resources, {
-            css: ['/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css', '/app/assets/app.css', '/app/index.css'],
+            css: ['/app/themes/gramlot-base/theme.css', '/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css',
+                '/app/assets/app.css', '/app/index.css'],
             js: [{url: '/app/index_aux.js', group: null}],
         });
         assert.ok(!html.includes('<link'));
         assert.ok(!html.includes('/app/app/'));
-        const main = await fetch(app.url + argument.config.rpcUrl, {method: 'POST', headers: {'content-type': 'application/json'},
+        const main = await fetch(app.url + argument.config.rpcUrl, {method: 'POST',
+            headers: {'content-type': 'application/json', cookie: ownerCookie(opened)},
             body: toTytx({id: 'r1', pageId: argument.config.pageId, contentType: 'source', name: 'main', params: {}})});
         assert.match(JSON.parse(await main.text()).value, /Hello/);
         for (const path of ['/', '/assets/gramlot.js', '/gramlot/rpc', '/index.css', '/application/', '/appx']) {
@@ -208,7 +216,7 @@ export class Logic { greeting(kwargs) { return 'Hello, ' + kwargs.name; } }
     const app = await startServer({pages: folder});
     try {
         const {argument} = bootstrap(await (await fetch(app.url + '/single')).text());
-        assert.deepEqual(argument.resources, {css: [], js: [{url: '/single.js', group: null}]});
+        assert.deepEqual(argument.resources, {css: ['/themes/gramlot-base/theme.css'], js: [{url: '/single.js', group: null}]});
         const response = await fetch(app.url + '/single.js');
         assert.equal(response.status, 200);
         assert.ok(response.headers.get('content-type').startsWith('text/javascript'));
@@ -276,13 +284,90 @@ test('/themes/* comes from the core under the prefix, before assets; a pages fol
     } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
 
-test('GC-230: checkProtocol passes on the conformance page, with and without a mount prefix and a policy', async () => {
-    const pages = fileURLToPath(new URL('./fixtures/conformance/', import.meta.url));
-    for (const options of [{}, {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]) {
-        const app = await startServer({pages, ...options});
-        try { await checkProtocol(app.url + (options.mountPath ?? ''), '/'); }
+// The check of the renewal of a page (item 18) takes 2.5 times the pageTtl of the server.
+for (const [label, options] of [['without a mount prefix', {}],
+    ['with a mount prefix and a policy', {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]]) {
+    test(`GC-230: checkProtocol passes on the conformance page, ${label}`, async () => {
+        const pages = fileURLToPath(new URL('./fixtures/conformance/', import.meta.url));
+        const app = await startServer({pages, pageTtl: 1, ...options});
+        try { await checkProtocol(app.url + (options.mountPath ?? ''), '/', {pageTtl: 1}); }
         finally { await app.close(); }
+    });
+}
+
+test('GC-230 §135: each browser is its own owner by the cookie gramlot_owner; ownerForRequest replaces it', async () => {
+    for (const [mountPath, path] of [['', '/'], ['/app', '/app/']]) {
+        const {folder, pages} = await pagesFolder();
+        const app = await startServer({pages, mountPath});
+        try {
+            const first = await fetch(app.url + path);
+            const [setCookie, ...others] = first.headers.getSetCookie();
+            assert.deepEqual(others, []);
+            const [pair, ...attributes] = setCookie.split('; ');
+            assert.match(pair, /^gramlot_owner=[A-Za-z0-9_-]{32}$/);
+            assert.deepEqual(attributes, [`Path=${mountPath || '/'}`, 'HttpOnly', 'SameSite=Lax']);
+            const call = async (opened, cookie) => {
+                const {pageId, rpcUrl} = bootstrap(await opened.clone().text()).argument.config;
+                const response = await fetch(app.url + rpcUrl, {method: 'POST',
+                    headers: {'content-type': 'application/json', ...(cookie ? {cookie} : {})},
+                    body: toTytx({id: 'r1', pageId, contentType: 'source', name: 'main', params: {}})});
+                return JSON.parse(await response.text());
+            };
+            assert.match((await call(first, pair)).value, /Hello/);
+            assert.equal((await call(first)).error.code, 'page_expired');
+            assert.equal((await call(first, `${pair}x`)).error.code, 'page_expired');
+            assert.equal((await call(first, 'gramlot_owner=')).error.code, 'page_expired');
+            // The browser that sends its cookie again keeps its value; a browser without one gets another.
+            const again = await fetch(app.url + path, {headers: {cookie: pair}});
+            assert.equal(ownerCookie(again), pair);
+            assert.match((await call(again, pair)).value, /Hello/);
+            const other = await fetch(app.url + path);
+            assert.notEqual(ownerCookie(other), pair);
+            assert.equal((await call(first, ownerCookie(other))).error.code, 'page_expired');
+            // A close message without the cookie of the page leaves it open.
+            const {pageId, closeUrl} = bootstrap(await first.text()).argument.config;
+            const close = cookie => fetch(app.url + closeUrl, {method: 'POST',
+                headers: {'content-type': 'application/json', ...(cookie ? {cookie} : {})}, body: JSON.stringify({pageId})});
+            assert.equal((await close()).status, 200);
+            assert.equal(app.gramlotServer.pages.has(pageId), true);
+            assert.equal((await close(pair)).status, 200);
+            assert.equal(app.gramlotServer.pages.has(pageId), false);
+        } finally { await app.close(); await rm(folder, {recursive: true}); }
     }
+});
+
+test('every 405 lists the methods of the URL in Allow; the runtime is no-cache, the other responses no-store', async () => {
+    const {folder, pages} = await pagesFolder();
+    const logo = join(folder, 'logo.svg');
+    await writeFile(logo, '<svg/>');
+    const app = await startServer({pages, mountPath: '/app', assets: {'/img/logo.svg': {file: logo, type: 'image/svg+xml'}}});
+    const send = (method, path) => fetch(app.url + '/app' + path,
+        {method, ...(['POST', 'PUT', 'PATCH'].includes(method) ? {body: '{}'} : {})});
+    try {
+        for (const [path, allow, methods] of [
+            ['/', 'GET', ['POST', 'HEAD', 'PUT', 'DELETE', 'PATCH']],
+            ['/index.html', 'GET', ['HEAD', 'POST']],
+            ['/assets/gramlot.js', 'GET, HEAD', ['POST', 'PUT', 'DELETE', 'PATCH']],
+            ['/themes/gramlot-base/theme.css', 'GET, HEAD', ['POST', 'DELETE']],
+            ['/img/logo.svg', 'GET, HEAD', ['POST', 'DELETE']],
+            ['/index.css', 'GET, HEAD', ['POST', 'DELETE']],
+            ['/index_aux.js', 'GET, HEAD', ['POST', 'DELETE']],
+            ['/gramlot/rpc', 'POST', ['GET', 'HEAD', 'PUT', 'DELETE']],
+            ['/gramlot/close', 'POST', ['GET', 'HEAD', 'PUT', 'DELETE']],
+        ]) {
+            for (const method of methods) {
+                const response = await send(method, path);
+                assert.equal(response.status, 405, `${method} ${path}`);
+                assert.equal(response.headers.get('allow'), allow, `${method} ${path}`);
+            }
+        }
+        const cache = async path => (await send('GET', path)).headers.get('cache-control');
+        assert.equal(await cache('/assets/gramlot.js'), 'no-cache');
+        for (const path of ['/', '/themes/gramlot-base/theme.css', '/img/logo.svg', '/index.css', '/missing']) {
+            assert.equal(await cache(path), 'no-store', path);
+        }
+        assert.equal((await send('GET', '/assets/gramlot.js')).headers.get('x-content-type-options'), 'nosniff');
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
 });
 
 for (const [label, contentType, status] of [
@@ -292,6 +377,7 @@ for (const [label, contentType, status] of [
     ['empty media type', '', 415],
     ['invalid UTF-8', 'application/json', 400],
     ['UTF-8 text', 'application/json', 200],
+    ['leading byte order mark', 'application/json', 200],
     ['mixed-case JSON', 'Application/JSON', 200],
     ['charset parameter', 'application/json; charset=utf-8', 200],
     ['media-type whitespace', 'application/json ; charset=UTF-8', 200],
@@ -312,12 +398,14 @@ for (const [label, contentType, status] of [
                 const opened = await fetch(app.url);
                 const {pageId} = bootstrap(await opened.text()).argument.config;
                 const value = label === 'UTF-8 text' ? 'caffè ☕ 漢字' : 'invalid-byte';
+                const cookie = ownerCookie(opened);
                 const payload = path === '/gramlot/rpc'
                     ? {id: 'boundary', pageId, contentType: 'data', name: 'echo', params: {value}}
                     : {pageId, value};
-                const body = Buffer.from(JSON.stringify(payload));
+                let body = Buffer.from(JSON.stringify(payload));
                 if (label === 'invalid UTF-8') body[body.indexOf('invalid-byte')] = 0xff;
-                const headers = contentType === null ? {} : {'content-type': contentType};
+                if (label === 'leading byte order mark') body = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), body]);
+                const headers = {cookie, ...(contentType === null ? {} : {'content-type': contentType})};
                 const response = await fetch(app.url + path, {method: 'POST', headers, body});
                 assert.equal(response.status, status);
                 if (status === 200) {
@@ -331,7 +419,7 @@ for (const [label, contentType, status] of [
                 }
                 assert.deepEqual(calls, path === '/gramlot/rpc' && status === 200 ? [value] : []);
                 const after = await fetch(app.url + '/gramlot/rpc', {
-                    method: 'POST', headers: {'content-type': 'application/json'},
+                    method: 'POST', headers: {'content-type': 'application/json', cookie},
                     body: toTytx({id: 'alive', pageId, contentType: 'source', name: 'main', params: {}}),
                 });
                 assert.equal(after.status, 200);

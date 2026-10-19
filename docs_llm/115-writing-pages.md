@@ -56,8 +56,8 @@ Block ID: **GS-115-015**.
 
 | Export | `Page.css` and `<name>.css` |
 | --- | --- |
-| One file | `<style>` in load order; `/themes/…` from the `@gramlot/gramlot` package, other URLs from the page folder; `http(s)://`, `//`, `.`/`..`, missing file → build error |
-| Directory | Links; root-relative URLs inside the export (folder build copies the folder's files, `buildDirectory` the listed `assets`); `/themes/…` copied from the core; `<name>.css` → `assets/styles/<route>.css`; relative, `//`, `.`/`..` refused |
+| One file | `<style>` in load order: the theme of the page first (base theme, `css_theme`, none for `false`), `Page.css`, `<name>.css`; `/themes/…` from the `@gramlot/gramlot` package, other URLs from the page folder; `http(s)://`, `//`, `.`/`..`, missing file → build error |
+| Directory | Links; root-relative URLs inside the export (folder build copies the folder's files, `buildDirectory` the listed `assets`); the theme of each page and `/themes/…` copied from the core; `<name>.css` → `assets/styles/<route>.css`; relative, `//`, `.`/`..` refused |
 
 <a id="gs-115-020"></a>
 

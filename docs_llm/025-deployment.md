@@ -46,7 +46,7 @@ Block ID: **GN-125-015**.
 - Page modules and stylesheets are public: no keys, queries or data access in the
   pages folder.
 - CSP: strict with named logic only; permissive with inline code.
-- Identity: default `ownerForRequest` lets any client with a page ID read it.
+- Identity: each browser owns its pages by the cookie `gramlot_owner`; `ownerForRequest` derives the owner from the session.
 - No body size limit in the adapter: set it in the proxy (nginx `client_max_body_size`, 413);
   `pageTtl`, `maxPages` bound the registry.
 - 500 responses carry a fixed text; the error goes to `onError`.

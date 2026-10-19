@@ -13,13 +13,13 @@ Block ID: **GN-120-005**.
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `pages` | string | — | Pages folder → `new GramlotFileServer(pages, options)` unless `server` |
-| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`) |
+| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`); themes and pages-folder files only for a `GramlotFileServer` |
 | `hostname` | string | `'127.0.0.1'` | Address |
 | `port` | number | `0` | Port; `0` = free port, see `app.url` |
 | `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |
 | `assets` | object | `{}` | URL path → `{file, type}`, `GET`/`HEAD` |
 | `contentSecurityPolicy` | string/null | `null` | Header on HTML pages, `{nonce}` replaced |
-| `ownerForRequest` | `async (request) => owner` | `null` | Identity compared on rpc/close |
+| `ownerForRequest` | `async (request) => owner` | `null`: cookie `gramlot_owner` | Identity compared on rpc/close; replaces the cookie |
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
 | `runtimeUrl`, `rpcUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/rpc`, `/gramlot/close` | `GramlotServer` URLs |
 | `rootId` | string | `'gramlot-root'` | Root element id |
@@ -71,9 +71,11 @@ nothing written. `null`: no header, inline runs.
 
 Block ID: **GN-120-020**.
 
-`ownerForRequest(request)` → owner, compared with `===` to the owner at opening.
-Different owner: main/source 404, close 200 and no effect. Default `null`: any
-client reads any open page. Derive the owner from the application's session.
+Each browser owns its pages: the page response sets the cookie `gramlot_owner` (random,
+`Path` the prefix or `/`, `HttpOnly`, `SameSite=Lax`, session), reused when sent back. Different
+or missing owner: rpc outcome `page_expired`, close 200 and no effect.
+`ownerForRequest(request)` → owner, compared with `===`, replaces the cookie (no cookie set):
+derive the owner from the application's session.
 
 <a id="gn-120-025"></a>
 

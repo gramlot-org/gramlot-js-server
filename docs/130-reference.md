@@ -65,7 +65,7 @@ Block ID: **GS-130-015**.
   `data`, `src.remoteSource(node, method, params)`, `dispose()`. In the export,
   `rpc.transport` is the `WorkerTransport` and `dispose()` terminates the Worker.
 - `WorkerTransport` (`serverless/src/worker-transport.js`): `open(signal)` resolves
-  with `{pageId, title, resources, capabilities}`; `call(text, signal)` sends a
+  with `{pageId, title, resources, capabilities, nameSyntax}`; `call(text, signal)` sends a
   request envelope (TYTX text) and resolves with the response envelope text, as the
   core `HttpTransport`; `close(pageId)` sends the close message; `dispose(error)`;
   `pending` (outstanding requests), `closed`. A Worker `error` or `messageerror`
@@ -76,7 +76,7 @@ Block ID: **GS-130-015**.
 
   | Window sends | Worker answers |
   | --- | --- |
-  | `{id, open: true}` | `{id, open: {pageId, title, resources, capabilities: []}}` |
+  | `{id, open: true}` | `{id, open: {pageId, title, resources, capabilities: [], nameSyntax}}` |
   | `{id, text}`, `text` the request envelope | `{id, text}`, `text` the response envelope of `call` |
   | `{pageId}`, no `id` | nothing; the page is closed |
 

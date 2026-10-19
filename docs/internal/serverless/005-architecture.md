@@ -17,9 +17,11 @@ remain in Gramlot core. GramlotWorkerServer delegates execution to the core `Gra
 correlates messages and owns Worker disposal. Serverless mount opens the page in the
 Worker, resolves export asset paths, maps the page logic module and runs the core
 `PageBootstrap`. `PageBootstrap` writes the CSS links, imports the logic module,
-registers its `Logic` and exposes the app before start. The Worker transport reaches
-`Gramlot` inside the bootstrap config. A `PageBootstrap` subclass overrides
-`closePage()`: it disposes the Worker transport instead of sending a close beacon.
+registers its `Logic` and exposes the app before start. A `PageBootstrap` subclass gives it
+the `WorkerServerAdapter` (a core `ServerAdapter`, GC-230 §045), whose `createTransport()` hands
+`Gramlot` the Worker transport. That transport has no synchronous call (`supportsCallSync` is
+not declared): `gramlot.rpc.callSync` throws and a `dataRemote` with `sync` reads asynchronously.
+A page that closes sends the close message through the transport, which then terminates the Worker.
 
 <a id="gs-005-010"></a>
 

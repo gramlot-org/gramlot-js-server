@@ -62,7 +62,8 @@ Generated files: `index.html`, `<route>/index.html` for the other routes,
 `assets/standalone.js` (the runtime, shared), `assets/runtime-notices.json`,
 `assets/workers/<route>.js` (the bootstrap of each page, with its Worker and
 logic module embedded) and `assets/styles/<route>.css` (the stylesheet
-`<name>.css` of a page). A `Page.css` URL under `/themes/` is copied from the core
+`<name>.css` of a page). The theme of each page (the base theme unless `Page.css_theme`
+names another or is `false`) and a `Page.css` URL under `/themes/` are copied from the core
 package unless an asset has its path. `folderPages(folder)`, from the same module,
 returns the `{pages, assets}` of a folder for the command. Each document loads the two scripts through relative paths and
 passes its directory to `mount` as `assetRoot`. The documents carry no Content

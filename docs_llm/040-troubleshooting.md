@@ -32,8 +32,8 @@ Block ID: **GN-140-010**.
 Block ID: **GN-140-015**.
 
 rpc answers the outcome `page_expired` (`RpcError`) for an open page: `pageTtl` (1800 s) elapsed, page closed,
-server restarted, or a different owner. Reload; raise `pageTtl`; keep
-`ownerForRequest` stable.
+server restarted, or a different owner (another browser, cleared `gramlot_owner` cookie). Reload; raise
+`pageTtl`; keep `ownerForRequest` stable.
 
 <a id="gn-140-020"></a>
 

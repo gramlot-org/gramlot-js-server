@@ -37,7 +37,8 @@ try {
         await page.locator('#name').fill('Grace');
         assert.equal(await page.locator('#greeting').textContent(), 'Hello, Grace');
         const color = await page.locator('#greeting').evaluate(node => getComputedStyle(node).color);
-        assert.equal(color, styled ? 'rgb(0, 0, 128)' : 'rgb(0, 0, 0)');
+        // Without theme.css the text has the ink of the base theme, which every page carries.
+        assert.equal(color, styled ? 'rgb(0, 0, 128)' : 'rgb(36, 52, 73)');
         assert.equal(page.workers().length, 1);
         assert.deepEqual(errors, []);
         await page.close();

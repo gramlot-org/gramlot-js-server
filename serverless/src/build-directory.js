@@ -1,6 +1,6 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
-import {checkPage, loadPage, logicBundle, logicModule, pageStylesheet, workerBundle} from './bundles.js';
+import {checkPage, loadPage, logicBundle, logicModule, pageStyleUrls, pageStylesheet, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {copyFile, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -149,8 +149,9 @@ export async function folderPages(folder) {
 
 /** Export a set of JS Pages that open directly from the resulting directory, replacing a
  * previous export at output (a directory with assets/standalone.js). The same-name
- * stylesheet foo.css of a page is written to assets/styles/<route>.css; a Page.css URL under
- * /themes/ is copied from the @gramlot/gramlot package unless an asset already has its path. */
+ * stylesheet foo.css of a page is written to assets/styles/<route>.css; the theme of a page
+ * (the base theme unless Page.css_theme says otherwise) and a Page.css URL under /themes/ are
+ * copied from the @gramlot/gramlot package unless an asset already has its path. */
 export async function buildDirectory({pages, output, assets = [], collections = []}) {
     const {entries, destination} = validate({pages, output, assets});
     await previousExport(destination);
@@ -177,7 +178,7 @@ export async function buildDirectory({pages, output, assets = [], collections = 
     await regularFile(join(dirname(core.runtime), 'runtime-notices.json'), 'Runtime notices');
     const copies = [...assets];
     for (const [, {module}] of Object.entries(loaded)) {
-        for (const url of module.Page.css ?? []) {
+        for (const url of pageStyleUrls(module.Page)) {
             const target = url.slice(1);
             if (!url.startsWith('/themes/') || copies.some(asset => asset.target === target)) continue;
             checkTarget(target);

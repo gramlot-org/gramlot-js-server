@@ -14,13 +14,13 @@ Block ID: **GN-120-005**.
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `pages` | string | — | Path of the pages folder; builds `new GramlotFileServer(pages, options)` when `server` is not given |
-| `server` | `GramlotServer` | `null` | A custom `GramlotServer` implementing `resolvePage` and `resolveResources`; `pages` is then ignored |
+| `server` | `GramlotServer` | `null` | A custom `GramlotServer` implementing `resolvePage` and `resolveResources`; `pages` is then ignored. The core themes and the files below the pages folder are served only for a `GramlotFileServer` |
 | `hostname` | string | `'127.0.0.1'` | Listening address |
 | `port` | number | `0` | Listening port; `0` selects a free port, reported in `app.url` |
 | `mountPath` | string | `''` | Mount prefix: added once to the root-relative bootstrap URLs and carried by every request path |
 | `assets` | object | `{}` | Application files: URL path (without the prefix) → `{file, type}`, served by `GET` and `HEAD` |
 | `contentSecurityPolicy` | string or null | `null` | Policy sent on HTML pages, `{nonce}` replaced by the bootstrap nonce |
-| `ownerForRequest` | `async (request) => owner` | returns `null` | Identity of the request, compared on rpc and close |
+| `ownerForRequest` | `async (request) => owner` | `null`: the cookie `gramlot_owner` | Identity of the request, compared on rpc and close; replaces the cookie |
 | `onError` | `(error) => void` | `console.error` | Receives unexpected errors; the response is 500 |
 | `runtimeUrl` | string | `'/assets/gramlot.js'` | `GramlotServer` option: URL of the runtime |
 | `rpcUrl` | string | `'/gramlot/rpc'` | `GramlotServer` option: URL that receives every request envelope |
@@ -97,13 +97,19 @@ sent and the browser applies no policy; inline code runs.
 
 Block ID: **GN-120-020**.
 
-`ownerForRequest(request)` receives the Fetch `Request` of every page, main,
-source and close request and returns the owner, any value compared with `===`.
-The owner is stored with the page at opening. A main or source request whose
-owner differs answers 404; a close request whose owner differs answers 200 and
-closes nothing. The default returns `null` for every request: every browser can
-read every open page. An application that serves several users derives the owner
-from its own session cookie or header.
+Each browser is the owner of the pages it opens. The page response sets the cookie
+`gramlot_owner` (a random value, `Path` the mount prefix or `/`, `HttpOnly`,
+`SameSite=Lax`, no lifetime) and reuses the value that the browser already sends; rpc
+and close requests carry it back. The owner is stored with the page at opening. A
+request whose owner differs, or that has no cookie, receives the outcome `page_expired`;
+a close request whose owner differs answers 200 and closes nothing. A client that learns
+a page ID cannot use it from another browser.
+
+`ownerForRequest(request)` replaces the cookie with the identity system of the
+application: it receives the Fetch `Request` of every page, rpc and close request and
+returns the owner, any value compared with `===`. The adapter then sets no cookie. An
+application that serves several users derives the owner from its own session cookie or
+header.
 
 <a id="gn-120-025"></a>
 

@@ -62,7 +62,10 @@ Paths are shown with the default `GramlotServer` options and without mount prefi
 | `GET` | any page path (`/`, `/orders`, `/orders/index.html`) | — | 200 `text/html`, the bootstrap document; `Content-Security-Policy` when configured |
 
 Every response of the adapter carries `Cache-Control: no-store`, except the
-runtime, which carries `X-Content-Type-Options: nosniff`.
+runtime, which carries `Cache-Control: no-cache` and `X-Content-Type-Options: nosniff`.
+A page response sets the owner cookie `gramlot_owner` ([Configuration](020-configuration.md)).
+Every 405 carries an `Allow` header: `GET, HEAD` on the runtime, the theme files, the
+assets and the companions, `POST` on rpc and close, `GET` on a page.
 
 `/gramlot/rpc` answers every call of the page: `contentType: 'source'` with `name: 'main'`
 for the page, `'source'` with another name for a Source method, `'data'` for an endpoint

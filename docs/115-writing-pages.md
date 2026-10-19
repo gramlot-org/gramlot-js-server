@@ -80,8 +80,8 @@ the page file is its stylesheet, loaded after the `Page.css` URLs.
 
 | Export | `Page.css` and `<name>.css` |
 | --- | --- |
-| One file (`build page.js`) | Written into the file as `<style>` elements, in load order. `/themes/…` is read from the `@gramlot/gramlot` package (`/themes/gramlot-base/theme.css`); any other URL (`/site.css`, `site.css`) from the folder of the page. `http(s)://`, `//…`, a `.`/`..` segment or a missing file fail the build. |
-| Directory (`build pages`, `buildDirectory`) | Links. Root-relative URLs (`/site.css`) resolve inside the export directory: the folder build copies the files of the folder; `buildDirectory` copies the files listed in `assets`. `/themes/…` URLs are copied from the core package. `<name>.css` is written to `assets/styles/<route>.css`. A relative URL, `//…`, or a `.`/`..` segment is refused at start. |
+| One file (`build page.js`) | Written into the file as `<style>` elements, in load order: the theme of the page first (the base theme `gramlot-base`, or the `css_theme` of the page; none for `css_theme = false`), then `Page.css`, then `<name>.css`. A URL listed twice stays once, in its last position. `/themes/…` is read from the `@gramlot/gramlot` package (`/themes/gramlot-base/theme.css`); any other URL (`/site.css`, `site.css`) from the folder of the page. `http(s)://`, `//…`, a `.`/`..` segment or a missing file fail the build. |
+| Directory (`build pages`, `buildDirectory`) | Links. Root-relative URLs (`/site.css`) resolve inside the export directory: the folder build copies the files of the folder; `buildDirectory` copies the files listed in `assets`. The theme of each page and the `/themes/…` URLs are copied from the core package. `<name>.css` is written to `assets/styles/<route>.css`. A relative URL, `//…`, or a `.`/`..` segment is refused at start. |
 
 A URL that points outside the export is not served by anything.
 

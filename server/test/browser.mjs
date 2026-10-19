@@ -28,11 +28,12 @@ try {
  })).json()).error?.code==='page_expired', await page.evaluate(()=>window.gramlot.pageId));
  await page.goto(url);await page.waitForFunction(()=>window.gramlot?.state==='started');
  const pageId=await page.evaluate(()=>window.gramlot.pageId);
+ const cookie=(await page.context().cookies()).map(({name,value})=>`${name}=${value}`).join('; ');
  await page.goto('about:blank');
  let closed=false;
  for(let attempt=0;attempt<40;attempt++){
   const response=await fetch(url+'/gramlot/rpc',{
-   method:'POST',headers:{'content-type':'application/json'},
+   method:'POST',headers:{'content-type':'application/json',cookie},
    body:JSON.stringify({id:'check',pageId,contentType:'source',name:'main',params:{}})
   });
   if((await response.json()).error?.code==='page_expired'){closed=true;break;}

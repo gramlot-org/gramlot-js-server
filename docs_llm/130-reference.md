@@ -42,11 +42,11 @@ Block ID: **GS-130-015**.
 `mount(options) → Gramlot` ([GS-120-020](120-configuration.md));
 `globalThis.gramlot`. `Gramlot`: `state` (`'started'`), `src.source`, `data`,
 `src.remoteSource(node, method, params)`, `dispose()` (terminates the Worker),
-`rpc.transport`. `WorkerTransport`: `open(signal)` → `{pageId, title, resources, capabilities}`,
+`rpc.transport`. `WorkerTransport`: `open(signal)` → `{pageId, title, resources, capabilities, nameSyntax}`,
 `call(text, signal)` → response envelope text (as `HttpTransport`), `close(pageId)`, `dispose(error)`,
 `pending`, `closed`; Worker `error`/`messageerror` dispose it. `GramlotWorkerServer`:
 extends core `GramlotServer`, GC-230 Part C over `postMessage`: `{id, open: true}` →
-`{id, open: {pageId, title, resources, capabilities: []}}`; `{id, text}` → `{id, text}` (envelopes
+`{id, open: {pageId, title, resources, capabilities: [], nameSyntax}}`; `{id, text}` → `{id, text}` (envelopes
 of `call`); `{pageId}` without `id` closes. Outcomes inside the envelope; failed open,
 `InvalidRequest`, `Unknown Worker message` → `{id, error: {name, message}}`. Owner null.
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
