@@ -39,8 +39,8 @@ renamed; `assets` `{source: absolute file, target: relative path
 One core installation for pages and exporter (`… must resolve the same Gramlot core
 installation`). Returns `{output, routes}`. Writes `index.html`,
 `<route>/index.html`, `assets/standalone.js`, `assets/runtime-notices.json`,
-`assets/workers/<route>.js`, `assets/styles/<route>.css` (`<name>.css`); `/themes/`
-URLs of `Page.css` copied from the core; `folderPages(folder)` gives `{pages,
+`assets/workers/<route>.js`, `assets/styles/<route>.css` (`<name>.css`); the theme of each page
+and the `/themes/` URLs of `Page.css` copied from the core; `folderPages(folder)` gives `{pages,
 assets}` of a folder; relative script paths; `assetRoot` = the document's
 directory; no Content Security Policy in the documents.
 
@@ -62,8 +62,7 @@ logic module; no `'unsafe-inline'`; `'unsafe-eval'` compiles the inline code of 
 received from the Worker: named logic and inline code run; code written later is refused
 ([Troubleshooting](140-troubleshooting.md)); `<style>` (from `Page.css`, `<name>.css`) and `style` attributes; `data:`/`blob:` images;
 connections open (`connect-src *`) until a page can declare its own policy. Only
-profile, from 0.2.3 (0.2.2: no `'unsafe-eval'`, `connect-src 'none'`); not an option of
-`build`.
+profile; not an option of `build`.
 
 <a id="gs-120-020"></a>
 
@@ -88,16 +87,15 @@ Block ID: **GS-120-025**.
 
 `new GramlotWorkerServer(PageClass, {logic = null, stylesheet = null, inlineCss = false,
 pageTtl = 1800, maxPages = 1000, …})` (`@gramlot/gramlot-serverless/gramlot-worker-server`), in
-the Worker; `logic` was `aux` until 0.2.3 (old name not accepted). The exporter
-writes the entry itself; options matter for custom Worker bundles. Other core `GramlotServer`
-options are server URLs. One page (`/`); `resolveResources` returns `Page.css`, the
-page stylesheet (none with `inlineCss`) and the logic URL.
+the Worker. The exporter
+writes the entry itself; options matter for custom Worker bundles. Also `cssTheme` (base theme as a CSS URL
+when `inlineCss` is false; the exporter itself inlines or copies the theme of each page) and `collections`
+(section 090). Other core `GramlotServer` options are server URLs. One page (`/`); `resolveResources` returns `Page.css`, the
+page stylesheet (none with `inlineCss`, which also leaves out the theme) and the logic URL.
 
 <a id="gs-120-090"></a>
-## 090 · Application component collections (development)
+## 090 · Application component collections
 
 Block ID: **GS-120-090**.
 
-`buildDirectory({pages, output, assets, collections})` accepts application collections. Each entry contains `grammar` and a root-relative `module` URL. Include a bundled ES module asset at the matching target (without the leading slash). The exporter embeds its text with the page modules and passes the grammar to the Worker server. The gallery declares inputs and includes the asset itself; rebuild the directory to update it. The single-file build API is unchanged.
-
-This is the initial 0.3 development increment; no new package release is implied.
+`buildDirectory({pages, output, assets, collections})` accepts application collections. Each entry contains `grammar` and a root-relative `module` URL. Include a bundled ES module asset at the matching target (without the leading slash). The exporter embeds its text with the page modules and passes the grammar to the Worker server. The gallery declares inputs and includes the asset itself; rebuild the directory to update it. The single-file build API takes no collections.

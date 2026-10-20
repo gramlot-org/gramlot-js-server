@@ -21,7 +21,7 @@ npm install
 cd serverless
 ```
 
-`serverless/examples/quickstart/`: `page.js` (Page and Logic), `styled.js` (the
+`serverless/examples/quickstart/`: `page.js` (Page and Logic; `Logic` is optional), `styled.js` (the
 page with a stylesheet), `theme.css`, `export.mjs` (directory export).
 
 <a id="gs-110-010"></a>
@@ -61,7 +61,7 @@ names a `Logic` method; the setter gives `Ada`.
 Block ID: **GS-110-015**.
 
 `func: 'greeting'` → `Logic.greeting`; `main` in the Worker, `Logic` in the window.
-`page_aux.js` exporting `Logic` still admitted; both → error. Inline code runs too
+`page_aux.js` exporting `Logic` also admitted; both → error. Inline code runs too
 ([Configuration](120-configuration.md)).
 
 <a id="gs-110-020"></a>
@@ -106,7 +106,8 @@ paths are refused. Folder of pages: `gramlot-serverless build pages -o dist`.
 Block ID: **GS-110-030**.
 
 [No server: a tutorial](135-serverless-tutorial.md), [Writing pages for this host](115-writing-pages.md),
-[Configuration](120-configuration.md), the core [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
+[Configuration](120-configuration.md), the core [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html) and
+[Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
 
 
 <a id="gs-110-035"></a>

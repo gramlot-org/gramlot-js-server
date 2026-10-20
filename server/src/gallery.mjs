@@ -29,8 +29,9 @@ function runtimeCatalog(runtime) {
 }
 
 /** Stage one page module per route in folder: the gallery for index, and for each example a
- * subclass that appends frame.js, its stylesheet <key>.css and <key>_aux.js, which re-exports
- * Logic from the URL of the logic module. Returns the assets, with each logic module as JavaScript. */
+ * subclass that appends frame.js, its stylesheet <key>.css and <key>_aux.js, which re-exports every
+ * name of the logic module from its URL (`export *`): Logic when the module exports it, no Logic when it
+ * does not, as the core allows. Returns the assets, with each logic module as JavaScript. */
 async function stage(folder, {buildGallery, galleryPage}, catalogs, prefix, serverlessDownloadUrl) {
     const {routes, assets} = buildGallery({catalogs});
     const urlOf = Object.fromEntries(Object.entries(assets).map(([url, {file}]) => [file, url]));
@@ -57,7 +58,7 @@ export class Page extends Example {
             const url = urlOf[logic];
             if (!url) throw new Error(`The logic module of ${key} is not a gallery asset: ${logic}`);
             assets[url] = {...assets[url], type: JAVASCRIPT};
-            await writeFile(join(folder, `${key}_aux.js`), `export {Logic} from ${JSON.stringify(prefix + url)};\n`);
+            await writeFile(join(folder, `${key}_aux.js`), `export * from ${JSON.stringify(prefix + url)};\n`);
         }
     }
     return assets;

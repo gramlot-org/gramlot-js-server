@@ -4,8 +4,9 @@ Document ID: **GS-115**.
 
 [Paired view](../docs/115-writing-pages.md).
 
-Binding: the core's [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
-Here: what is specific to the export without a server.
+Binding: the core's [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html); page structure:
+[Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html); Worker messages: Part C of the
+[server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html). Here: what is specific to the export without a server.
 
 <a id="gs-115-005"></a>
 
@@ -33,7 +34,7 @@ js-server.
 
 Block ID: **GS-115-010**.
 
-`Logic` of the page module, else `<name>_aux.js`; both → `Two logic modules for
+`Logic` of the page module, else `<name>_aux.js`; neither → no logic methods; both → `Two logic modules for
 one page`. Root group: `func: 'greeting'`; formula `method(kwargs)`, controller
 `method(node, kwargs)`.
 
@@ -56,8 +57,8 @@ Block ID: **GS-115-015**.
 
 | Export | `Page.css` and `<name>.css` |
 | --- | --- |
-| One file | `<style>` in load order; `/themes/…` from the `@gramlot/gramlot` package, other URLs from the page folder; `http(s)://`, `//`, `.`/`..`, missing file → build error |
-| Directory | Links; root-relative URLs inside the export (folder build copies the folder's files, `buildDirectory` the listed `assets`); `/themes/…` copied from the core; `<name>.css` → `assets/styles/<route>.css`; relative, `//`, `.`/`..` refused |
+| One file | `<style>` in load order: the theme of the page first (base theme, `css_theme`, none for `false`), `Page.css`, `<name>.css`; `/themes/…` from the `@gramlot/gramlot` package, other URLs from the page folder; `http(s)://`, `//`, `.`/`..`, missing file → build error |
+| Directory | Links; root-relative URLs inside the export (folder build copies the folder's files, `buildDirectory` the listed `assets`); the theme of each page and `/themes/…` copied from the core; `<name>.css` → `assets/styles/<route>.css`; relative, `//`, `.`/`..` refused |
 
 <a id="gs-115-020"></a>
 
@@ -66,9 +67,12 @@ Block ID: **GS-115-015**.
 Block ID: **GS-115-020**.
 
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 The Worker answers them with the envelope `contentType: 'source'` ([Reference](130-reference.md)).
+The Worker transport has no synchronous call: a `dataRemote` with `sync` reads asynchronously and
+`gramlot.rpc.callSync` throws; over HTTP it reads synchronously
+([Remote content and lazy Data](https://gramlot.readthedocs.io/en/latest/docs/public/099-remote-content.html)).
 
 <a id="gs-115-025"></a>
 
@@ -82,15 +86,6 @@ Not: unimported code, an external application server or database.
 `dataRpc`, `remote` and `dataRemote` execute bundled Page methods in the Worker;
 they provide neither a Python server nor persistent server state. All public:
 no secrets in pages or their modules.
-
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.
 
 <a id="gs-115-035"></a>
 ## 035 · Page formatting context

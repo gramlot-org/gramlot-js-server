@@ -1,8 +1,10 @@
 import {PageBootstrap} from '@gramlot/gramlot';
+import {WorkerServerAdapter} from './worker-server-adapter.js';
 import {WorkerTransport} from './worker-transport.js';
 
-// A logic module imports @gramlot/gramlot/page from the core of the window (GramlotStandalone).
-export {Page, IndexPage, IndexLogic, mountIndexPage} from '@gramlot/gramlot';
+// A logic module imports @gramlot/gramlot/page from the core of the window (GramlotStandalone): the window
+// exports every name of that entry, so a name the core adds there reaches the logic modules without a list here.
+export * from '@gramlot/gramlot/page';
 
 function exportRoot(assetRoot) {
     if (assetRoot === null) return null;
@@ -30,9 +32,13 @@ function styleUrl(href, root) {
     return resolved.href;
 }
 
-/** The page has no server to close: closing releases its Worker. */
+/** The bootstrap of a page whose server is its Worker: the server adapter hands out the Worker transport, which
+ * closes the server page with the close message and releases the Worker with dispose. */
 class WorkerBootstrap extends PageBootstrap {
-    closePage() { this.config.transport.dispose(); }
+    constructor({transport, ...options}) {
+        super(options);
+        this.serverAdapter = new WorkerServerAdapter(transport);
+    }
 }
 
 /** Start one JS Page in a dedicated bundled Worker through PageBootstrap.
@@ -48,9 +54,9 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
     const abort = () => transport.dispose(signal.reason);
     signal?.addEventListener('abort', abort, {once: true});
     try {
-        const {pageId, title, resources, capabilities, locale, timeZone, devices} = await transport.open(signal);
+        const {pageId, title, resources, capabilities, nameSyntax, locale, timeZone, devices} = await transport.open(signal);
         document.title = title;
-        const bootstrap = new WorkerBootstrap({document, config: {pageId, element, rootId, capabilities, transport, locale, timeZone, devices}, resources: {
+        const bootstrap = new WorkerBootstrap({document, transport, config: {pageId, element, rootId, capabilities, nameSyntax, locale, timeZone, devices}, resources: {
             css: resources.css.map(href => styleUrl(href, root)),
             collections: (resources.collections ?? []).map(url => {
                 if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone collection not provided: ${url}`);

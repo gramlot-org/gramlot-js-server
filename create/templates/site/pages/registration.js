@@ -5,7 +5,7 @@ import {Page as BasePage} from '@gramlot/gramlot/page';
  * through the buttons of gramlot.utl.inout. */
 export class Page extends BasePage {
     static title = 'Registration';
-    static css = ['/themes/gramlot-base/theme.css', '/site.css'];
+    static css = ['/site.css'];
 
     main(root) {
         const menu = root.nav({class: 'menu', 'aria-label': 'Pages'});

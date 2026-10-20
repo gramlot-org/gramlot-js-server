@@ -4,11 +4,13 @@ import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {inlineStylesheets, loadPage, logicBundle, logicModule, workerBundle} from '../src/bundles.js';
+import {build as bundle} from 'esbuild';
+import {inlineStylesheets, loadPage, logicBundle, logicModule, pageNames, workerBundle} from '../src/bundles.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const page = join(root, 'tests/fixtures/companion/page.js');
 const pageModule = join(root, 'tests/fixtures/page-module/page.js');
+const typedLiterals = join(root, 'tests/fixtures/typed-literals/page.js');
 const options = {bundle: true, platform: 'browser', format: 'iife', write: false};
 
 async function folder(t) {
@@ -43,6 +45,30 @@ test('the Logic export of the page module is the logic; its bundle takes the cor
     assert.ok(module.length < 20000, `${module.length} bytes`);
 });
 
+test('the window core module exports every name of the core page entry, so a Logic imports Bag and createDecimal', async () => {
+    // The names are read from the core entry; the window runtime (standalone.js) exports each of them.
+    assert.deepEqual(pageNames, Object.keys(await import('@gramlot/gramlot/page')));
+    for (const name of ['Page', 'IndexPage', 'IndexLogic', 'mountIndexPage', 'Bag', 'BagNode', 'createDecimal', 'ServerAdapter']) {
+        assert.ok(pageNames.includes(name), name);
+    }
+    const {metafile} = await bundle({...options, format: 'esm', metafile: true, entryPoints: [join(root, 'src/standalone.js')]});
+    const [{exports}] = Object.values(metafile.outputs);
+    assert.deepEqual(pageNames.filter(name => !exports.includes(name)), []);
+    const logic = await logicModule(typedLiterals, await loadPage(typedLiterals));
+    assert.deepEqual(logic, {file: typedLiterals, url: '/page.js'});
+    const module = await logicBundle(logic, options);
+    assert.match(module, /globalThis\.GramlotStandalone/);
+    assert.doesNotMatch(module, /class GramlotBuilder/);
+});
+
+test('a Logic with typed literals runs against the core of the window', async t => {
+    globalThis.GramlotStandalone = await import('../src/standalone.js');
+    t.after(() => { delete globalThis.GramlotStandalone; });
+    const module = await logicBundle({file: typedLiterals, url: '/page.js'}, options);
+    const {Logic} = await import(`data:text/javascript,${encodeURIComponent(module)}`);
+    assert.equal(new Logic().sum(), '0.3');
+});
+
 test('a Logic export and a companion for one page are an error; a module without Page is refused', async t => {
     const path = await folder(t);
     const both = join(path, 'both.js');
@@ -68,7 +94,24 @@ test('one file inlines /themes/ from the core package, other URLs from the page 
         await assert.rejects(inlineStylesheets(join(path, 'page.js'), styled(css)), message);
     }
     await writeFile(join(path, 'a.css'), 'a');
-    assert.deepEqual(await inlineStylesheets(join(path, 'page.js'), styled(['/a.css', 'a.css'])), [join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(join(path, 'page.js'), styled(['/a.css', 'a.css'])), [theme, join(path, 'a.css')]);
+});
+
+test('the theme of the page comes first: the base theme, css_theme, none, and the base theme listed in Page.css once', async t => {
+    const require = createRequire(import.meta.url);
+    const theme = name => require.resolve(`@gramlot/gramlot/themes/${name}/theme.css`);
+    const path = await folder(t);
+    await writeFile(join(path, 'a.css'), 'a');
+    const file = join(path, 'page.js');
+    const themed = (css, css_theme) => class { static css = css; static css_theme = css_theme; };
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css'])), [theme('gramlot-base'), join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css'], 'gramlot-compact')), [theme('gramlot-compact'), join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css'], false)), [join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/themes/gramlot-base/theme.css', '/a.css'])),
+        [theme('gramlot-base'), join(path, 'a.css')]);
+    assert.deepEqual(await inlineStylesheets(file, themed(['/a.css', '/themes/gramlot-base/theme.css'])),
+        [join(path, 'a.css'), theme('gramlot-base')]);
+    await assert.rejects(inlineStylesheets(file, themed([], '../x')), {name: 'InvalidResourceName'});
 });
 
 test('inline.js is not reachable from the GramlotWorkerServer bundle', async () => {

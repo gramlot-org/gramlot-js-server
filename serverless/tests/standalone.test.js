@@ -3,14 +3,18 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {fromTytx, toTytx} from '@genrojs/tytx';
 import {Page} from '@gramlot/gramlot/page';
+import {NAME_SYNTAX, NameSyntax} from '@gramlot/gramlot/server';
 import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
+import {WorkerServerAdapter} from '../src/worker-server-adapter.js';
 import {WorkerTransport} from '../src/worker-transport.js';
-import {Gramlot} from '@gramlot/gramlot';
+import {Gramlot, ServerAdapter} from '@gramlot/gramlot';
 import {mount} from '../src/standalone.js';
+
+const BASE_THEME = '/themes/gramlot-base/theme.css';
 
 // Browser-like endpoints with structured cloning; actual Worker execution is
 // covered by scripts/verify_worker_host_browser.mjs.
-function channel(PageClass, options) {
+function channel(PageClass, options, Server = GramlotWorkerServer) {
     const worker = new EventTarget();
     const scope = new EventTarget();
     let terminated = false;
@@ -24,7 +28,7 @@ function channel(PageClass, options) {
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'self');
     globalThis.self = scope;
     let server;
-    try { server = new GramlotWorkerServer(PageClass, options); }
+    try { server = new Server(PageClass, options); }
     finally { if (previous) Object.defineProperty(globalThis, 'self', previous); else delete globalThis.self; }
     return {worker, server, transport: new WorkerTransport(worker), terminated: () => terminated};
 }
@@ -109,12 +113,13 @@ test('Worker rejects unknown messages, invalid envelopes, unsupported pages and 
     }
     class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
     const styled = channel(Styled);
-    assert.deepEqual((await styled.transport.open()).resources, {css: Styled.css, js: []});
+    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: []});
     styled.transport.dispose();
     const {transport} = channel(Hello);
     await assert.rejects(transport.request({operation: 'main'}), {name: 'TypeError', message: 'Unknown Worker message'});
-    const {pageId, capabilities} = await transport.open();
+    const {pageId, capabilities, nameSyntax} = await transport.open();
     assert.deepEqual(capabilities, []);
+    assert.deepEqual(nameSyntax, NAME_SYNTAX.toJSON());
     await assert.rejects(transport.call('{'), {name: 'InvalidRequest'});
     await assert.rejects(transport.call(toTytx({id: 'r', pageId, contentType: 'source', name: 'main', params: null})),
         {name: 'InvalidRequest'});
@@ -145,12 +150,12 @@ test('standalone mount owns startup and failure cleanup', async t => {
     assert.equal(endpoints[1].terminated(), true);
 });
 
-function workers(t, PageClass, options) {
+function workers(t, PageClass, options, Server) {
     const endpoints = [];
     const previous = Object.getOwnPropertyDescriptor(globalThis, 'Worker');
     t.after(() => { if (previous) Object.defineProperty(globalThis, 'Worker', previous); else delete globalThis.Worker; });
     globalThis.Worker = function () {
-        const endpoint = channel(PageClass, options);
+        const endpoint = channel(PageClass, options, Server);
         endpoint.worker.removeEventListener('message', endpoint.transport.receive);
         endpoints.push(endpoint);
         return endpoint.worker;
@@ -174,12 +179,57 @@ test('PageBootstrap writes Page.css links and receives the Worker transport in i
     const doc = document();
     const app = await mount({workerUrl: 'page-worker.js', document: doc});
     assert.equal(doc.title, 'Gramlot');
-    assert.deepEqual([...doc.querySelectorAll('link[rel="stylesheet"]')].map(link => link.getAttribute('href')), Styled.css);
+    assert.deepEqual([...doc.querySelectorAll('link[rel="stylesheet"]')].map(link => link.getAttribute('href')),
+        [BASE_THEME, ...Styled.css]);
     assert.equal(doc.querySelector('h1').textContent, 'Hello Worker');
     assert.equal(app.rpc.transport, doc.defaultView.gramlot.rpc.transport);
     assert.equal(app.rpc.transport.worker, endpoints[0].worker);
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
+});
+
+test('the page has the server adapter of its Worker, which hands out the Worker transport', async t => {
+    const endpoints = workers(t, Hello);
+    const app = await mount({workerUrl: 'page-worker.js', document: document()});
+    assert.ok(app.serverAdapter instanceof WorkerServerAdapter);
+    assert.ok(app.serverAdapter instanceof ServerAdapter);
+    assert.equal(app.serverAdapter.createTransport(), app.rpc.transport);
+    assert.equal(app.rpc.transport.worker, endpoints[0].worker);
+    app.dispose();
+    assert.equal(endpoints[0].terminated(), true);
+});
+
+test('the page builder takes the name syntax that the Worker server declares', async t => {
+    const narrow = new NameSyntax(String.raw`[a-z]+(?:\.[a-z]+)*`);
+    class NarrowServer extends GramlotWorkerServer { get nameSyntax() { return narrow; } }
+    for (const [Server, syntax] of [[GramlotWorkerServer, NAME_SYNTAX], [NarrowServer, narrow]]) {
+        workers(t, Hello, {}, Server);
+        const app = await mount({workerUrl: 'page-worker.js', document: document()});
+        assert.deepEqual(app.src.builder.nameSyntax.toJSON(), syntax.toJSON());
+        app.dispose();
+    }
+});
+
+test('a Worker transport has no synchronous call: callSync throws and a dataRemote with sync reads asynchronously', async t => {
+    class Menu extends Page {
+        main(root) {
+            root.dataRemote({destination_path: 'menu', method: 'loadMenu', table: 'users'});
+            root.p('^menu', {id: 'menu'});
+        }
+        loadMenu({table}) { return `rows of ${table}`; }
+    }
+    Menu.registerEndpoint('loadMenu');
+    workers(t, Menu);
+    const doc = document();
+    const app = await mount({workerUrl: 'page-worker.js', document: doc});
+    t.after(() => app.dispose());
+    assert.equal(app.rpc.transport.supportsCallSync, undefined);
+    assert.equal(app.rpc.supportsCallSync, false);
+    assert.throws(() => app.rpc.callSync('data', 'loadMenu', {table: 'users'}),
+        /rpc 'loadMenu': the transport of this page has no synchronous call/);
+    // The dataRemote reads with sync: true by default; the Worker answers it asynchronously.
+    await new Promise(resolve => setTimeout(resolve, 20));
+    assert.equal(doc.querySelector('#menu').textContent, 'rows of users');
 });
 
 test('the window imports the logic module named by the Worker and registers its Logic', async t => {
@@ -205,7 +255,7 @@ test('a missing or failing logic module stops startup and releases the Worker', 
     doc.defaultView.navigator.sendBeacon = url => { beacons.push(url); return true; };
     await assert.rejects(mount({workerUrl: 'page-worker.js', document: doc,
         modules: {'/page_aux.js': module('throw new Error("broken companion");')}}), /import failed: broken companion/);
-    // WorkerBootstrap.closePage releases the Worker instead of sending a close beacon.
+    // The transport of the Worker closes the server page with a message, not with a beacon, and releases the Worker.
     assert.deepEqual(beacons, []);
     assert.equal(endpoints[1].terminated(), true);
     assert.equal(doc.defaultView.gramlot, undefined);
@@ -216,7 +266,8 @@ test('explicit assetRoot resolves declared root CSS inside a local export direct
     const endpoints = workers(t, Styled);
     const doc = document();
     const app = await mount({workerUrl: 'page-worker.js', document: doc, assetRoot: 'file:///export/site/'});
-    assert.equal(doc.querySelector('link[rel="stylesheet"]').href, 'file:///export/site/themes/theme.css');
+    assert.deepEqual([...doc.querySelectorAll('link[rel="stylesheet"]')].map(link => link.href),
+        ['file:///export/site/themes/gramlot-base/theme.css', 'file:///export/site/themes/theme.css']);
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
 
@@ -230,15 +281,29 @@ test('explicit assetRoot resolves declared root CSS inside a local export direct
     assert.equal(escaping[0].terminated(), true);
 });
 
-test('the Worker returns Page.css then the same-name stylesheet, and no CSS with inlineCss', async () => {
+test('the Worker returns the theme, Page.css, then the same-name stylesheet, and no CSS with inlineCss', async () => {
     class Styled extends Hello { static css = ['/theme.css']; }
+    class Compact extends Styled { static css_theme = 'gramlot-compact'; }
+    class Bare extends Styled { static css_theme = false; }
+    class Listed extends Hello { static css = [BASE_THEME, '/theme.css']; }
     const linked = channel(Styled, {stylesheet: '/assets/styles/index.css', logic: '/index.js'});
     assert.deepEqual((await linked.transport.open()).resources,
-        {css: ['/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}]});
+        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}]});
     linked.transport.dispose();
-    const inline = channel(Styled, {stylesheet: '/assets/styles/index.css', inlineCss: true});
-    assert.deepEqual((await inline.transport.open()).resources, {css: [], js: []});
-    inline.transport.dispose();
+    for (const [PageClass, css] of [[Compact, ['/themes/gramlot-compact/theme.css', '/theme.css']],
+        [Bare, ['/theme.css']], [Listed, [BASE_THEME, '/theme.css']]]) {
+        const themed = channel(PageClass);
+        assert.deepEqual((await themed.transport.open()).resources.css, css, PageClass.name);
+        themed.transport.dispose();
+    }
+    const base = channel(Styled, {cssTheme: false});
+    assert.deepEqual((await base.transport.open()).resources.css, ['/theme.css']);
+    base.transport.dispose();
+    for (const PageClass of [Styled, Compact, Listed]) {
+        const inline = channel(PageClass, {stylesheet: '/assets/styles/index.css', inlineCss: true});
+        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: []}, PageClass.name);
+        inline.transport.dispose();
+    }
 });
 
 class Contract extends Page {

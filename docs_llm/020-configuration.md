@@ -13,26 +13,28 @@ Block ID: **GN-120-005**.
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `pages` | string | — | Pages folder → `new GramlotFileServer(pages, options)` unless `server` |
-| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`) |
+| `server` | `GramlotServer` | `null` | Custom `GramlotServer` (`resolvePage`, `resolveResources`); core themes for any server, pages-folder files only for a `GramlotFileServer` |
 | `hostname` | string | `'127.0.0.1'` | Address |
 | `port` | number | `0` | Port; `0` = free port, see `app.url` |
 | `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |
 | `assets` | object | `{}` | URL path → `{file, type}`, `GET`/`HEAD` |
 | `contentSecurityPolicy` | string/null | `null` | Header on HTML pages, `{nonce}` replaced |
-| `ownerForRequest` | `async (request) => owner` | `null` | Identity compared on rpc/close |
+| `ownerForRequest` | `async (request) => owner` | `null`: cookie `gramlot_owner` | Identity compared on rpc/close; replaces the cookie |
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
 | `runtimeUrl`, `rpcUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/rpc`, `/gramlot/close` | `GramlotServer` URLs |
 | `rootId` | string | `'gramlot-root'` | Root element id |
-| `pageTtl` | number | `1800` | Seconds a page stays registered |
+| `pageTtl` | number | `1800` | Seconds a page stays registered without a call (opening and each call start the period again) |
 | `maxPages` | integer | `1000` | Registry capacity; above: 503 |
+| `cssTheme` | string or `false` | `'gramlot-base'` | Base theme of every page (core themes folder); `false` none; a page replaces it with `static css_theme` |
+| `collections` | array | `[]` | Component collections (section 035) |
 | `reload` | boolean or `null` | `null` | `GramlotFileServer`: re-import a changed page module; `null` → from `GRAMLOT_DEV` |
 
 `GramlotServer` options and `reload` reach `GramlotFileServer` only when the adapter builds it.
 `GRAMLOT_DEV`: unset → `gramlot.min.js`, page modules imported once; `YES` →
 `gramlot.min.js`, changed page modules re-imported; `DEBUG` → `gramlot.js`,
 re-imported; other values fail the start. Same runtime URL in every mode.
-`rpcUrl`: every request envelope (main, Source methods, endpoints); `mainUrl`/`sourceUrl`
-removed by core 0.2.14, no `/gramlot/main` or `/gramlot/source` route.
+`rpcUrl`: every request envelope (main, Source methods, endpoints); there is no
+`/gramlot/main` or `/gramlot/source` route.
 
 <a id="gn-120-010"></a>
 
@@ -44,8 +46,7 @@ Block ID: **GN-120-010**.
 `/app/gramlot/rpc|close`, `/app/index.css`; relative and absolute
 `Page.css` unchanged; never `/app/app/`. Requests carry the prefix: the adapter
 removes it; outside it 404; `/app` → 301 `/app/`. A front server forwards the
-path unchanged ([Deployment](025-deployment.md)). Until 0.2.3 the front server
-removed it.
+path unchanged ([Deployment](025-deployment.md)).
 
 <a id="gn-120-015"></a>
 
@@ -71,9 +72,11 @@ nothing written. `null`: no header, inline runs.
 
 Block ID: **GN-120-020**.
 
-`ownerForRequest(request)` → owner, compared with `===` to the owner at opening.
-Different owner: main/source 404, close 200 and no effect. Default `null`: any
-client reads any open page. Derive the owner from the application's session.
+Each browser owns its pages: the page response sets the cookie `gramlot_owner` (random,
+`Path` the prefix or `/`, `HttpOnly`, `SameSite=Lax`, session), reused when sent back. Different
+or missing owner: rpc outcome `page_expired`, close 200 and no effect.
+`ownerForRequest(request)` → owner, compared with `===`, replaces the cookie (no cookie set):
+derive the owner from the application's session.
 
 <a id="gn-120-025"></a>
 
@@ -81,9 +84,11 @@ client reads any open page. Derive the owner from the application's session.
 
 Block ID: **GN-120-025**.
 
-No body size limit in the adapter (a front proxy may set one), content type
-`application/json` (415); `pageTtl` positive and finite, pruned at openings and rpc; `maxPages`
-→ 503; `close()` clears the registry and stops the server.
+No body size limit in the adapter (a front proxy may set one), media type
+`application/json` (415; `charset` accepted), body UTF-8 (a leading byte order mark is
+removed, invalid bytes 400); `pageTtl` positive and finite, a page expires `pageTtl` seconds
+after its last use, pruned at openings and rpc; `maxPages` → 503; `close()` clears the
+registry and stops the server.
 
 <a id="gn-120-030"></a>
 
@@ -97,10 +102,8 @@ with that type; `HEAD` headers only; other methods 405. Key without `/`, or no
 (when the core has the file), assets, companions, pages.
 
 <a id="gn-120-035"></a>
-## 035 · Application component collections (development)
+## 035 · Application component collections
 
 Block ID: **GN-120-035**.
 
-The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.
-
-This is the initial 0.3 development increment; no new package release is implied.
+The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`; the core guide [Components](https://gramlot.readthedocs.io/en/latest/docs/public/105-components.html) describes an entry. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.

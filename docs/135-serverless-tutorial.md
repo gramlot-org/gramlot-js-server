@@ -9,7 +9,7 @@ wants a registration form that opens without a server: a file he can send by
 mail, put on a USB stick or upload to the club's web site. Later he wants a
 small site of a few pages. The tutorial uses `npm create @gramlot` (package
 `@gramlot/create`) and the packages `@gramlot/gramlot-serverless` and
-`@gramlot/gramlot-js-server` 0.2.4 or later. The commands and their outputs were
+`@gramlot/gramlot-js-server` 0.2.14 or later. The commands and their outputs were
 run on 2026-10-04; `create/test/create.test.js` runs both projects in CI.
 
 <a id="gs-135-005"></a>
@@ -22,8 +22,9 @@ Block ID: **GS-135-005**.
 - A browser, on every computer that opens them. The people who fill in the form
   need nothing else: no Node, no server, no account.
 
-Mario writes the pages in JavaScript. Each page is one module with two classes:
-`Page` builds the page, `Logic` holds the methods the page calls while it runs.
+Mario writes the pages in JavaScript. Each page is one module with a class `Page`,
+which builds the page, and, when the page has methods to call while it runs, a
+class `Logic`.
 
 <a id="gs-135-010"></a>
 
@@ -77,8 +78,9 @@ export class Logic {
 ```
 
 Mario changes the fields, the labels and the texts as he likes. The core guide
-[Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html)
-describes every element and declaration.
+[Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html) and
+[Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html) describe every element
+and declaration.
 
 <a id="gs-135-015"></a>
 
@@ -220,11 +222,10 @@ template serves the project folder, `node_modules` included
 ([Deployment](025-deployment.md)). The server guides start at
 [Introduction](005-introduction.md).
 
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.
+**Learning path.** After this environment's setup, follow
+[Learn by topic](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015)
+of the core. The gallery is a source viewer, not a file editor: edit a separate
+project and build again after saving. `Page` runs in a Web Worker of the browser,
+`Logic` in the window. Use named `Logic` for reusable behavior; inline code runs in
+the single file, whose policy allows `'unsafe-eval'`, and in a directory export
+that sets no policy. The common examples do not cover every advanced case.

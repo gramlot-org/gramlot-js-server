@@ -36,11 +36,27 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     assert.ok(c03.includes('"/c03_aux.js":'));
     assert.ok(c03.includes('../gallery/dist/frame.js'));
     assert.match(c03, /countChange/);
-    for (const path of ['index.html', 'c03/index.html', 'assets/styles/b08.css', 'themes/gramlot-base/theme.css',
+    for (const path of ['index.html', 'c03/index.html', 'assets/styles/b09.css', 'themes/gramlot-base/theme.css',
         'gallery/gallery.css', 'gallery/dist/gallery.js', 'gallery/dist/frame.js', 'assets/branding/gramlot-logo-dark.svg']) {
         assert.ok((await stat(join(output, path))).isFile(), path);
     }
     await assert.rejects(stat(join(output, 'gallery/page.js')), {code: 'ENOENT'});
+});
+
+test('an example with Logic gets its companion; one without Logic gets none and stays out of the window', async t => {
+    const folder = await mkdtemp(join(root, 'tests/.build-'));
+    t.after(() => rm(folder, {recursive: true, force: true}));
+    const output = join(folder, 'gallery');
+    const fixtures = join(root, 'tests/fixtures/gallery');
+    const {routes} = await buildStaticGallery({output, catalogs: [[join(fixtures, 'catalog.json'), join(fixtures, 'pages')]]});
+    assert.ok(routes.includes('modules-01') && routes.includes('modules-02'));
+    const plain = await readFile(join(output, 'assets/workers/modules-01.js'), 'utf8');
+    const logic = await readFile(join(output, 'assets/workers/modules-02.js'), 'utf8');
+    // The page without Logic imports createDecimal, which the core of the window does not export: it is never bundled for the window.
+    assert.doesNotMatch(plain, /_aux\.js/);
+    assert.match(logic, /"\/modules-02_aux\.js":/);
+    assert.match(logic, /twice/);
+    for (const route of ['modules-01', 'modules-02']) assert.ok((await stat(join(output, route, 'index.html'))).isFile(), route);
 });
 
 test('the command: gallery needs one output; --catalog needs two values', () => {

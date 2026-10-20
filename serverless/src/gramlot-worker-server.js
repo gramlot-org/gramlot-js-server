@@ -4,8 +4,9 @@ import {GramlotServer, PageNotFound} from '@gramlot/gramlot/gramlot-server';
  * logic is the URL that names the page logic module (the page module foo.js or the
  * companion foo_aux.js), or null. The Worker only returns it: the window maps it to the
  * module and imports it there. stylesheet is the URL of the same-name stylesheet foo.css,
- * or null; with inlineCss the document already holds every stylesheet and no CSS URL
- * is returned. */
+ * or null; with inlineCss the document already holds every stylesheet, the theme included,
+ * and no CSS URL is returned. Otherwise the CSS is the theme of the page (themeCss), Page.css
+ * and the stylesheet. */
 export class GramlotWorkerServer extends GramlotServer {
     constructor(PageClass, {logic = null, stylesheet = null, inlineCss = false, ...options} = {}) {
         super(options);
@@ -15,6 +16,11 @@ export class GramlotWorkerServer extends GramlotServer {
         this.inlineCss = inlineCss;
         this.scope = self;
         this.scope.addEventListener('message', event => this.dispatch(event.data));
+    }
+
+    /** The CSS URL of the theme of the page: none with inlineCss, where the document already holds it. */
+    themeCss(PageClass) {
+        return this.inlineCss ? [] : super.themeCss(PageClass);
     }
 
     async resolvePage(path) {

@@ -39,7 +39,7 @@ export async function build({page, output}) {
     const runtime = (await bundle({...options, globalName: 'GramlotStandalone', stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
-export {Page, IndexPage, IndexLogic, mountIndexPage} from './src/standalone.js';
+export * from './src/standalone.js';
 const blob = text => URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
 const workerUrl = blob(${JSON.stringify(worker)});
 const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));

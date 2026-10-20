@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/gramlot-js-server",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "Node.js and Bun host adapter for Gramlot JavaScript pages",
   "license": "Apache-2.0",
   "repository": {
@@ -21,7 +21,7 @@
     "node": ">=22"
   },
   "peerDependencies": {
-    "@gramlot/gramlot": ">=0.3.2",
+    "@gramlot/gramlot": ">=0.3.6",
     "@gramlot/gramlot-examples": ">=0.3.4"
   },
   "peerDependenciesMeta": {
@@ -30,7 +30,7 @@
     }
   },
   "devDependencies": {
-    "@genrojs/tytx": ">=0.16.2",
+    "@genrojs/tytx": ">=0.16.3",
     "@gramlot/gramlot-examples": ">=0.3.4"
   },
   "exports": {

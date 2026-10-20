@@ -2,8 +2,10 @@
 
 Document ID: **GN-115**. [Expanded version](../docs/015-writing-pages.md).
 
-Binding and lifecycle: the core's [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html).
-Here: files, folders, the page logic, what is served.
+Binding and lifecycle: the core's [Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html);
+page structure: [Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html); the adapter follows the
+[server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html). Here: files, folders, the page logic,
+what is served.
 
 <a id="gn-115-005"></a>
 
@@ -15,7 +17,8 @@ Block ID: **GN-115-005**.
 `shop/orders/orders.js`; the file wins; `/orders/index.html` → `/orders`,
 `/index.html` → `/`. Segments: letters, digits, `_`, `-`; else
 404; a real path leaving the folder: 404. The module exports `Page` extending the
-core's `Page`, and may export `Logic`; `static title` defaults to `Gramlot`.
+core's `Page`, and may export `Logic` (a page without named logic needs none); `static title`
+defaults to `Gramlot`.
 Beside the page: `orders.css` (stylesheet), `orders_aux.js` (logic module when
 the page module exports no `Logic`),
 `orders.md` (README, never served). `_aux` is reserved. Modules are trusted ESM,
@@ -27,12 +30,15 @@ cached: a change needs a restart.
 
 Block ID: **GN-115-010**.
 
-`static css = ['/themes/gramlot-base/theme.css', '/site.css', 'print.css', 'https://…']`:
+`static css = ['/themes/gramlot-compact/theme.css', '/site.css', 'print.css', 'https://…']`:
 root-relative gets the mount prefix once and is served when below the pages
 folder or in `assets`; `/themes/…` comes from the installed core when it has the
 file; relative
-resolves in the browser; absolute stays. Order: `Page.css`, then `orders.css`;
-a repeated URL loads once, last position.
+resolves in the browser; absolute stays. Order: the theme of the page (base theme
+`gramlot-base`, no line needed), `Page.css`, then `orders.css`; a repeated URL loads once,
+last position. `static css_theme = '<name>'` replaces the base theme, `false` loads none;
+the option `cssTheme` of `startServer` sets the base theme of every page
+([Themes and CSS](https://gramlot.readthedocs.io/en/latest/docs/public/096-themes-and-css.html)).
 
 <a id="gn-115-015"></a>
 
@@ -40,8 +46,8 @@ a repeated URL loads once, last position.
 
 Block ID: **GN-115-015**.
 
-One logic module: `Logic` of `orders.js`, else `orders_aux.js`; both → error.
-Root group: `func: 'add'`. Public, imports resolve in the browser
+At most one logic module: `Logic` of `orders.js`, else `orders_aux.js`; both → error;
+neither → no logic methods. Root group: `func: 'add'`. Public, imports resolve in the browser
 (`@gramlot/gramlot/page` via the import map); server-only imports → `orders_aux.js`.
 `js_requires`/`css_requires` raise `InvalidResourceName` on `GramlotFileServer`; the resource
 system comes with genro-kajenn (Genro, the successor of GenroPy).
@@ -53,7 +59,8 @@ export class Logic {
 }
 ```
 
-Explicit constructor, a method `page`, a missing name: bootstrap errors. Named
+Explicit constructor, a method `page`, a missing name: bootstrap errors; a misspelt
+export (`logic`) shows only when a `func` looks for its method. Named
 logic runs under the strict CSP; inline code needs the permissive profile
 ([Configuration](020-configuration.md)).
 
@@ -64,9 +71,11 @@ logic runs under the strict CSP; inline code needs the permissive profile
 Block ID: **GN-115-020**.
 
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 The adapter answers them on `POST /gramlot/rpc`, `contentType: 'source'` ([Reference](030-reference.md)).
+A `dataRemote` with `sync` (default) reads synchronously over HTTP
+([Remote content and lazy Data](https://gramlot.readthedocs.io/en/latest/docs/public/099-remote-content.html)).
 
 <a id="gn-115-025"></a>
 
@@ -76,15 +85,6 @@ Block ID: **GN-115-025**.
 
 `GET`/`HEAD` serve `.css` and `.js` whose real path is below the pages folder
 (`text/css`, `text/javascript`): page modules, `_aux.js`, stylesheets. READMEs,
-other extensions, escaping symlinks, encoded `..`: 404. `POST` on a companion:
-405. Undecodable path: 400. Also: runtime `/assets/gramlot.js` and every file of
+other extensions, escaping symlinks, encoded `..`: 404. Another method on a companion:
+405, `Allow: GET, HEAD`. Undecodable path: 400. Also: runtime `/assets/gramlot.js` and every file of
 `/themes/` from the installed core, files of `assets`. Nothing else ([Deployment](025-deployment.md)).
-
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.

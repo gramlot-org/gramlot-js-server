@@ -15,8 +15,8 @@ Block ID: **GS-130-005**.
 `mount` (window); `/gramlot-worker-server` → `GramlotWorkerServer` (Worker); `/directory` also
 `folderPages`. Command `gramlot-serverless` (`node serverless/src/cli.js`): `build
 PAGE.js -o OUTPUT.html`, `build FOLDER -o OUTPUT`, `gallery OUTPUT [--catalog …]`.
-Dependencies `@gramlot/gramlot >=0.2.17`, `@genrojs/builders >=0.5.2`, `esbuild`;
-optional peer `@gramlot/gramlot-examples >=0.2.12` (gallery).
+Dependencies `@genrojs/builders >=0.6.0`, `esbuild`; peer `@gramlot/gramlot >=0.3.6`;
+optional peer `@gramlot/gramlot-examples >=0.3.4` (gallery).
 
 <a id="gs-130-010"></a>
 
@@ -42,16 +42,18 @@ Block ID: **GS-130-015**.
 `mount(options) → Gramlot` ([GS-120-020](120-configuration.md));
 `globalThis.gramlot`. `Gramlot`: `state` (`'started'`), `src.source`, `data`,
 `src.remoteSource(node, method, params)`, `dispose()` (terminates the Worker),
-`rpc.transport`. `WorkerTransport`: `open(signal)` → `{pageId, title, resources, capabilities}`,
+`rpc.transport`. `WorkerTransport`: `open(signal)` → `{pageId, title, resources, capabilities, nameSyntax}`,
 `call(text, signal)` → response envelope text (as `HttpTransport`), `close(pageId)`, `dispose(error)`,
-`pending`, `closed`; Worker `error`/`messageerror` dispose it. `GramlotWorkerServer`:
-extends core `GramlotServer`, GC-230 Part C over `postMessage`: `{id, open: true}` →
-`{id, open: {pageId, title, resources, capabilities: []}}`; `{id, text}` → `{id, text}` (envelopes
+`pending`, `closed`; Worker `error`/`messageerror` dispose it; no `supportsCallSync` (`callSync` throws, a
+`dataRemote` with `sync` reads asynchronously). `WorkerServerAdapter` (`serverless/src/worker-server-adapter.js`,
+not an entry): the core `ServerAdapter` whose `createTransport()` returns that transport. `GramlotWorkerServer`:
+extends core `GramlotServer`, Part C of the [server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html) over `postMessage`: `{id, open: true}` →
+`{id, open: {pageId, title, resources, capabilities: [], nameSyntax}}`; `{id, text}` → `{id, text}` (envelopes
 of `call`); `{pageId}` without `id` closes. Outcomes inside the envelope; failed open,
 `InvalidRequest`, `Unknown Worker message` → `{id, error: {name, message}}`. Owner null.
 Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
 
 <a id="gs-130-020"></a>
 
@@ -72,9 +74,10 @@ logic module sources as Blob URLs revoked after start. Directory:
 
 Block ID: **GS-130-025**.
 
-`npm test` (32 tests); `verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` (Page and
-Logic in one module, theme, stylesheets, file and directory);
-`verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` (gallery from disk, every example);
+`npm test`; `verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` (Page and
+Logic in one module, theme, stylesheets, and a Logic that imports `Bag` and `createDecimal`
+from `@gramlot/gramlot/page`; file and directory);
+`verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` (gallery from disk, every example, the `Logic` of the examples that call its methods);
 `verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` (file and
 directory export in a real browser); `verify_export_browser.mjs HTML PLAYWRIGHT
 EXECUTABLE TEXT [METHOD] [ENGINE]`; `verify_inline_browser.mjs HTML PLAYWRIGHT
@@ -90,7 +93,7 @@ Block ID: **GS-130-030**.
 
 `gramlot-serverless gallery OUTPUT [--catalog CATALOG.json PAGES]...`: the
 gramlot-examples gallery as a directory from disk; `index.html` + `<key>/index.html`;
-common families + `serverless-02` (`npm create @gramlot page`) + each `--catalog`. Prints `Built <output>: the gallery and <n> examples; open
+every family of the common `catalog.json` + `serverless-02` (`npm create @gramlot page`) + each `--catalog`. Prints `Built <output>: the gallery and <n> examples; open
 index.html`. Rules of `buildDirectory` (a previous gallery is replaced); export size depends
 on the installed examples and runtime, with one Worker per route. Missing examples package → `The gallery needs
 @gramlot/gramlot-examples: …`.

@@ -4,7 +4,7 @@ import {Page as BasePage} from '@gramlot/gramlot/page';
  * Each file of this folder is a page: registration.js is the page registration/. */
 export class Page extends BasePage {
     static title = 'My site';
-    static css = ['/themes/gramlot-base/theme.css', '/site.css'];
+    static css = ['/site.css'];
 
     main(root) {
         const menu = root.nav({class: 'menu', 'aria-label': 'Pages'});
