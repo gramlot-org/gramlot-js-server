@@ -9,7 +9,7 @@ wants a registration form that opens without a server: a file he can send by
 mail, put on a USB stick or upload to the club's web site. Later he wants a
 small site of a few pages. The tutorial uses `npm create @gramlot` (package
 `@gramlot/create`) and the packages `@gramlot/gramlot-serverless` and
-`@gramlot/gramlot-js-server` 0.2.4 or later. The commands and their outputs were
+`@gramlot/gramlot-js-server` 0.2.14 or later. The commands and their outputs were
 run on 2026-10-04; `create/test/create.test.js` runs both projects in CI.
 
 <a id="gs-135-005"></a>
