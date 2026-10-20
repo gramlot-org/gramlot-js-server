@@ -125,7 +125,7 @@ Block ID: **GS-130-025**.
 | Script | Checks |
 | --- | --- |
 | `npm test` | Exporter output and failure handling, stylesheets, page logic, directory and folder export, gallery, bundles, `GramlotWorkerServer` and transport, `mount`, the quick start with typing (jsdom) |
-| `serverless/scripts/verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` | A page with `Page` and `Logic` in one module, a core theme, `Page.css` and its stylesheet, as one file and as a directory |
+| `serverless/scripts/verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` | A page with `Page` and `Logic` in one module, a core theme, `Page.css` and its stylesheet, and a page whose `Logic` imports `Bag` and `createDecimal` from `@gramlot/gramlot/page`, each as one file and as a directory |
 | `serverless/scripts/verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` | `gramlot-serverless gallery` from disk: the gallery page, frames and theme, every example, the `Logic` of the examples that call its methods |
 | `serverless/scripts/verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The quick start as one file and as a directory export in a real browser: initial values, typing, the stylesheet, no HTTP(S) |
 | `serverless/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |

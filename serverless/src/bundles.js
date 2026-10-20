@@ -1,5 +1,6 @@
 import {build as bundle} from 'esbuild';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
+import * as corePage from '@gramlot/gramlot/page';
 import {realpath, stat} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {basename, dirname, extname, isAbsolute, join, relative, sep} from 'node:path';
@@ -8,14 +9,17 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const workerServer = fileURLToPath(new URL('./gramlot-worker-server.js', import.meta.url));
 const require = createRequire(import.meta.url);
 
-/** The window exposes the Page of its own core as GramlotStandalone: a logic module
- * imports @gramlot/gramlot/page from there, so the window holds one core instance. */
+/** The names of the core entry @gramlot/gramlot/page, read from the entry itself. */
+export const pageNames = Object.keys(corePage).filter(name => name !== 'default');
+
+/** The window exposes the entry @gramlot/gramlot/page of its own core as GramlotStandalone (standalone.js exports
+ * every name of that entry): a logic module imports it from there, so the window holds one core instance. */
 const windowCore = {
     name: 'gramlot-window-core',
     setup(build) {
         build.onResolve({filter: /^@gramlot\/gramlot\/page$/}, () => ({path: 'page', namespace: 'gramlot-window-core'}));
         build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, () => ({
-            contents: 'export const {Page, IndexPage, IndexLogic, mountIndexPage} = globalThis.GramlotStandalone;', loader: 'js',
+            contents: `export const {${pageNames.join(', ')}} = globalThis.GramlotStandalone;`, loader: 'js',
         }));
     },
 };

@@ -2,8 +2,9 @@ import {PageBootstrap} from '@gramlot/gramlot';
 import {WorkerServerAdapter} from './worker-server-adapter.js';
 import {WorkerTransport} from './worker-transport.js';
 
-// A logic module imports @gramlot/gramlot/page from the core of the window (GramlotStandalone).
-export {Page, IndexPage, IndexLogic, mountIndexPage} from '@gramlot/gramlot';
+// A logic module imports @gramlot/gramlot/page from the core of the window (GramlotStandalone): the window
+// exports every name of that entry, so a name the core adds there reaches the logic modules without a list here.
+export * from '@gramlot/gramlot/page';
 
 function exportRoot(assetRoot) {
     if (assetRoot === null) return null;

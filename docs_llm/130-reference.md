@@ -75,7 +75,8 @@ logic module sources as Blob URLs revoked after start. Directory:
 Block ID: **GS-130-025**.
 
 `npm test`; `verify_page_module_browser.mjs PLAYWRIGHT [ENGINE]` (Page and
-Logic in one module, theme, stylesheets, file and directory);
+Logic in one module, theme, stylesheets, and a Logic that imports `Bag` and `createDecimal`
+from `@gramlot/gramlot/page`; file and directory);
 `verify_gallery_browser.mjs PLAYWRIGHT [ENGINE]` (gallery from disk, every example, the `Logic` of the examples that call its methods);
 `verify_quickstart_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` (file and
 directory export in a real browser); `verify_export_browser.mjs HTML PLAYWRIGHT
