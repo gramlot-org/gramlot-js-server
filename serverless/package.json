@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/gramlot-serverless",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "No server: Gramlot pages open from one HTML file or a static directory; the page runs in a Web Worker of the browser.",
   "license": "Apache-2.0",
   "repository": {
@@ -30,6 +30,7 @@
     "src/standalone.js",
     "src/gramlot-worker-server.js",
     "src/worker-transport.js",
+    "src/worker-server-adapter.js",
     "src/runtime-notices.js",
     "NOTICE",
     "gallery"
@@ -39,11 +40,11 @@
     "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout tests/*.test.js"
   },
   "dependencies": {
-    "@gramlot/gramlot": ">=0.3.2",
-    "@genrojs/builders": ">=0.5.2",
+    "@genrojs/builders": ">=0.6.0",
     "esbuild": "0.28.2"
   },
   "peerDependencies": {
+    "@gramlot/gramlot": ">=0.3.6",
     "@gramlot/gramlot-examples": ">=0.3.4"
   },
   "peerDependenciesMeta": {
@@ -55,7 +56,7 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "@genrojs/tytx": ">=0.16.2",
+    "@genrojs/tytx": ">=0.16.3",
     "@gramlot/gramlot-examples": ">=0.3.4",
     "jsdom": "27.0.1"
   }

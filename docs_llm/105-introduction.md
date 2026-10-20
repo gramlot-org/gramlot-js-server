@@ -30,12 +30,14 @@ Block ID: **GS-105-010**.
 Build: the page module is imported (as `GramlotFileServer`) for `Page.css` and `Logic`;
 `main` does not run; the page is bundled for the Worker, its logic for the window.
 Run: `mount` creates the Worker and sends `{id, open: true}`; `GramlotWorkerServer` returns the page ID, the title, `capabilities: []`,
-the stylesheet URLs (none in the single file) and the logic URL; `PageBootstrap`
+the `nameSyntax`, the stylesheet URLs (none in the single file) and the logic URL, if the page has logic; `PageBootstrap`
+(with a `WorkerServerAdapter`, a core `ServerAdapter` that hands out the Worker transport)
 writes the CSS links, imports the logic, registers `Logic`, creates
-`window.gramlot`, starts; `main` runs in the Worker; the window renders and binds;
+`window.gramlot`, starts; the Worker transport has no synchronous call: `callSync` throws and a
+`dataRemote` with `sync` reads asynchronously (synchronously over HTTP); `main` runs in the Worker; the window renders and binds;
 `dispose()` ends the Worker. Calls are the request/response envelopes of the server
 protocol (`source` for Source, `data` for endpoints). Declare Source fragments with `Page.registerSource` and mount them with `remote`;
-use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See the
-[shared authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-100).
-Logic: `Logic` of the page module, else `<page>_aux.js`; window only; imports
+use `dataRpc` for endpoint values and `dataRemote` for lazy Data. See [Calling the server](https://github.com/gramlot-org/gramlot/blob/main/docs/public/098-server-calls.md#gc-095-100)
+and [Remote content and lazy Data](https://github.com/gramlot-org/gramlot/blob/main/docs/public/099-remote-content.md#gc-095-105).
+Logic: `Logic` of the page module, else `<page>_aux.js`, else none; window only; imports
 `@gramlot/gramlot/page` from the core of the window ([Configuration](120-configuration.md)).

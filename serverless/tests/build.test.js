@@ -38,7 +38,10 @@ export class Page extends BasePage {
     assert.equal(scriptSrc, `'sha256-${createHash('sha256').update(scripts[0]).digest('base64')}' 'unsafe-eval' blob:`);
     assert.doesNotMatch(html, /<script[^>]+src=/);
     assert.doesNotMatch(html, /\(0,eval\)/);
-    assert.doesNotMatch(html, /<style>|<link/);
+    // The base theme of the page is inlined; nothing is linked, so no file is missing beside the HTML.
+    assert.doesNotMatch(html, /<link/);
+    assert.equal(html.match(/<style>/g).length, 1);
+    assert.match(html, /Gramlot Base: application UI theme/);
 });
 
 test('invalid input and failed bundling preserve existing output', async t => {

@@ -62,7 +62,8 @@ Generated files: `index.html`, `<route>/index.html` for the other routes,
 `assets/standalone.js` (the runtime, shared), `assets/runtime-notices.json`,
 `assets/workers/<route>.js` (the bootstrap of each page, with its Worker and
 logic module embedded) and `assets/styles/<route>.css` (the stylesheet
-`<name>.css` of a page). A `Page.css` URL under `/themes/` is copied from the core
+`<name>.css` of a page). The theme of each page (the base theme unless `Page.css_theme`
+names another or is `false`) and a `Page.css` URL under `/themes/` are copied from the core
 package unless an asset has its path. `folderPages(folder)`, from the same module,
 returns the `{pages, assets}` of a folder for the command. Each document loads the two scripts through relative paths and
 passes its directory to `mount` as `assetRoot`. The documents carry no Content
@@ -97,8 +98,7 @@ connect-src *; base-uri 'none'; form-action 'none'
 - Connections are open (`connect-src *`): `fetch`, `XMLHttpRequest` and WebSocket
   work from the document, until a page can declare its own policy.
 
-This is the only profile of the file, from gramlot-js-server 0.2.3 (0.2.2 wrote no
-`'unsafe-eval'` and `connect-src 'none'`). The policy is not an option of
+This is the only profile of the file. The policy is not an option of
 `build`.
 
 <a id="gs-120-020"></a>
@@ -134,25 +134,24 @@ Block ID: **GS-120-025**.
 `new GramlotWorkerServer(PageClass, {logic, stylesheet, inlineCss, ...serverOptions})` from
 `@gramlot/gramlot-serverless/gramlot-worker-server` runs inside the Worker. The exporter writes the
 Worker entry itself, so these options are relevant to custom Worker bundles only.
-Until 0.2.3 the option `logic` was called `aux`; the old name is not accepted.
 
 | Option | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `logic` | string or `null` | `null` | URL that names the page logic module, returned in the `open` resources with group `null`. |
 | `stylesheet` | string or `null` | `null` | URL of the page stylesheet, returned after `Page.css`. |
-| `inlineCss` | boolean | `false` | The document holds the stylesheets: no CSS URL is returned. The single file sets it. |
+| `inlineCss` | boolean | `false` | The document holds the stylesheets, the theme included: no CSS URL is returned. The single file sets it. |
 | `pageTtl` | number (seconds) | `1800` | Core `GramlotServer` option: the registered page expires after it. |
 | `maxPages` | integer | `1000` | Core `GramlotServer` option: registry capacity. |
+| `cssTheme` | string or `false` | `'gramlot-base'` | Core `GramlotServer` option: the base theme returned as a CSS URL when `inlineCss` is false; the exporter itself inlines or copies the theme of each page. |
+| `collections` | array | `[]` | Core `GramlotServer` option: application component collections (section 090). |
 
 The remaining core `GramlotServer` options describe server URLs and have no effect in a
 Worker. `GramlotWorkerServer` serves one page (`/`); `resolveResources` returns `Page.css`
 as written, the page stylesheet and the logic URL.
 
 <a id="gs-120-090"></a>
-## 090 · Application component collections (development)
+## 090 · Application component collections
 
 Block ID: **GS-120-090**.
 
-`buildDirectory({pages, output, assets, collections})` accepts application collections. Each entry contains `grammar` and a root-relative `module` URL. Include a bundled ES module asset at the matching target (without the leading slash). The exporter embeds its text with the page modules and passes the grammar to the Worker server. The gallery declares inputs and includes the asset itself; rebuild the directory to update it. The single-file build API is unchanged.
-
-This is the initial 0.3 development increment; no new package release is implied.
+`buildDirectory({pages, output, assets, collections})` accepts application collections. Each entry contains `grammar` and a root-relative `module` URL. Include a bundled ES module asset at the matching target (without the leading slash). The exporter embeds its text with the page modules and passes the grammar to the Worker server. The gallery declares inputs and includes the asset itself; rebuild the directory to update it. The single-file build API takes no collections.

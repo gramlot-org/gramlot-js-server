@@ -1,0 +1,25 @@
+{
+  "environment": "modules",
+  "families": [
+    {
+      "key": "modules",
+      "title": "Logic modules",
+      "examples": [
+        {
+          "key": "modules-01",
+          "title": "Without Logic",
+          "folder": "01_without_logic",
+          "description": "A page module that exports no Logic.",
+          "explanation": "The page module exports Page only: it has no companion, so no logic module reaches the window."
+        },
+        {
+          "key": "modules-02",
+          "title": "With Logic",
+          "folder": "02_with_logic",
+          "description": "A page module that exports Logic.",
+          "explanation": "The page module exports Page and Logic; the companion of the gallery names Logic only."
+        }
+      ]
+    }
+  ]
+}

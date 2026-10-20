@@ -78,8 +78,9 @@ export class Logic {
   `name` changes; `_init: true` runs it once before the DOM is built.
 - `dataSetter` writes the initial value `Ada`.
 
-[Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html)
-in the core documentation explains every declaration.
+[Writing pages](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html) and
+[Data binding and controllers](https://gramlot.readthedocs.io/en/latest/docs/public/097-data-binding.html) in the core documentation
+explain every element and declaration.
 
 <a id="gn-110-015"></a>
 
@@ -95,8 +96,9 @@ The browser imports the page module for its `Logic`, so the module is public and
 every import of it resolves in the browser: `@gramlot/gramlot/page` resolves to the
 runtime through the import map of the bootstrap. Server-only code belongs in
 modules the page module does not import. A separate `index_aux.js` exporting
-`Logic` is still admitted, for a page with server-only imports; a page module
-that exports `Logic` and an `index_aux.js` beside it are an error.
+`Logic` is also admitted, for a page with server-only imports; a page module
+that exports `Logic` and an `index_aux.js` beside it are an error. `Logic` is
+optional: a page without named logic needs no class.
 
 <a id="gn-110-020"></a>
 
@@ -111,9 +113,10 @@ body { font-family: sans-serif; margin: 2rem; }
 ```
 
 A stylesheet shared by several pages is declared in `static css = ['/site.css']`
-and placed below the pages folder. The core theme is declared as
-`static css = ['/themes/gramlot-base/theme.css']`: the adapter serves it from the
-installed core ([Writing pages for this host](015-writing-pages.md)).
+and placed below the pages folder. The core theme needs no declaration: the
+server loads the base theme `gramlot-base` before the stylesheets of every page,
+and the adapter serves it from the installed core
+([Writing pages for this host](015-writing-pages.md)).
 
 <a id="gn-110-025"></a>
 
@@ -163,14 +166,13 @@ Verified on 2026-10-04 with Playwright Chromium 153, on Node and on Bun: field
 `Ada`, text `Hello, Ada`, after `fill('#name', 'Grace')` the text `Hello, Grace`,
 no console errors.
 
-**Learning path.** Follow the [shared release-by-release example sequence](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015) after this
-environment's setup. Revisit examples when a later release simplifies the code;
-prerequisite links support that chronology. The gallery is a source viewer, not a file editor. Edit a
-separate project; Page runs on the host and Logic in the browser (the standalone
-host is a JavaScript Worker). Reload/reopen after saving; development reload is
-not automatic hot reload. The sequence explains inline and named Logic in their
-release context; use named Logic for reusable behavior. Inline examples require the
-documented CSP profile. Common examples do not cover every advanced case.
+**Learning path.** After this environment's setup, follow
+[Learn by topic](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-015)
+of the core. The gallery is a source viewer, not a file editor: edit a separate
+project. `Page` runs on the host, `Logic` in the browser. Reload or reopen the
+page after saving; development reload is not automatic hot reload. Use named
+`Logic` for reusable behavior; inline examples need the permissive Content
+Security Policy profile. The common examples do not cover every advanced case.
 
 <a id="gn-110-035"></a>
 

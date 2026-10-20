@@ -4,7 +4,7 @@ import {existsSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {buildDirectory} from './build-directory.js';
 
 const require = createRequire(import.meta.url);
@@ -79,7 +79,12 @@ export class Page extends Example {
 }
 `);
             if (stylesheet) await copyFile(stylesheet, join(stage, `${key}.css`));
-            if (logic) await writeFile(join(stage, `${key}_aux.js`), `export {Logic} from ${JSON.stringify(logic)};\n`);
+            // The window bundles the companion by its Logic export. `export *` would keep the page module and its
+            // imports in the bundle, and a page may import names the window core lacks: only a logic module that
+            // exports Logic gets a companion (an example without Logic has none).
+            if (logic && 'Logic' in await import(pathToFileURL(logic).href)) {
+                await writeFile(join(stage, `${key}_aux.js`), `export {Logic} from ${JSON.stringify(logic)};\n`);
+            }
             pages[key] = join(stage, `${key}.js`);
         }
         // The theme comes from the core through Page.css; the example sources stay in the gallery page.

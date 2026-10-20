@@ -19,8 +19,9 @@ npm start            # development: the same pages on http://127.0.0.1:8080/ wit
 npm run start:bun    # the same with Bun
 ```
 
-A page is one module that exports `Page`, which builds the page, and `Logic`, the
-methods the page calls in the browser. The templates show a form whose data leave
+A page is one module that exports `Page`, which builds the page, and, when the
+page has named logic, `Logic`, the methods the page calls in the browser. The
+templates show a form whose data leave
 the browser through `gramlot.utl.inout` (email, file, download).
 
 The build uses `@gramlot/gramlot-serverless`, the server uses

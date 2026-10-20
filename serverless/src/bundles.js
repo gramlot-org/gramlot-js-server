@@ -1,4 +1,6 @@
 import {build as bundle} from 'esbuild';
+import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
+import * as corePage from '@gramlot/gramlot/page';
 import {realpath, stat} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {basename, dirname, extname, isAbsolute, join, relative, sep} from 'node:path';
@@ -7,14 +9,17 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const workerServer = fileURLToPath(new URL('./gramlot-worker-server.js', import.meta.url));
 const require = createRequire(import.meta.url);
 
-/** The window exposes the Page of its own core as GramlotStandalone: a logic module
- * imports @gramlot/gramlot/page from there, so the window holds one core instance. */
+/** The names of the core entry @gramlot/gramlot/page, read from the entry itself. */
+export const pageNames = Object.keys(corePage).filter(name => name !== 'default');
+
+/** The window exposes the entry @gramlot/gramlot/page of its own core as GramlotStandalone (standalone.js exports
+ * every name of that entry): a logic module imports it from there, so the window holds one core instance. */
 const windowCore = {
     name: 'gramlot-window-core',
     setup(build) {
         build.onResolve({filter: /^@gramlot\/gramlot\/page$/}, () => ({path: 'page', namespace: 'gramlot-window-core'}));
         build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, () => ({
-            contents: 'export const {Page, IndexPage, IndexLogic, mountIndexPage} = globalThis.GramlotStandalone;', loader: 'js',
+            contents: `export const {${pageNames.join(', ')}} = globalThis.GramlotStandalone;`, loader: 'js',
         }));
     },
 };
@@ -65,15 +70,24 @@ export async function pageStylesheet(page) {
     return await isFile(file) ? file : null;
 }
 
-/** The files of Page.css for one file: /themes/… from the @gramlot/gramlot package, any other
- * URL from the folder of the page; then foo.css. A repeated file stays once, in its last position. */
-export async function inlineStylesheets(page, PageClass) {
+/** The URLs of the CSS of a page, in load order: its theme (GramlotServer.themeCss, the base theme unless
+ * the page sets Page.css_theme), then Page.css. A repeated URL stays once, in its last position, as the Worker
+ * returns them. */
+export function pageStyleUrls(PageClass) {
     if (!Array.isArray(PageClass.css) || PageClass.css.some(url => typeof url !== 'string')) {
         throw new TypeError('Standalone Page.css must be an array of strings');
     }
+    const urls = [...new GramlotServer().themeCss(PageClass), ...PageClass.css];
+    return urls.filter((url, index) => urls.lastIndexOf(url) === index);
+}
+
+/** The files of the CSS of one file: the theme and /themes/… of Page.css from the @gramlot/gramlot package,
+ * any other URL of Page.css from the folder of the page; then foo.css. A repeated file stays once, in its last
+ * position. */
+export async function inlineStylesheets(page, PageClass) {
     const folder = await realpath(dirname(page));
     const files = [];
-    for (const url of PageClass.css) {
+    for (const url of pageStyleUrls(PageClass)) {
         if (/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('//')) {
             throw new TypeError(`One file cannot include the stylesheet ${url}: only local files are inlined`);
         }

@@ -3,8 +3,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn, spawnSync} from 'node:child_process';
 import {existsSync, readFileSync} from 'node:fs';
+import {mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {createInterface} from 'node:readline';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {startGallery} from '../src/gallery.mjs';
 
 const runtime = globalThis.Bun ? 'bun' : 'node';
@@ -33,7 +36,7 @@ test('the gallery stages one route per example under the mount prefix', async ()
         assert.deepEqual(main.resources.css.at(-1), '/js/e06.css');
         assert.equal((await get('/js/e06.css')).status, 200);
         const aux = await get('/js/c03_aux.js');
-        assert.equal(await aux.text(), 'export {Logic} from "/js/pages/controllers/03_named_logic.js";\n');
+        assert.equal(await aux.text(), 'export * from "/js/pages/controllers/03_named_logic.js";\n');
         const logic = await get('/js/pages/controllers/03_named_logic.js');
         assert.ok(logic.headers.get('content-type').startsWith('text/javascript'));
         assert.match(await logic.text(), /export class Logic/);
@@ -47,6 +50,37 @@ test('the gallery stages one route per example under the mount prefix', async ()
         assert.equal((await get(`/js/${runtime}-01`)).status, 404);
     } finally { await app.close(); }
     assert.equal(existsSync(app.pages), false, 'close removes the staged pages');
+});
+
+test('the companion of an example re-exports every name of its module: valid with and without Logic', async () => {
+    const fixtures = new URL('./fixtures/gallery/', import.meta.url);
+    const catalog = [fileURLToPath(new URL('catalog.json', fixtures)), fileURLToPath(new URL('pages/', fixtures))];
+    const app = await startGallery({runtime, port: 0, mountPath: '/js', catalogs: [catalog]});
+    const folder = await mkdtemp(join(tmpdir(), 'gramlot-linked-'));
+    try {
+        const keys = ['modules-01', 'modules-02'];
+        for (const [key, file] of [[keys[0], '01_without_logic'], [keys[1], '02_with_logic']]) {
+            const aux = await fetch(`${app.url}/js/${key}_aux.js`);
+            assert.equal(aux.status, 200, key);
+            const text = await aux.text();
+            assert.equal(text, `export * from "/js/pages/modules/${file}.js";\n`);
+            assert.ok((await fetch(`${app.url}/js/pages/modules/${file}.js`)).headers.get('content-type').startsWith('text/javascript'));
+            // The page of the example names its companion, whatever the module exports.
+            const html = await fetch(`${app.url}/js/${key}`).then(response => response.text());
+            const {resources} = JSON.parse(html.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
+            assert.deepEqual(resources.js, [{url: `/js/${key}_aux.js`, group: null}], key);
+            // The URL of the module is a path of the server: link the same module from its file, as the browser links the URL.
+            await writeFile(join(folder, `${key}.mjs`), text.replace('"/js/pages/', `"${new URL('pages/', fixtures).href}`));
+        }
+        const [plain, logic] = await Promise.all(keys.map(key => import(pathToFileURL(join(folder, `${key}.mjs`)).href)));
+        assert.equal(Object.hasOwn(plain, 'Logic'), false, 'no Logic to link: not an error');
+        assert.equal(typeof plain.Page, 'function');
+        assert.equal(typeof logic.Logic, 'function');
+        assert.equal(new logic.Logic().twice({base: 'ok'}), 'okok');
+    } finally {
+        await app.close();
+        await rm(folder, {recursive: true, force: true});
+    }
 });
 
 test('the command: usage, unknown runtime or option, invalid port', () => {

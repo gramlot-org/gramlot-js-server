@@ -50,6 +50,31 @@ test('exports two static routes, one runtime, Worker bundles, and only listed as
     assert.ok((await stat(join(output, 'assets/runtime-notices.json'))).size > 0);
     assert.equal(await readFile(join(output, 'themes/base/theme.css'), 'utf8'), 'body { color: navy; }');
     await assert.rejects(stat(join(output, 'unlisted.css')), {code: 'ENOENT'});
+    // The base theme of the page, which the Worker names as its first CSS URL, is copied beside the pages.
+    const base = createRequire(import.meta.url).resolve('@gramlot/gramlot/themes/gramlot-base/theme.css');
+    assert.equal(await readFile(join(output, 'themes/gramlot-base/theme.css'), 'utf8'), await readFile(base, 'utf8'));
+});
+
+test('the theme of each page reaches the directory: the base theme, a css_theme, none; an asset keeps its path', async t => {
+    const {folder, output} = await fixture(t);
+    const themed = async (name, body) => {
+        const file = join(folder, `${name}.js`);
+        await writeFile(file, `import {Page as BasePage} from '@gramlot/gramlot/page';
+export class Page extends BasePage { ${body} main(root) { root.h1('${name}'); } }`);
+        return file;
+    };
+    const resolve = name => createRequire(import.meta.url).resolve(`@gramlot/gramlot/themes/${name}/theme.css`);
+    const pages = {index: await themed('index', "static css_theme = 'gramlot-compact';"), bare: await themed('bare', 'static css_theme = false;')};
+    await buildDirectory({pages, output});
+    assert.equal(await readFile(join(output, 'themes/gramlot-compact/theme.css'), 'utf8'), await readFile(resolve('gramlot-compact'), 'utf8'));
+    await assert.rejects(stat(join(output, 'themes/gramlot-base')), {code: 'ENOENT'});
+    const own = join(folder, 'own.css');
+    await writeFile(own, 'body { margin: 1px; }');
+    await buildDirectory({pages: {index: await themed('plain', '')}, output,
+        assets: [{source: own, target: 'themes/gramlot-base/theme.css'}]});
+    assert.equal(await readFile(join(output, 'themes/gramlot-base/theme.css'), 'utf8'), 'body { margin: 1px; }');
+    await assert.rejects(buildDirectory({pages: {index: await themed('wrong', "static css_theme = '../x';")}, output}),
+        {name: 'InvalidResourceName'});
 });
 
 test('rejects invalid routes, asset traversal and collisions before creating output', async t => {
