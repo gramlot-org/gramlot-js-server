@@ -125,3 +125,6 @@ Verification: three static-gallery tests and seven directory-export tests pass. 
 
 
 Intermediate release qualification — 2026-10-21. Owner authorizes tree, pages, gallery and guide only, including the necessary connected integrations. All 43 tests pass; the generator passes its three tests. Chromium opens all 85 offline gallery lessons without network access, including shared tree collection imports and the gallery theme. Collection modules and Logic share the window runtime; Worker source remains separate. Database selectors and Genropy experiments are excluded. Package publication is pending at this checkpoint.
+
+
+Publication receipt — 2026-10-21. Release v0.2.15 passed all required repository and tag checks and was published for the Node/Bun server, serverless exporter and project generator. The publication workflow completed successfully: https://github.com/gramlot-org/gramlot-js-server/actions/runs/39574695535 . This records package publication; hosted gallery promotion has its own deployment receipt.
