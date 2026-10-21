@@ -50,7 +50,7 @@ function validate({pages, output, assets}) {
     }
     if (!Array.isArray(assets)) throw new TypeError('assets must be an array');
     const generated = [
-        'index.html', 'app.webmanifest', 'assets/standalone.js', 'assets/runtime-notices.json',
+        'index.html', 'app.webmanifest', 'assets/standalone.js', 'assets/runtime-notices.json', 'assets/collections.js',
         ...entries.map(([route]) => `assets/workers/${route}.js`),
         ...entries.filter(([route]) => route !== 'index').map(([route]) => `${route}/index.html`),
     ];
@@ -103,6 +103,7 @@ function documentFor(route, PageClass) {
     const body = html.body();
     body.div({id: 'gramlot-root'});
     body.script(null, {src: `${relativeRoot}assets/standalone.js`});
+    body.script(null, {src: `${relativeRoot}assets/collections.js`});
     body.script(null, {src: `${relativeRoot}assets/workers/${route}.js`});
     return '<!doctype html>' + document.render();
 }
@@ -112,7 +113,7 @@ function bootstrapFor(worker, modules, route) {
     return `(() => {
     const blob = text => URL.createObjectURL(new Blob([text], {type: 'text/javascript'}));
     const workerUrl = blob(${JSON.stringify(worker)});
-    const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));
+    const modules = Object.fromEntries(Object.entries({...${JSON.stringify(modules)}, ...gramlotCollectionModules}).map(([url, text]) => [url, blob(text)]));
     GramlotStandalone.mount({workerUrl, modules, assetRoot: new URL(${JSON.stringify(relativeRoot)}, document.baseURI).href})
         .then(app => { globalThis.gramlot = app; })
         .catch(error => { console.error(error); })
@@ -201,12 +202,16 @@ export async function buildDirectory({pages, output, assets = [], collections = 
             if (!manifest || Object.getPrototypeOf(manifest) !== Object.prototype) throw new TypeError('Page.manifest must return a JSON object');
             await writeFile(join(stage, 'app.webmanifest'), JSON.stringify(manifest, null, 2) + '\n');
         }
+        // Collection code (including optional WASM engines) is shared by every route.
+        // A classic script keeps file-origin exports independent of module fetch.
         const collectionModules = {};
         for (const {module} of collections) {
             const asset = copies.find(item => '/' + item.target === module);
             if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
             collectionModules[module] = await collectionBundle(asset.source, workerOptions);
         }
+        await writeFile(join(stage, 'assets/collections.js'),
+            `const gramlotCollectionModules = ${JSON.stringify(collectionModules)};\n`);
         for (const [route, page] of entries) {
             const {logic, stylesheet} = loaded[route];
             if (stylesheet) {
@@ -215,8 +220,7 @@ export async function buildDirectory({pages, output, assets = [], collections = 
             }
             const worker = (await workerBundle(page, workerOptions, {logic: logic?.url ?? null,
                 stylesheet: stylesheet ? `/assets/styles/${route}.css` : null, collections})).text;
-            const modules = {...collectionModules,
-                ...(logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {})};
+            const modules = logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {};
             await mkdir(dirname(join(stage, 'assets/workers', `${route}.js`)), {recursive:true});
             await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');

@@ -122,3 +122,13 @@ test('inline.js is not reachable from the GramlotWorkerServer bundle', async () 
     assert.ok(inputs.some(path => path.endsWith('src/gramlot-worker-server.js')));
     assert.deepEqual(inputs.filter(path => /binding\/inline\.js$/.test(path)), []);
 });
+
+
+test('Logic uses the shared CodeMirror options composition from the window core',async t=>{
+    const path=await folder(t),file=join(path,'editor.js');
+    await writeFile(file,`import {codeMirrorWithOptions} from '@gramlot/gramlot/page';
+export class Logic { editor(node){return codeMirrorWithOptions(node,{datapath:'document',value:'^.content'});} }`);
+    const bundle=await logicBundle({file,url:'/editor.js'},options);
+    assert.match(bundle,/GramlotStandalone/);assert.match(bundle,/codeMirrorWithOptions/);
+    assert.doesNotMatch(bundle,/class GramlotBuilder/);
+});

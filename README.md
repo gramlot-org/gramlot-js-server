@@ -14,7 +14,7 @@ for the core and the other repositories.
 ## What this repository is
 
 This repository runs JavaScript Gramlot pages. It holds three npm packages; the
-current release is 0.2.15, the same version for the three:
+current release is 0.2.16, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
@@ -213,3 +213,8 @@ workflow updates both public galleries and their serverless ZIP. It can also be
 run manually on main to retry a failed deployment. See the
 [deployment runbook](https://github.com/gramlot-org/gramlot-examples/blob/main/deploy/galleries/README.md)
 for credentials, verification and rollback.
+
+
+## Editors release
+
+The static directory exporter shares optional collection code once across all routes, including the bundled Typst compiler and fonts. The gallery includes CodeMirror, HTML/Jodit, Markdown and Typst examples with browser PDF.

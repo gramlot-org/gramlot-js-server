@@ -74,3 +74,20 @@ manual application DOM construction, eval bootstrap or fallback compiler.
 
 Runtime license notices are embedded as inert JSON metadata in the HTML head,
 not as a visible panel in the application.
+
+
+<a id="gs-005-055"></a>
+
+## 055 · Shared optional collection modules
+
+Block ID: **GS-005-055**.
+
+The directory exporter writes collection module strings once in the reserved
+`assets/collections.js`, loaded before each route bootstrap. The bootstrap merges
+that map with page-specific Logic and makes local Blob module URLs as before.
+This keeps large optional engines such as Typst out of every page Worker bundle
+and preserves directory exports without runtime module fetches. The internal
+`gramlotCollectionModules` name follows the existing camelCase module-map naming.
+Typst compilation itself belongs to the core optional collection; it does not
+introduce a compiler or server endpoint into the exporter. The current single-HTML
+export command does not accept optional collections; use directory export.
