@@ -1,8 +1,8 @@
 /** The gallery of @gramlot/gramlot-examples on the Node or Bun host (GE-010 §025). */
-import {copyFile, mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {copyFile, mkdir, mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
 const JAVASCRIPT = 'text/javascript; charset=utf-8';
@@ -40,13 +40,16 @@ export class Page extends Gallery {
     static catalogs = ${JSON.stringify(catalogs)};
     static serverlessDownloadUrl = ${JSON.stringify(serverlessDownloadUrl)};
     static logoUrl = ${JSON.stringify(`${prefix}/assets/branding/gramlot-logo-dark.svg`)};
-    static galleryScript = ${JSON.stringify(`${prefix}/gallery/dist/gallery.js`)};
 }
 `);
-    for (const [key, {page, stylesheet, logic}] of Object.entries(routes)) {
-        if (key === 'index') continue;
+    await writeFile(join(folder, 'index_aux.js'), `export {Logic} from ${JSON.stringify(`${prefix}/gallery/dist/gallery.js`)};\n`);
+    const galleryUrls = Object.fromEntries(Object.entries(routes).filter(([key]) => key !== 'index').map(([key, route]) => [key, `${prefix}/${route.url}`]));
+    for (const [routeKey, {page, stylesheet, logic, url: key}] of Object.entries(routes)) {
+        if (routeKey === 'index') continue;
+        await mkdir(dirname(join(folder, `${key}.js`)), {recursive:true});
         await writeFile(join(folder, `${key}.js`), `import {Page as Example} from ${JSON.stringify(pathToFileURL(page).href)};
 export class Page extends Example {
+    static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
         await super.main(root, ...args);
         root.script({src: ${JSON.stringify(`${prefix}/gallery/dist/frame.js`)}});

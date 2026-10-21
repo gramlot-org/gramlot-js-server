@@ -19,7 +19,8 @@
           "description": "A page module that exports Logic.",
           "explanation": "The page module exports Page and Logic; the companion of the gallery names Logic only."
         }
-      ]
+      ],
+      "folder": "modules"
     }
   ]
 }

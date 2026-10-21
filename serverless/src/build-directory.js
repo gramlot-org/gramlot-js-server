@@ -1,6 +1,6 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
-import {checkPage, loadPage, logicBundle, logicModule, pageStyleUrls, pageStylesheet, workerBundle} from './bundles.js';
+import {checkPage, collectionBundle, loadPage, logicBundle, logicModule, pageStyleUrls, pageStylesheet, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {copyFile, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -14,7 +14,7 @@ const workerOptions = {
     bundle: true, platform: 'browser', format: 'iife', target: 'es2022',
     write: false, legalComments: 'inline',
 };
-const routePattern = /^[a-z][a-z0-9_-]*$/;
+const routePattern = /^[a-z0-9][a-z0-9_-]*$/;
 const targetPattern = /^[A-Za-z0-9._/-]+$/;
 
 function checkTarget(target) {
@@ -39,7 +39,7 @@ function validate({pages, output, assets}) {
         throw new TypeError('pages must include an index route');
     }
     for (const [route, page] of entries) {
-        if (!routePattern.test(route)) throw new TypeError(`Invalid route identifier: ${route}`);
+        if (!route.split('/').every(segment => routePattern.test(segment))) throw new TypeError(`Invalid route identifier: ${route}`);
         if (typeof page !== 'string' || !isAbsolute(page) || !['.js', '.mjs'].includes(extname(page))) {
             throw new TypeError(`Page for ${route} must be an absolute .js or .mjs file`);
         }
@@ -92,7 +92,7 @@ async function missing(path) {
 }
 
 function documentFor(route, PageClass) {
-    const relativeRoot = route === 'index' ? './' : '../';
+    const relativeRoot = route === 'index' ? './' : '../'.repeat(route.split('/').length);
     const document = new HtmlBuilder();
     const html = document.root.html({lang: 'en'});
     const head = html.head();
@@ -108,7 +108,7 @@ function documentFor(route, PageClass) {
 }
 
 function bootstrapFor(worker, modules, route) {
-    const relativeRoot = route === 'index' ? './' : '../';
+    const relativeRoot = route === 'index' ? './' : '../'.repeat(route.split('/').length);
     return `(() => {
     const blob = text => URL.createObjectURL(new Blob([text], {type: 'text/javascript'}));
     const workerUrl = blob(${JSON.stringify(worker)});
@@ -201,20 +201,23 @@ export async function buildDirectory({pages, output, assets = [], collections = 
             if (!manifest || Object.getPrototypeOf(manifest) !== Object.prototype) throw new TypeError('Page.manifest must return a JSON object');
             await writeFile(join(stage, 'app.webmanifest'), JSON.stringify(manifest, null, 2) + '\n');
         }
+        const collectionModules = {};
+        for (const {module} of collections) {
+            const asset = copies.find(item => '/' + item.target === module);
+            if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
+            collectionModules[module] = await collectionBundle(asset.source, workerOptions);
+        }
         for (const [route, page] of entries) {
             const {logic, stylesheet} = loaded[route];
             if (stylesheet) {
-                await mkdir(join(stage, 'assets/styles'), {recursive: true});
+                await mkdir(dirname(join(stage, 'assets/styles', `${route}.css`)), {recursive: true});
                 await copyFile(stylesheet, join(stage, 'assets/styles', `${route}.css`));
             }
             const worker = (await workerBundle(page, workerOptions, {logic: logic?.url ?? null,
                 stylesheet: stylesheet ? `/assets/styles/${route}.css` : null, collections})).text;
-            const modules = logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {};
-            for (const {module} of collections) {
-                const asset = copies.find(item => '/' + item.target === module);
-                if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
-                modules[module] = await readFile(asset.source, 'utf8');
-            }
+            const modules = {...collectionModules,
+                ...(logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {})};
+            await mkdir(dirname(join(stage, 'assets/workers', `${route}.js`)), {recursive:true});
             await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});

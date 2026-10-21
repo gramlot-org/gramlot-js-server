@@ -121,3 +121,20 @@ Gallery commands of this repository: `gramlot node gallery`, `gramlot bun galler
 [GS-130 section 030](../130-reference.md)).
 
 See the [Gramlot guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/025-try.md#gc-025-020) for the authoritative shared policy. Public documentation follows `main`; unpublished development changes are not yet part of that public reference.
+
+
+Development verification, 2026-10-20 — Gallery staging now creates parent directories for filesystem routes and stages index_aux.js re-exporting ordinary gallery Logic. Four Node gallery tests pass; Chromium/WebKit pass against the local Node host for nested directories, own index pages, retained tabs and drawers.
+
+
+<a id="gn-010-020"></a>
+
+## 020 · Numbered gallery paths — 2026-10-21
+
+Block ID: **GN-010-020**.
+
+Owner explicitly authorizes connected catalogue and staging changes: “Sì, adegua anche le integrazioni”. Gallery catalogues require the physical family `folder`; each executable route is staged at its nested `url`, with its companions. Catalogue keys remain lesson identities. Hosted carousel links include the mount path; offline links include the route depth. Numbered path segments, including `00-index`, are supported by the static exporter without accepting traversal or empty segments. Markdown directory descriptions are supplied by the examples navigation and rendered by the gallery. No core loader change, route alias, release or deployment is included.
+
+Verification: four Node gallery tests pass, including mounted resources and launching the alternate runtime. Both documentation builds pass. Live Node checks confirm ordered lazy directories and selection of the Markdown index without console errors.
+
+
+Intermediate release qualification — 2026-10-21. Owner authorizes tree, pages, gallery and guide only, including the necessary connected integrations. Node and Bun each pass 40 tests; both mounted Chromium galleries pass all 84 common lessons. Nested route staging and Logic companions preserve mount prefixes. Both documentation views build without warnings. Database selectors and Genropy experiments are excluded. Package publication is pending at this checkpoint.

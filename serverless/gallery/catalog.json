@@ -12,7 +12,8 @@
           "description": "The page of npm create @gramlot page: a form whose data leave the browser through gramlot.inout.",
           "explanation": "The data stay in the browser of whoever fills in the form. The buttons prepare an email, save a file that Reload reads back with the exact types, or download JSON."
         }
-      ]
+      ],
+      "folder": "serverless_pages"
     }
   ]
 }

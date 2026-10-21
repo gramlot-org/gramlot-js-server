@@ -1,5 +1,6 @@
 import {build as bundle} from 'esbuild';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
+import * as core from '@gramlot/gramlot';
 import * as corePage from '@gramlot/gramlot/page';
 import {realpath, stat} from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -17,9 +18,9 @@ export const pageNames = Object.keys(corePage).filter(name => name !== 'default'
 const windowCore = {
     name: 'gramlot-window-core',
     setup(build) {
-        build.onResolve({filter: /^@gramlot\/gramlot\/page$/}, () => ({path: 'page', namespace: 'gramlot-window-core'}));
-        build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, () => ({
-            contents: `export const {${pageNames.join(', ')}} = globalThis.GramlotStandalone;`, loader: 'js',
+        build.onResolve({filter: /^@gramlot\/gramlot(?:\/page)?$/}, args => ({path: args.path.endsWith('/page') ? 'page' : 'core', namespace: 'gramlot-window-core'}));
+        build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, args => ({
+            contents: `export const {${(args.path === 'page' ? pageNames : Object.keys(core)).join(', ')}} = globalThis.GramlotStandalone;`, loader: 'js',
         }));
     },
 };
@@ -127,4 +128,10 @@ export async function logicBundle(logic, options) {
         resolveDir: dirname(logic.file),
         contents: `export {Logic} from ${JSON.stringify(logic.file)};`,
     }})).outputFiles[0].text;
+}
+
+/** Bundle a collection for the window, sharing the runtime used by page Logic. */
+export async function collectionBundle(module, options) {
+    return (await bundle({...options, format: 'esm', plugins: [windowCore],
+        entryPoints: [module]})).outputFiles[0].text;
 }

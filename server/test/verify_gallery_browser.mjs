@@ -6,6 +6,7 @@
  * requests, and b08, c03 and c08 call methods of the Logic of their page module.
  */
 import assert from 'node:assert/strict';
+import {galleryRow, galleryRoutes} from '../../scripts/gallery-navigation.mjs';
 import {spawn} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
@@ -85,21 +86,20 @@ try {
     await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
-    await page.evaluate(() => { document.getElementById('open-c03').closest('details').open = true; });
-    await page.click('#open-c03');
+    await (await galleryRow(page, 'c03')).click();
     const frame = page.frameLocator('#frame-c03');
     await frame.locator('#final').waitFor();
-    assert.equal(await page.getAttribute('#frame-c03', 'src'), 'c03');
-    assert.equal(await page.evaluate(() => document.getElementById('frame-c03').contentWindow.location.pathname), `${MOUNT}/c03`);
-    await page.click('#gallery-settings-toggle');
+    assert.equal(await page.getAttribute('#frame-c03', 'src'), galleryRoutes.c03);
+    assert.equal(await page.evaluate(() => document.getElementById('frame-c03').contentWindow.location.pathname), `${MOUNT}/${galleryRoutes.c03}`);
+    await page.locator('.drawer[aria-label="Open bottom region"]').click();
     await page.selectOption('#index-theme', 'dark');
-    await page.getByRole('button', {name: 'Close settings', exact: true}).click();
+    await page.locator('.drawer[aria-label="Close bottom region"]').click();
     await page.waitForFunction(() => document.getElementById('frame-c03').contentDocument.documentElement.getAttribute('data-theme') === 'dark');
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();
 
     for (const key of keys) {
-        const {page, errors} = await open(browser, `${gallery}${key}`);
+        const {page, errors} = await open(browser, `${gallery}${galleryRoutes[key]}`);
         assert.ok(await page.evaluate(() => document.getElementById('gramlot-root').childElementCount > 0), key);
         await LOGIC[key]?.(page, selector => page.locator(selector).textContent());
         assert.deepEqual(errors, [], key);

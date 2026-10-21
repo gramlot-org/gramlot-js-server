@@ -1,5 +1,5 @@
 /** The gallery of @gramlot/gramlot-examples as a static directory (GE-010 §025). */
-import {copyFile, mkdtemp, readFile, rm, symlink, writeFile} from 'node:fs/promises';
+import {copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
@@ -13,6 +13,7 @@ const require = createRequire(import.meta.url);
 async function examplesPackage() {
     try {
         return {buildGallery: (await import('@gramlot/gramlot-examples')).buildGallery,
+            navigationDirectory: (await import('@gramlot/gramlot-examples')).navigationDirectory,
             gallery: dirname(fileURLToPath(import.meta.resolve('@gramlot/gramlot-examples/gallery/gallery-page.js')))};
     } catch (error) {
         if (error.code === 'ERR_MODULE_NOT_FOUND' && error.message.includes('@gramlot/gramlot-examples')) {
@@ -40,7 +41,7 @@ function coreModules() {
 /** Export the gallery to output: the common families, the catalogue of this package and catalogs
  * ([catalog.json, pages folder] pairs). Each example is the route <key>/; index is the gallery. */
 export async function buildStaticGallery({output, catalogs = []}) {
-    const {buildGallery, gallery} = await examplesPackage();
+    const {buildGallery, navigationDirectory, gallery} = await examplesPackage();
     const all = [...packageCatalog(), ...catalogs];
     const {families, routes, assets, collections} = buildGallery({catalogs: all});
     const stage = await mkdtemp(join(tmpdir(), 'gramlot-static-gallery-'));
@@ -51,30 +52,48 @@ export async function buildStaticGallery({output, catalogs = []}) {
         for (const {key, title, path, examples} of families) {
             content.push({key, title, readme: await read(join(path, 'README.md')), examples: await Promise.all(
                 examples.map(async ({key, title, description, folder}) => {
-                    const {page, logic} = routes[key];
+                    const {page, logic, url} = routes[key];
                     // The page module shows its own Logic; only a companion NN_name_aux.js is shown apart.
-                    return {key, title, description, folder, frameUrl: `${key}/index.html`, readme: await read(join(path, `${folder}.md`)),
+                    return {key, title, description, folder, frameUrl: `${url}/index.html`, readme: await read(join(path, `${folder}.md`)),
                         source: await read(page), logic: logic && logic !== page ? await read(logic) : null};
                 }))});
         }
-        await writeFile(join(stage, 'index.js'), `import {GalleryPage} from ${JSON.stringify(join(gallery, 'gallery-page.js'))};
+        const directories = {};
+        const collect = directory => {
+            const bag = navigationDirectory(directory, all);
+            for (const node of bag.getNodes()) {
+                if (node.attr.url) node.setAttr({url: `${node.attr.url}/index.html`});
+                if (node.attr.directory !== undefined) collect(node.attr.directory);
+            }
+            directories[directory] = bag.toTytx();
+        };
+        collect('');
+        await writeFile(join(stage, 'index_aux.js'), `export {Logic} from ${JSON.stringify(join(gallery, 'dist/gallery.js'))};\n`);
+        await writeFile(join(stage, 'index.js'), `import {Bag} from '@gramlot/gramlot';
+import {GalleryPage} from ${JSON.stringify(join(gallery, 'gallery-page.js'))};
+const directories = ${JSON.stringify(directories)};
 export class Page extends GalleryPage {
+    static get navigation() { return Bag.fromTytx(directories['']); }
+    navigation_section({directory}) { return Bag.fromTytx(directories[directory]); }
     static logoUrl = 'assets/branding/gramlot-logo-dark.svg';
-    static galleryScript = 'gallery/dist/gallery.js';
+    static introductionUrl = 'pages/00-index/index.html';
     static families = ${JSON.stringify(content)};
 }
+Page.registerEndpoint('navigation_section');
 `);
         const pages = {index: join(stage, 'index.js')};
-        const galleryUrls = Object.fromEntries(Object.keys(routes).filter(key => key !== 'index')
-            .map(key => [key, `../${key}/index.html`]));
-        for (const [key, {page, stylesheet, logic}] of Object.entries(routes)) {
-            if (key === 'index') continue;
+        for (const [routeKey, {page, stylesheet, logic, url:key}] of Object.entries(routes)) {
+            if (routeKey === 'index') continue;
+            const relativeRoot = '../'.repeat(key.split('/').length);
+            const galleryUrls = Object.fromEntries(Object.keys(routes).filter(route => route !== 'index')
+                .map(route => [route, `${relativeRoot}${routes[route].url}/index.html`]));
+            await mkdir(dirname(join(stage, `${key}.js`)), {recursive:true});
             await writeFile(join(stage, `${key}.js`), `import {Page as Example} from ${JSON.stringify(page)};
 export class Page extends Example {
     static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
         await super.main(root, ...args);
-        root.script({src: '../gallery/dist/frame.js'});
+        root.script({src: ${JSON.stringify(relativeRoot + 'gallery/dist/frame.js')}});
     }
 }
 `);
