@@ -129,3 +129,6 @@ The reusable `IndexPage` and `IndexLogic` are available through the existing Pag
 entry in both Worker and window bundles. Use concrete exported URLs such as
 `hello/index.html` in navigation. See the
 [core index guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-110).
+
+
+Development route update, 2026-10-20: explicit buildDirectory page maps may use slash-separated route segments, each following the existing lowercase route-identifier grammar. Empty segments and traversal remain invalid. The gallery uses nested routes for filesystem index pages and child pages; relative runtime/worker/frame paths reflect their depth. Its normal root Logic is staged as index_aux.js. Filesystem discovery is completed at export time and its one-level Bags are serialized through TYTX; browser expansion still requests individual directory Bags from the Worker.

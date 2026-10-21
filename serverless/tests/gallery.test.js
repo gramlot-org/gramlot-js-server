@@ -5,6 +5,7 @@ import {mkdtemp, readFile, rm, stat} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {buildGallery} from '@gramlot/gramlot-examples';
 import {buildStaticGallery} from '../src/gallery.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -15,31 +16,35 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     t.after(() => rm(folder, {recursive: true, force: true}));
     const output = join(folder, 'gallery');
     const result = await buildStaticGallery({output});
-    const keys = JSON.parse(await readFile(catalog, 'utf8')).families.flatMap(family => family.examples.map(({key}) => key));
-    assert.deepEqual(result.routes, ['index', ...keys, 'serverless-02'].sort());
+    const families = JSON.parse(await readFile(catalog, 'utf8')).families;
+    const common = buildGallery().routes;
+    const url = key => common[key].url;
+    assert.deepEqual(result.routes, ['index', ...Object.entries(common).filter(([key]) => key !== 'index').map(([, route]) => route.url), 'pages/serverless_pages/02_registration'].sort());
     await assert.rejects(stat(join(output, 'serverless-01/index.html')), {code: 'ENOENT'});
-    assert.ok((await stat(join(output, 'assets/styles/serverless-02.css'))).isFile());
+    assert.ok((await stat(join(output, 'assets/styles/pages/serverless_pages/02_registration.css'))).isFile());
     const manifest = JSON.parse(await readFile(join(output, 'app.webmanifest'), 'utf8'));
     assert.equal(manifest.start_url, './');
     assert.equal(manifest.icons[0].src, './assets/branding/app-icon.png');
     assert.match(await readFile(join(output, 'index.html'), 'utf8'), /rel="manifest"/);
-    assert.doesNotMatch(await readFile(join(output, 'e01/index.html'), 'utf8'), /rel="manifest"/);
+    assert.doesNotMatch(await readFile(join(output, 'pages/01-html_elements/01-html_basics/01-hello_world/index.html'), 'utf8'), /rel="manifest"/);
     assert.ok((await stat(join(output, 'assets/branding/app-icon.png'))).isFile());
     const index = await readFile(join(output, 'assets/workers/index.js'), 'utf8');
-    for (const text of ['c03/index.html', 'assets/branding/gramlot-logo-dark.svg', 'gallery/dist/gallery.js']) {
+    for (const text of ['pages/03-controllers/01-logic/03-named_logic/index.html', 'assets/branding/gramlot-logo-dark.svg', '/index_aux.js']) {
         assert.ok(index.includes(text), text);
     }
-    const carousel = await readFile(join(output, 'assets/workers/l08.js'), 'utf8');
-    assert.ok(carousel.includes('../l07/index.html'), 'nested gallery frames use file routes');
+    const carousel = await readFile(join(output, 'assets/workers/pages/05-containers/03-stack.js'), 'utf8');
+    assert.ok(carousel.includes('../../../pages/05-containers/02-tabs/index.html'), 'nested gallery frames use file routes');
     assert.ok(index.includes('galleryGuidePanel'), 'the guided lesson is bundled');
-    const c03 = await readFile(join(output, 'assets/workers/c03.js'), 'utf8');
-    assert.ok(c03.includes('"/c03_aux.js":'));
-    assert.ok(c03.includes('../gallery/dist/frame.js'));
+    const c03 = await readFile(join(output, 'assets/workers/pages/03-controllers/01-logic/03-named_logic.js'), 'utf8');
+    assert.ok(c03.includes('"/03-named_logic_aux.js":'));
+    assert.ok(c03.includes('../../../../gallery/dist/frame.js'));
     assert.match(c03, /countChange/);
-    for (const path of ['index.html', 'c03/index.html', 'assets/styles/b09.css', 'themes/gramlot-base/theme.css',
+    for (const path of ['index.html', 'pages/03-controllers/01-logic/03-named_logic/index.html', 'assets/styles/pages/02-binding/01-paths_and_updates/04-freeze.css', 'themes/gramlot-base/theme.css',
+        'pages/01-html_elements/06-nested/01-child/index.html', 'assets/workers/pages/01-html_elements/06-nested/01-child.js',
         'gallery/gallery.css', 'gallery/dist/gallery.js', 'gallery/dist/frame.js', 'assets/branding/gramlot-logo-dark.svg']) {
         assert.ok((await stat(join(output, path))).isFile(), path);
     }
+    assert.match(await readFile(join(output, 'pages/01-html_elements/06-nested/01-child/index.html'), 'utf8'), /src="\.\.\/\.\.\/\.\.\/\.\.\/assets\/standalone.js"/);
     await assert.rejects(stat(join(output, 'gallery/page.js')), {code: 'ENOENT'});
 });
 
@@ -49,14 +54,14 @@ test('an example with Logic gets its companion; one without Logic gets none and 
     const output = join(folder, 'gallery');
     const fixtures = join(root, 'tests/fixtures/gallery');
     const {routes} = await buildStaticGallery({output, catalogs: [[join(fixtures, 'catalog.json'), join(fixtures, 'pages')]]});
-    assert.ok(routes.includes('modules-01') && routes.includes('modules-02'));
-    const plain = await readFile(join(output, 'assets/workers/modules-01.js'), 'utf8');
-    const logic = await readFile(join(output, 'assets/workers/modules-02.js'), 'utf8');
+    assert.ok(routes.includes('pages/modules/01_without_logic') && routes.includes('pages/modules/02_with_logic'));
+    const plain = await readFile(join(output, 'assets/workers/pages/modules/01_without_logic.js'), 'utf8');
+    const logic = await readFile(join(output, 'assets/workers/pages/modules/02_with_logic.js'), 'utf8');
     // The page without Logic imports createDecimal, which the core of the window does not export: it is never bundled for the window.
     assert.doesNotMatch(plain, /_aux\.js/);
-    assert.match(logic, /"\/modules-02_aux\.js":/);
+    assert.match(logic, /"\/02_with_logic_aux\.js":/);
     assert.match(logic, /twice/);
-    for (const route of ['modules-01', 'modules-02']) assert.ok((await stat(join(output, route, 'index.html'))).isFile(), route);
+    for (const route of ['pages/modules/01_without_logic', 'pages/modules/02_with_logic']) assert.ok((await stat(join(output, route, 'index.html'))).isFile(), route);
 });
 
 test('the command: gallery needs one output; --catalog needs two values', () => {

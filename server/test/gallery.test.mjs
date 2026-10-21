@@ -30,17 +30,17 @@ test('the gallery stages one route per example under the mount prefix', async ()
         assert.equal((await get(manifest.icons[0].src)).headers.get('content-type'), 'image/png');
         assert.equal((await fetch(app.url + '/js/app.webmanifest', {method: 'HEAD'})).status, 200);
         assert.equal((await fetch(app.url + '/js/app.webmanifest', {method: 'POST'})).status, 405);
-        assert.equal((await get('/js/e01/app.webmanifest')).status, 404);
-        const main = JSON.parse((await get('/js/e06').then(response => response.text()))
+        assert.equal((await get('/js/pages/01-html_elements/01-html_basics/01-hello_world/app.webmanifest')).status, 404);
+        const main = JSON.parse((await get('/js/pages/01-html_elements/02-native_controls/01-forms').then(response => response.text()))
             .match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
-        assert.deepEqual(main.resources.css.at(-1), '/js/e06.css');
-        assert.equal((await get('/js/e06.css')).status, 200);
-        const aux = await get('/js/c03_aux.js');
-        assert.equal(await aux.text(), 'export * from "/js/pages/controllers/03_named_logic.js";\n');
-        const logic = await get('/js/pages/controllers/03_named_logic.js');
+        assert.deepEqual(main.resources.css.at(-1), '/js/pages/01-html_elements/02-native_controls/01-forms.css');
+        assert.equal((await get('/js/pages/01-html_elements/02-native_controls/01-forms.css')).status, 200);
+        const aux = await get('/js/pages/03-controllers/01-logic/03-named_logic_aux.js');
+        assert.equal(await aux.text(), 'export * from "/js/pages/03-controllers/01-logic/03-named_logic.js";\n');
+        const logic = await get('/js/pages/03-controllers/01-logic/03-named_logic.js');
         assert.ok(logic.headers.get('content-type').startsWith('text/javascript'));
         assert.match(await logic.text(), /export class Logic/);
-        assert.equal((await get('/js/pages/controllers/03_named_logic.md')).headers.get('content-type'), 'text/plain');
+        assert.equal((await get('/js/pages/03-controllers/01-logic/03-named_logic.md')).headers.get('content-type'), 'text/plain');
         for (const path of ['/js/gallery/dist/gallery.js', '/js/gallery/dist/frame.js', '/js/gallery/gallery.css',
             '/js/assets/branding/gramlot-logo-dark.svg', '/js/themes/gramlot-base/theme.css', '/js/assets/gramlot.js']) {
             assert.equal((await get(path)).status, 200, path);
@@ -60,15 +60,15 @@ test('the companion of an example re-exports every name of its module: valid wit
     try {
         const keys = ['modules-01', 'modules-02'];
         for (const [key, file] of [[keys[0], '01_without_logic'], [keys[1], '02_with_logic']]) {
-            const aux = await fetch(`${app.url}/js/${key}_aux.js`);
+            const aux = await fetch(`${app.url}/js/pages/modules/${file}_aux.js`);
             assert.equal(aux.status, 200, key);
             const text = await aux.text();
             assert.equal(text, `export * from "/js/pages/modules/${file}.js";\n`);
             assert.ok((await fetch(`${app.url}/js/pages/modules/${file}.js`)).headers.get('content-type').startsWith('text/javascript'));
             // The page of the example names its companion, whatever the module exports.
-            const html = await fetch(`${app.url}/js/${key}`).then(response => response.text());
+            const html = await fetch(`${app.url}/js/pages/modules/${file}`).then(response => response.text());
             const {resources} = JSON.parse(html.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
-            assert.deepEqual(resources.js, [{url: `/js/${key}_aux.js`, group: null}], key);
+            assert.deepEqual(resources.js, [{url: `/js/pages/modules/${file}_aux.js`, group: null}], key);
             // The URL of the module is a path of the server: link the same module from its file, as the browser links the URL.
             await writeFile(join(folder, `${key}.mjs`), text.replace('"/js/pages/', `"${new URL('pages/', fixtures).href}`));
         }

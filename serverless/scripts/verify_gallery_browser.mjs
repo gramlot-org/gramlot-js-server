@@ -6,6 +6,7 @@
  * c08 call methods of the Logic of their page module.
  */
 import assert from 'node:assert/strict';
+import {galleryRow, galleryRoutes} from '../../scripts/gallery-navigation.mjs';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {mkdtemp, rm} from 'node:fs/promises';
@@ -17,8 +18,9 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const [playwrightEntry, engineName = 'chromium'] = process.argv.slice(2);
 if (!playwrightEntry) throw new Error('Usage: verify_gallery_browser.mjs PLAYWRIGHT_ENTRY [ENGINE]');
 const catalog = createRequire(import.meta.url).resolve('@gramlot/gramlot-examples/catalog.json');
-const keys = [catalog, fileURLToPath(new URL('../gallery/catalog.json', import.meta.url))]
-    .flatMap(file => JSON.parse(readFileSync(file, 'utf8')).families.flatMap(family => family.examples.map(({key}) => key)));
+const routes = Object.fromEntries([catalog, fileURLToPath(new URL('../gallery/catalog.json', import.meta.url))]
+    .flatMap(file => JSON.parse(readFileSync(file, 'utf8')).families.flatMap(family => family.examples.map(item => [item.key, `pages/${family.folder}/${item.folder}`]))));
+const keys = Object.keys(routes);
 
 // One behaviour per page with named logic, from scripts/verify_pages_browser.mjs of gramlot-examples.
 const LOGIC = {
@@ -58,7 +60,7 @@ async function open(context, url) {
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     await page.goto(url);
-    await page.waitForFunction(() => ['started', 'failed'].includes(window.gramlot?.state));
+    await page.waitForFunction(() => ['started', 'failed'].includes(window.gramlot?.state)).catch(error => { throw new Error(`${error.message}; ${errors.join('; ')}`); });
     assert.equal(await page.evaluate(() => window.gramlot.state), 'started', `${url}: ${errors.join('; ')}`);
     return {page, errors};
 }
@@ -77,21 +79,20 @@ try {
     await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
-    await page.evaluate(() => { document.getElementById('open-c03').closest('details').open = true; });
-    await page.click('#open-c03');
+    await (await galleryRow(page, 'c03')).click();
     const frame = page.frameLocator('#frame-c03');
     await frame.locator('#final').waitFor();
     assert.equal(await frame.locator('#final').textContent(), '80');
-    assert.equal(await page.getAttribute('#frame-c03', 'src'), 'c03/index.html');
-    await page.click('#gallery-settings-toggle');
+    assert.equal(await page.getAttribute('#frame-c03', 'src'), `${galleryRoutes.c03}/index.html`);
+    await page.locator('.drawer[aria-label="Open bottom region"]').click();
     await page.selectOption('#index-theme', 'dark');
-    await page.getByRole('button', {name: 'Close settings', exact: true}).click();
+    await page.locator('.drawer[aria-label="Close bottom region"]').click();
     await frame.locator('html[data-theme="dark"]').waitFor({state: 'attached'});
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();
 
     for (const key of keys) {
-        const {page, errors} = await open(context, pathToFileURL(join(output, key, 'index.html')).href);
+        const {page, errors} = await open(context, pathToFileURL(join(output, routes[key], 'index.html')).href);
         assert.ok(await page.evaluate(() => document.getElementById('gramlot-root').childElementCount > 0), key);
         await LOGIC[key]?.(page, selector => page.locator(selector).textContent());
         assert.deepEqual(errors, [], key);

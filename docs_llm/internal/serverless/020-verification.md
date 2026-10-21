@@ -108,3 +108,20 @@ Hello World and source-live in headless Chromium 153.0.8010.12. With the core
 tests pass, the sentinel check and the source-live browser check pass in the same
 Chromium. The exporter package is not published; these results concern the
 repository checkout.
+
+
+Development verification, 2026-10-20 — The gallery snapshots one-level navigation Bags at export time, retaining lazy directory requests in its Worker. Root Logic uses the window core; FramePage, Bag and NavigationResolver are exposed through that shared module. Nested route segments retain the existing segment grammar, use depth-correct asset/frame URLs and get parent directories for workers/stylesheets. Ten directory/gallery exporter tests pass. This is a local build verification, not a deployment.
+
+
+<a id="gs-020-030"></a>
+
+## 030 · Numbered gallery paths — 2026-10-21
+
+Block ID: **GS-020-030**.
+
+Owner explicitly authorizes connected catalogue and staging changes: “Sì, adegua anche le integrazioni”. Gallery catalogues require the physical family `folder`; each executable route is staged at its nested `url`, with its companions. Catalogue keys remain lesson identities. Hosted carousel links include the mount path; offline links include the route depth. Numbered path segments, including `00-index`, are supported by the static exporter without accepting traversal or empty segments. Markdown directory descriptions are supplied by the examples navigation and rendered by the gallery. No core loader change, route alias, release or deployment is included.
+
+Verification: three static-gallery tests and seven directory-export tests pass. The export preserves numbered nested routes, companion styles and Logic, root-relative resources and carousel file URLs. This is build/test evidence; no new offline browser qualification is claimed.
+
+
+Intermediate release qualification — 2026-10-21. Owner authorizes tree, pages, gallery and guide only, including the necessary connected integrations. All 43 tests pass; the generator passes its three tests. Chromium opens all 85 offline gallery lessons without network access, including shared tree collection imports and the gallery theme. Collection modules and Logic share the window runtime; Worker source remains separate. Database selectors and Genropy experiments are excluded. Package publication is pending at this checkpoint.
