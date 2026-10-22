@@ -128,3 +128,32 @@ Intermediate release qualification — 2026-10-21. Owner authorizes tree, pages,
 
 
 Publication receipt — 2026-10-21. Release v0.2.15 passed all required repository and tag checks and was published for the Node/Bun server, serverless exporter and project generator. The publication workflow completed successfully: https://github.com/gramlot-org/gramlot-js-server/actions/runs/39574695535 . This records package publication; hosted gallery promotion has its own deployment receipt.
+
+<a id="gs-020-035"></a>
+
+## 035 · Optional Typst collection packaging — 2026-10-21
+
+Block ID: **GS-020-035**.
+
+Directory exports put collection module strings once in assets/collections.js.
+Route bootstraps merge these with Logic and create local Blob module URLs.
+Tests cover two routes sharing one module, script loading order, reserved-path
+collision and execution of the generated module-map bootstrap. Typst's gallery
+page exports with layout/editors/typst collections and local theme assets. Its
+PDF compiler, renderer and fonts are embedded; the core tests exercise actual
+WASM compilation with fetch forbidden. The single-HTML API is unchanged and
+does not accept optional collections.
+
+Combined build/directory/standalone/bundles run: 32 of 33 pass. The unchanged
+module-graph test fails because inline.js is reachable through server/page.js →
+index-page-runtime.js → core index → source-handler → binding/runtime. The
+Typst modules are not on that path. This existing dependency-boundary defect is
+not weakened or repaired by the packaging change. Eight directory tests pass.
+Browser file:// opening was refused by the tool, so fresh file-origin UI
+verification of the exported directory remains manual. No release or deployment.
+
+The existing `codeMirrorWithOptions` is now exposed by the window-core bridge,
+standalone runtime and single-file bootstrap. Its regression test passes; this
+fixes the CodeMirror options playground export without bundling another core.
+
+Editor release qualification — 2026-10-21. All 45 serverless tests pass against the consolidated core/examples candidates, including one shared collection payload across routes, reserved-output rejection, imported module semantics and the prohibition of inline.js in the Worker graph. Both documentation views build successfully. Typst compiler/font bytes are contained in the collection; the browser engine tests run with network disabled. The earlier inline-graph failure is resolved by retaining the published core entry-point boundaries. Publication is pending at this checkpoint.

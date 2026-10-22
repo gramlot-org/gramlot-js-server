@@ -1,4 +1,5 @@
 import test from 'node:test';
+import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {mkdir, mkdtemp, writeFile, readFile, rm, stat} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
@@ -173,4 +174,36 @@ export class Page extends BasePage { main(root) { root.h1(label(${JSON.stringify
     await rm(join(site, 'helper.js'));
     await writeFile(join(site, 'Chi siamo.js'), page('x'));
     await assert.rejects(folderPages(site), /Page file Chi siamo\.js: a page name starts with a lowercase letter/);
+});
+
+
+test('collection code is shared once across routes and its generated asset is reserved', async t => {
+    const {folder,page,output}=await fixture(t);
+    const asset=join(folder,'collection.js');
+    await writeFile(asset,'export default {sentinel:"sharedCompilerBytes"};');
+    await buildDirectory({pages:{index:page,second:page},output,
+        assets:[{source:asset,target:'components/example.js'}],
+        collections:[{grammar:{},module:'/components/example.js'}]});
+    const shared=await readFile(join(output,'assets/collections.js'),'utf8');
+    assert.match(shared,/sharedCompilerBytes/);
+    let mounted;
+    const context=vm.createContext({URL,Blob,console,document:{baseURI:'https://example.test/'},
+        GramlotStandalone:{async mount(config){
+            mounted=await Promise.all(Object.entries(config.modules).map(async([key,url])=>[key,await (await fetch(url)).text()]));
+            return {};
+        }}});
+    vm.runInContext(shared,context);
+    vm.runInContext(await readFile(join(output,'assets/workers/index.js'),'utf8'),context);
+    await new Promise(resolve=>setTimeout(resolve,0));
+    assert.deepEqual(mounted.map(([key]) => key), ['/components/example.js']);
+    const exported = await import('data:text/javascript;base64,' + Buffer.from(mounted[0][1]).toString('base64'));
+    assert.deepEqual(exported.default, {sentinel:'sharedCompilerBytes'});
+
+    for(const route of ['index','second']){
+        const worker=await readFile(join(output,`assets/workers/${route}.js`),'utf8');
+        assert.doesNotMatch(worker,/sharedCompilerBytes/);assert.match(worker,/gramlotCollectionModules/);
+        const html=await readFile(join(output,route==='index'?'index.html':'second/index.html'),'utf8');
+        assert.ok(html.indexOf('assets/collections.js')<html.indexOf(`assets/workers/${route}.js`));
+    }
+    await assert.rejects(buildDirectory({pages:{index:page},output,assets:[{source:asset,target:'assets/collections.js'}]}),/conflict|reserved/i);
 });
