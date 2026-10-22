@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "@gramlot/gramlot": ">=0.3.9",
-    "@gramlot/gramlot-examples": ">=0.3.12"
+    "@gramlot/gramlot-examples": ">=0.3.11"
   },
   "peerDependenciesMeta": {
     "@gramlot/gramlot-examples": {
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@genrojs/tytx": ">=0.16.3",
-    "@gramlot/gramlot-examples": ">=0.3.12",
+    "@gramlot/gramlot-examples": ">=0.3.11",
     "jsdom": "27.0.1"
   }
 }
