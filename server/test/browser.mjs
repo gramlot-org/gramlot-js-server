@@ -42,7 +42,7 @@ try {
  assert.equal(closed,true,'pagehide beacon closes the server page');
  assert.deepEqual(errors,[]);
  // Mount prefix /app served by the adapter; the page module's Logic; the application CSP in both profiles.
- const open=async address=>{const response=await page.goto(address);await page.waitForFunction(()=>['started','failed'].includes(window.gramlot?.state));return response;};
+ const open=async (address,terminal='started')=>{const response=await page.goto(address);await page.waitForFunction(terminal=>window.gramlot?.state===terminal,terminal);return response;};
  for(const base of [strict,permissive]){
   const response=await open(base+'/avvio');
   assert.match(response.headers()['content-security-policy'],/script-src 'nonce-[\w-]+'/);
@@ -54,8 +54,8 @@ try {
  await open(permissive+'/inline');
  assert.deepEqual(await page.evaluate(()=>[window.gramlot.state,document.getElementById('inline').textContent]),['started','42']);
  assert.deepEqual(errors,[]);
- await open(strict+'/inline');
- assert.equal(await page.evaluate(()=>window.gramlot.state),'failed');
+ await open(strict+'/inline','disposed');
+ assert.deepEqual(await page.evaluate(()=>({state:window.gramlot.state,records:window.gramlot.src.renderer.records.size,children:document.getElementById('gramlot-root').childElementCount})),{state:'disposed',records:0,children:0});
  assert.equal(errors.length,1);
  assert.match(errors[0],/div '.*' node value: inline code blocked by the Content Security Policy/);console.log('PASS installed host, mount prefix and strict/permissive CSP '+runtime);
 }finally{await browser?.close();child.kill();await new Promise(r=>child.exitCode!==null?r():child.once('exit',r));}
