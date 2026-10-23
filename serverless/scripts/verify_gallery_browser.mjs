@@ -78,7 +78,7 @@ try {
     const {page, errors} = await open(context, pathToFileURL(join(output, 'index.html')).href);
     await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
-    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#235db2');
     await (await galleryRow(page, 'c03')).click();
     const frame = page.frameLocator('#frame-c03');
     await frame.locator('#final').waitFor();
@@ -95,7 +95,14 @@ try {
         const {page, errors} = await open(context, pathToFileURL(join(output, routes[key], 'index.html')).href);
         assert.ok(await page.evaluate(() => document.getElementById('gramlot-root').childElementCount > 0), key);
         await LOGIC[key]?.(page, selector => page.locator(selector).textContent());
-        assert.deepEqual(errors, [], key);
+        const expectedErrors = [];
+        if (key === 'html_editor') {
+            // The lesson's script must be refused by the sandbox, including from disk.
+            expectedErrors.push("Blocked script execution in 'about:srcdoc' because the document's frame is sandboxed and the 'allow-scripts' permission is not set.");
+            assert.equal(await page.locator('gramlot-html-preview iframe').getAttribute('sandbox'), '');
+            assert.equal(await page.frameLocator('gramlot-html-preview iframe').locator('body').getAttribute('data-executed'), null);
+        }
+        assert.deepEqual(errors, expectedErrors, key);
         await page.close();
     }
     assert.deepEqual(external, []);

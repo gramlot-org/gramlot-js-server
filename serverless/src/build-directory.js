@@ -1,6 +1,7 @@
+import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
-import {checkPage, collectionBundle, loadPage, logicBundle, logicModule, pageStyleUrls, pageStylesheet, workerBundle} from './bundles.js';
+import {checkPage, loadPage, logicBundle, logicModule, pageStyleUrls, pageStylesheet, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {copyFile, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -205,10 +206,11 @@ export async function buildDirectory({pages, output, assets = [], collections = 
         // Collection code (including optional WASM engines) is shared by every route.
         // A classic script keeps file-origin exports independent of module fetch.
         const collectionModules = {};
-        for (const {module} of collections) {
+        for (const collection of collections) {
+            const {module}=collection;
             const asset = copies.find(item => '/' + item.target === module);
             if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
-            collectionModules[module] = await collectionBundle(asset.source, workerOptions);
+            collectionModules[module] = await collectionBundle(collection,asset.source);
         }
         await writeFile(join(stage, 'assets/collections.js'),
             `const gramlotCollectionModules = ${JSON.stringify(collectionModules)};\n`);

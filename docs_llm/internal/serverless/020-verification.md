@@ -157,3 +157,13 @@ standalone runtime and single-file bootstrap. Its regression test passes; this
 fixes the CodeMirror options playground export without bundling another core.
 
 Editor release qualification — 2026-10-21. All 45 serverless tests pass against the consolidated core/examples candidates, including one shared collection payload across routes, reserved-output rejection, imported module semantics and the prohibition of inline.js in the Worker graph. Both documentation views build successfully. Typst compiler/font bytes are contained in the collection; the browser engine tests run with network disabled. The earlier inline-graph failure is resolved by retaining the published core entry-point boundaries. Publication is pending at this checkpoint.
+
+
+Documentation source integration — 2026-10-23. The owner authorizes the core and
+examples Read the Docs publication and consolidation of its required source
+prerequisites, without npm/PyPI releases. Prepared collection artifacts are
+verified before the directory exporter derives shared browser modules. The HTTP
+consumer uses the same verified identity and rejects changed bytes. Public
+cookie ownership and dynamic runtime exports are preserved. Coordinated CI uses
+`scripts/prepare_source_dependencies.py`: main for public-source runs, develop
+for preview runs, with commit identities in logs and no first-party pins.

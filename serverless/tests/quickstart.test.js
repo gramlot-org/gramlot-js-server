@@ -1,3 +1,4 @@
+import {loadStyles} from './styles.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
@@ -43,6 +44,7 @@ test('the quick start greets Ada and follows the field while typing', async t =>
     globalThis.GramlotStandalone = {Page: BasePage};
     t.after(() => { delete globalThis.GramlotStandalone; });
     const {window} = new JSDOM('<div id="gramlot-root"></div>');
+    loadStyles(window.document);
     const app = await mount({workerUrl: 'page-worker.js', document: window.document,
         modules: {'/page.js': `data:text/javascript,${encodeURIComponent(logic)}`}});
     assert.equal(window.document.title, 'Hello');

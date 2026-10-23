@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp, cp, readFile, writeFile, rm} from 'node:fs/promises';
+import {dirname, join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {buildGallery} from '@gramlot/gramlot-examples';
+import {GramlotServer} from '@gramlot/gramlot/server';
+import {createDispatch} from '../src/fetch.mjs';
+
+test('HTTP resources verify startup, every read, identity, private metadata and methods', async t => {
+    const gallery=buildGallery(), collection=gallery.collections.find(item=>item.name==='inputs');
+    const root=await mkdtemp(join(tmpdir(),'gramlot-http-integrity-'));
+    t.after(()=>rm(root,{recursive:true,force:true}));
+    await cp(dirname(dirname(gallery.assets[collection.module].file)),root,{recursive:true});
+    const entry=join(root,'assets/index.js');
+    const assets={[collection.module]:{file:entry,type:'text/javascript'}};
+    const host=await createDispatch({server:new GramlotServer({collections:[collection]}),assets,mountPath:'/demo'});
+    const request=(path=collection.module,method='GET')=>host.fetch(new Request('http://local/demo'+path,{method}));
+    const response=await request();
+    assert.equal(response.status,200);
+    assert.equal(response.headers.get('cache-control'),'no-store');
+    const bytes=await response.text();
+    assert.equal(bytes,await readFile(entry,'utf8'));
+    const head=await request(collection.module,'HEAD');
+    assert.equal(await head.text(),'');
+    assert.equal(Number(head.headers.get('content-length')),Buffer.byteLength(bytes));
+    const post=await request(collection.module,'POST');
+    assert.equal(post.status,405); assert.equal(post.headers.get('allow'),'GET, HEAD');
+    assert.equal((await request(collection.module.replace('assets/index.js','grammar.json'))).status,404);
+    assert.equal((await request(collection.module.replace(collection.buildId.slice(7),'0'.repeat(64)))).status,404);
+    const implementation=join(root,'assets/collection.js');
+    await writeFile(implementation,(await readFile(implementation,'utf8'))+'\n// tampered');
+    assert.equal((await request()).status,404);
+    await assert.rejects(createDispatch({server:new GramlotServer({collections:[collection]}),assets}),/fingerprint mismatch/);
+});
