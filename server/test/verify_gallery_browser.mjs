@@ -85,7 +85,7 @@ try {
     const {page, errors} = await open(browser, gallery);
     await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
-    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#456bc4');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#235db2');
     await (await galleryRow(page, 'c03')).click();
     const frame = page.frameLocator('#frame-c03');
     await frame.locator('#final').waitFor();
