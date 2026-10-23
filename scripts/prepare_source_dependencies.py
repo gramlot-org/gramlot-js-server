@@ -30,6 +30,7 @@ def main():
         f"@gramlot/builder@file:{core / 'tools/gramlot-builder'}", cwd=examples)
     run("npm", "run", "build", cwd=examples)
     run(*install, "--no-save", core_package,
-        f"@gramlot/gramlot-examples@file:{examples}", "playwright", cwd=ROOT)
+        f"@gramlot/gramlot-examples@file:{examples}",
+        f"@gramlot/builder@file:{core / 'tools/gramlot-builder'}", "playwright", cwd=ROOT)
 if __name__ == "__main__":
     main()
