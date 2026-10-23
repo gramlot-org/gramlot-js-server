@@ -129,9 +129,3 @@ export async function logicBundle(logic, options) {
         contents: `export {Logic} from ${JSON.stringify(logic.file)};`,
     }})).outputFiles[0].text;
 }
-
-/** Bundle a collection for the window, sharing the runtime used by page Logic. */
-export async function collectionBundle(module, options) {
-    return (await bundle({...options, format: 'esm', plugins: [windowCore],
-        entryPoints: [module]})).outputFiles[0].text;
-}

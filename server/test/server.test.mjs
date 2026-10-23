@@ -142,7 +142,7 @@ test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 
         assert.deepEqual(argument.config, {pageId: argument.config.pageId, rpcUrl: '/app/gramlot/rpc',
             closeUrl: '/app/gramlot/close', rootId: 'gramlot-root', capabilities: [], nameSyntax: NAME_SYNTAX.toJSON()});
         assert.deepEqual(argument.resources, {
-            css: ['/app/themes/gramlot-base/theme.css', '/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css',
+            collections: [], css: ['/app/themes/gramlot-base/theme.css', '/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css',
                 '/app/assets/app.css', '/app/index.css'],
             js: [{url: '/app/index_aux.js', group: null}],
         });
@@ -216,7 +216,7 @@ export class Logic { greeting(kwargs) { return 'Hello, ' + kwargs.name; } }
     const app = await startServer({pages: folder});
     try {
         const {argument} = bootstrap(await (await fetch(app.url + '/single')).text());
-        assert.deepEqual(argument.resources, {css: ['/themes/gramlot-base/theme.css'], js: [{url: '/single.js', group: null}]});
+        assert.deepEqual(argument.resources, {collections: [], css: ['/themes/gramlot-base/theme.css'], js: [{url: '/single.js', group: null}]});
         const response = await fetch(app.url + '/single.js');
         assert.equal(response.status, 200);
         assert.ok(response.headers.get('content-type').startsWith('text/javascript'));

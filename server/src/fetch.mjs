@@ -1,3 +1,4 @@
+import {readCollectionArtifact} from './collection-artifact.mjs';
 /** Gramlot server protocol (GC-230) over Request/Response, shared by the Node and Bun socket bridges. */
 import {randomBytes} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
@@ -48,6 +49,19 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
             throw new TypeError(`Asset ${path} needs a root-relative URL path, a file and a media type`);
         }
     }
+    // A fixed registry is verified before the host accepts requests.
+    const collectionResources = new Map();
+    for (const collection of server.collections) {
+        const entry = assets[collection.module]?.file;
+        if (!entry) throw new Error(`Missing collection resource: ${collection.name}`);
+        const expected = `/gramlot/collections/${encodeURIComponent(collection.name)}/${collection.buildId.slice(7)}/assets/index.js`;
+        if (collection.module !== expected) throw new Error('Collection URL must contain its verified identity');
+        const snapshot = await readCollectionArtifact(collection, entry);
+        const rootUrl = collection.module.slice(0, -'assets/index.js'.length);
+        for (const file of snapshot.content.keys()) {
+            if (file.startsWith('assets/')) collectionResources.set(rootUrl + file, {collection, entry, file});
+        }
+    }
     const runtime = await readFile(runtimeAsset());
     const ownerOf = ownerForRequest ?? (async request => cookieOwner(request));
     return {server, prefix, async fetch(request) {
@@ -58,6 +72,19 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
         const reading = ['GET', 'HEAD'].includes(request.method);
         if (prefix && url.pathname === prefix) return reply(null, 301, undefined, {Location: `${prefix}/${url.search}`});
         if (prefix && !url.pathname.startsWith(`${prefix}/`)) return reply('Not found', 404);
+        const pathname = url.pathname.slice(prefix.length);
+        if (pathname.startsWith('/gramlot/collections/')) {
+            if (!['GET', 'HEAD'].includes(request.method)) return reply('Method not allowed', 405, undefined, {Allow: 'GET, HEAD'});
+            const resource = collectionResources.get(pathname);
+            if (!resource) return reply('Not found', 404);
+            let snapshot;
+            try { snapshot = await readCollectionArtifact(resource.collection, resource.entry); }
+            catch { return reply('Not found', 404); }
+            const bytes = snapshot.content.get(resource.file);
+            return reply(request.method === 'HEAD' ? null : bytes, 200,
+                MEDIA_TYPES[extname(resource.file).toLowerCase()] ?? 'application/octet-stream',
+                {'Content-Length': String(bytes.length)});
+        }
         let path;
         try { path = decodeURIComponent(url.pathname.slice(prefix.length)); }
         catch { return reply('Invalid path', 400); }

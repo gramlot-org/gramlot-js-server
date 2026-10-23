@@ -1,3 +1,4 @@
+import {loadStyles} from './styles.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
@@ -40,7 +41,7 @@ class Hello extends Page {
 Hello.registerSource('details');
 Hello.registerSource('broken');
 
-const document = () => new JSDOM('<div id="gramlot-root"></div>').window.document;
+const document = () => loadStyles(new JSDOM('<div id="gramlot-root"></div>').window.document);
 
 /** The response envelope of one request envelope sent through transport.call. JSON.parse keeps a
  * fragment document as its TYTX string; decode = fromTytx decodes the value as well. */
@@ -113,7 +114,7 @@ test('Worker rejects unknown messages, invalid envelopes, unsupported pages and 
     }
     class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
     const styled = channel(Styled);
-    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: []});
+    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: [], collections: []});
     styled.transport.dispose();
     const {transport} = channel(Hello);
     await assert.rejects(transport.request({operation: 'main'}), {name: 'TypeError', message: 'Unknown Worker message'});
@@ -146,7 +147,7 @@ test('standalone mount owns startup and failure cleanup', async t => {
     assert.equal(doc.querySelector('h1').textContent, 'Hello Worker');
     app.dispose();
     assert.equal(endpoints[0].terminated(), true);
-    await assert.rejects(mount({workerUrl: 'page-worker.js', document: new JSDOM('').window.document}));
+    await assert.rejects(mount({workerUrl: 'page-worker.js', document: loadStyles(new JSDOM('').window.document)}));
     assert.equal(endpoints[1].terminated(), true);
 });
 
@@ -288,7 +289,7 @@ test('the Worker returns the theme, Page.css, then the same-name stylesheet, and
     class Listed extends Hello { static css = [BASE_THEME, '/theme.css']; }
     const linked = channel(Styled, {stylesheet: '/assets/styles/index.css', logic: '/index.js'});
     assert.deepEqual((await linked.transport.open()).resources,
-        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}]});
+        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}], collections: []});
     linked.transport.dispose();
     for (const [PageClass, css] of [[Compact, ['/themes/gramlot-compact/theme.css', '/theme.css']],
         [Bare, ['/theme.css']], [Listed, [BASE_THEME, '/theme.css']]]) {
@@ -301,7 +302,7 @@ test('the Worker returns the theme, Page.css, then the same-name stylesheet, and
     base.transport.dispose();
     for (const PageClass of [Styled, Compact, Listed]) {
         const inline = channel(PageClass, {stylesheet: '/assets/styles/index.css', inlineCss: true});
-        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: []}, PageClass.name);
+        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: [], collections: []}, PageClass.name);
         inline.transport.dispose();
     }
 });

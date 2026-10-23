@@ -108,7 +108,7 @@ export class Page extends Example {
         }
         // The theme comes from the core through Page.css; the example sources stay in the gallery page.
         const copied = Object.entries(assets)
-            .filter(([url]) => url === '/gallery/gallery.css' || url.startsWith('/gallery/dist/') || url.startsWith('/assets/branding/'))
+            .filter(([url]) => url === '/gallery/gallery.css' || url.startsWith('/gallery/dist/') || url.startsWith('/gramlot/collections/') || url.startsWith('/assets/branding/'))
             .map(([url, {file}]) => ({source: file, target: url.slice(1)}));
         return await buildDirectory({pages, output, assets: copied, collections});
     } finally {

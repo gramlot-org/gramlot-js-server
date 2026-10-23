@@ -14,8 +14,8 @@
     "gramlot": "./src/cli.mjs"
   },
   "scripts": {
-    "test": "node --test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs",
-    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs"
+    "test": "node --test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs test/collection-resources.test.mjs",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs test/collection-resources.test.mjs"
   },
   "engines": {
     "node": ">=22"

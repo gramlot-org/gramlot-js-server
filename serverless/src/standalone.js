@@ -59,9 +59,10 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
         document.title = title;
         const bootstrap = new WorkerBootstrap({document, transport, config: {pageId, element, rootId, capabilities, nameSyntax, locale, timeZone, devices}, resources: {
             css: resources.css.map(href => styleUrl(href, root)),
-            collections: (resources.collections ?? []).map(url => {
+            collections: (resources.collections ?? []).map(record => {
+                const {url} = record;
                 if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone collection not provided: ${url}`);
-                return modules[url];
+                return {...record,url:modules[url]};
             }),
             js: resources.js.map(({url, group}) => {
                 if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone module not provided: ${url}`);

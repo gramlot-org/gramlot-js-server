@@ -7,6 +7,7 @@ import {createRequire} from 'node:module';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildDirectory, folderPages} from '../src/build-directory.js';
+import {collectionBuildId} from '@gramlot/gramlot';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -179,11 +180,22 @@ export class Page extends BasePage { main(root) { root.h1(label(${JSON.stringify
 
 test('collection code is shared once across routes and its generated asset is reserved', async t => {
     const {folder,page,output}=await fixture(t);
-    const asset=join(folder,'collection.js');
-    await writeFile(asset,'export default {sentinel:"sharedCompilerBytes"};');
+    const packageRoot=join(folder,'example');
+    const files=new Map([
+        ['grammar.json',Buffer.from('{}')], ['commands.json',Buffer.from('{}')],
+        ['assets/index.js',Buffer.from('')],
+        ['assets/collection.js',Buffer.from('export default {sentinel:"sharedCompilerBytes"};')],
+    ]);
+    const metadata={name:'example',grammar:'grammar.json',commands:'commands.json',
+        module:'assets/index.js',css:[],dependencies:[],files:[...files.keys()]};
+    const buildId=await collectionBuildId(metadata,files);
+    files.set('assets/index.js',Buffer.from(`export {default} from "./collection.js";\nexport const buildId = "${buildId}";\n`));
+    await mkdir(join(packageRoot,'assets'),{recursive:true});
+    for(const [name,bytes] of files)await writeFile(join(packageRoot,name),bytes);
+    const asset=join(packageRoot,'assets/index.js');
     await buildDirectory({pages:{index:page,second:page},output,
-        assets:[{source:asset,target:'components/example.js'}],
-        collections:[{grammar:{},module:'/components/example.js'}]});
+        assets:[...files.keys()].map(name=>({source:join(packageRoot,name),target:'components/example/'+name})),
+        collections:[{name:'example',grammar:{},module:'/components/example/assets/index.js',buildId,css:[],dependencies:[]}]});
     const shared=await readFile(join(output,'assets/collections.js'),'utf8');
     assert.match(shared,/sharedCompilerBytes/);
     let mounted;
@@ -195,7 +207,7 @@ test('collection code is shared once across routes and its generated asset is re
     vm.runInContext(shared,context);
     vm.runInContext(await readFile(join(output,'assets/workers/index.js'),'utf8'),context);
     await new Promise(resolve=>setTimeout(resolve,0));
-    assert.deepEqual(mounted.map(([key]) => key), ['/components/example.js']);
+    assert.deepEqual(mounted.map(([key]) => key), ['/components/example/assets/index.js']);
     const exported = await import('data:text/javascript;base64,' + Buffer.from(mounted[0][1]).toString('base64'));
     assert.deepEqual(exported.default, {sentinel:'sharedCompilerBytes'});
 
