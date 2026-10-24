@@ -26,7 +26,7 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     assert.equal(manifest.start_url, './');
     assert.equal(manifest.icons[0].src, './assets/branding/app-icon.png');
     assert.match(await readFile(join(output, 'index.html'), 'utf8'), /rel="manifest"/);
-    assert.doesNotMatch(await readFile(join(output, 'pages/01-html_elements/01-html_basics/01-hello_world/index.html'), 'utf8'), /rel="manifest"/);
+    assert.doesNotMatch(await readFile(join(output, 'pages/08-html_svg/01-html_basics/01-hello_world/index.html'), 'utf8'), /rel="manifest"/);
     assert.ok((await stat(join(output, 'assets/branding/app-icon.png'))).isFile());
     const index = await readFile(join(output, 'assets/workers/index.js'), 'utf8');
     for (const text of ['pages/03-controllers/01-logic/03-named_logic/index.html', 'assets/branding/gramlot-logo-dark.svg', '/index_aux.js']) {
@@ -40,11 +40,11 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     assert.ok(c03.includes('../../../../gallery/dist/frame.js'));
     assert.match(c03, /countChange/);
     for (const path of ['index.html', 'pages/03-controllers/01-logic/03-named_logic/index.html', 'assets/styles/pages/02-binding/01-paths_and_updates/04-freeze.css', 'themes/gramlot-base/theme.css',
-        'pages/01-html_elements/06-nested/01-child/index.html', 'assets/workers/pages/01-html_elements/06-nested/01-child.js',
+        'pages/08-html_svg/06-nested/01-child/index.html', 'assets/workers/pages/08-html_svg/06-nested/01-child.js',
         'gallery/gallery.css', 'gallery/dist/gallery.js', 'gallery/dist/frame.js', 'assets/branding/gramlot-logo-dark.svg']) {
         assert.ok((await stat(join(output, path))).isFile(), path);
     }
-    assert.match(await readFile(join(output, 'pages/01-html_elements/06-nested/01-child/index.html'), 'utf8'), /src="\.\.\/\.\.\/\.\.\/\.\.\/assets\/standalone.js"/);
+    assert.match(await readFile(join(output, 'pages/08-html_svg/06-nested/01-child/index.html'), 'utf8'), /src="\.\.\/\.\.\/\.\.\/\.\.\/assets\/standalone.js"/);
     await assert.rejects(stat(join(output, 'gallery/page.js')), {code: 'ENOENT'});
 });
 

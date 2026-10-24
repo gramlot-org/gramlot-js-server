@@ -33,12 +33,12 @@ test('the gallery stages one route per example under the mount prefix', async ()
         assert.equal((await get(manifest.icons[0].src)).headers.get('content-type'), 'image/png');
         assert.equal((await fetch(app.url + '/js/app.webmanifest', {method: 'HEAD'})).status, 200);
         assert.equal((await fetch(app.url + '/js/app.webmanifest', {method: 'POST'})).status, 405);
-        assert.equal((await get('/js/pages/01-html_elements/01-html_basics/01-hello_world/app.webmanifest')).status, 404);
-        const main = JSON.parse((await get('/js/pages/01-html_elements/02-native_controls/01-forms').then(response => response.text()))
+        assert.equal((await get('/js/pages/08-html_svg/01-html_basics/01-hello_world/app.webmanifest')).status, 404);
+        const main = JSON.parse((await get('/js/pages/08-html_svg/02-native_controls/01-forms').then(response => response.text()))
             .match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
-        assert.deepEqual(main.resources.css.at(-1), '/js/pages/01-html_elements/02-native_controls/01-forms.css');
+        assert.deepEqual(main.resources.css.at(-1), '/js/pages/08-html_svg/02-native_controls/01-forms.css');
         assert.deepEqual(main.resources.collections, []);
-        const textboxHtml = await get('/js/pages/04-input_components/01-text/01-textbox').then(response => response.text());
+        const textboxHtml = await get('/js/pages/01-inputs/01-text/01-textbox').then(response => response.text());
         const textbox = JSON.parse(textboxHtml.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
         assert.deepEqual(textbox.resources.collections.map(item => item.name), ['inputs', 'layout']);
         for (const collection of textbox.resources.collections) {
@@ -46,7 +46,7 @@ test('the gallery stages one route per example under the mount prefix', async ()
             assert.equal(resource.status, 200);
             assert.equal(resource.headers.get('cache-control'), 'public, max-age=31536000, immutable');
         }
-        assert.equal((await get('/js/pages/01-html_elements/02-native_controls/01-forms.css')).status, 200);
+        assert.equal((await get('/js/pages/08-html_svg/02-native_controls/01-forms.css')).status, 200);
         const aux = await get('/js/pages/03-controllers/01-logic/03-named_logic_aux.js');
         assert.equal(await aux.text(), 'export * from "/js/pages/03-controllers/01-logic/03-named_logic.js";\n');
         const logic = await get('/js/pages/03-controllers/01-logic/03-named_logic.js');
