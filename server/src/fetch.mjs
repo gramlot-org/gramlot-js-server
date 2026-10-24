@@ -51,7 +51,9 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
     }
     // A fixed registry is verified before the host accepts requests.
     const collectionResources = new Map();
-    for (const collection of server.collections) {
+    const declarations = [...server.collections];
+    if (files) for await (const PageClass of server.iterPageClasses()) declarations.push(...server.pageCollections(PageClass));
+    for (const collection of server.collectionGraph(declarations)) {
         const entry = assets[collection.module]?.file;
         if (!entry) throw new Error(`Missing collection resource: ${collection.name}`);
         const expected = `/gramlot/collections/${encodeURIComponent(collection.name)}/${collection.buildId.slice(7)}/assets/index.js`;
@@ -59,7 +61,7 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
         const snapshot = await readCollectionArtifact(collection, entry);
         const rootUrl = collection.module.slice(0, -'assets/index.js'.length);
         for (const file of snapshot.content.keys()) {
-            if (file.startsWith('assets/')) collectionResources.set(rootUrl + file, {collection, entry, file});
+            if (file.startsWith('assets/')) collectionResources.set(rootUrl + file, {bytes: snapshot.content.get(file), file});
         }
     }
     const runtime = await readFile(runtimeAsset());
@@ -77,13 +79,10 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
             if (!['GET', 'HEAD'].includes(request.method)) return reply('Method not allowed', 405, undefined, {Allow: 'GET, HEAD'});
             const resource = collectionResources.get(pathname);
             if (!resource) return reply('Not found', 404);
-            let snapshot;
-            try { snapshot = await readCollectionArtifact(resource.collection, resource.entry); }
-            catch { return reply('Not found', 404); }
-            const bytes = snapshot.content.get(resource.file);
+            const bytes = resource.bytes;
             return reply(request.method === 'HEAD' ? null : bytes, 200,
                 MEDIA_TYPES[extname(resource.file).toLowerCase()] ?? 'application/octet-stream',
-                {'Content-Length': String(bytes.length)});
+                {'Content-Length': String(bytes.length), 'Cache-Control': 'public, max-age=31536000, immutable'});
         }
         let path;
         try { path = decodeURIComponent(url.pathname.slice(prefix.length)); }

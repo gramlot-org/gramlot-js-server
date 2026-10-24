@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {fromTytx, toTytx} from '@genrojs/tytx';
-import {Page} from '@gramlot/gramlot/page';
+import {Bag, Page} from '@gramlot/gramlot/page';
 import {NAME_SYNTAX, NameSyntax} from '@gramlot/gramlot/server';
 import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
 import {WorkerServerAdapter} from '../src/worker-server-adapter.js';
@@ -377,4 +377,22 @@ test('page locale and timezone cross the Worker boundary and drive formatted dis
     assert.equal(doc.querySelector('#amount').textContent, 'Total: 1234,50');
     app.data.setItem('amount', 5);
     assert.equal(doc.querySelector('#amount').textContent, 'Total: 5,00');
+});
+
+
+test('Worker initial companion data precedes defaults and is fresh on every main', async () => {
+    class Initial extends Page {
+        main(root) { root.input({id:'name',value:'^name',default:'Default',live:true}); }
+    }
+    const data = new Bag(); data.setItem('name','Ada',{caption:'Customer'});
+    const {transport,server} = channel(Initial,{initialData:toTytx(data)});
+    const {pageId}=await transport.open(), doc=document();
+    const app=new Gramlot({pageId,transport,document:doc});
+    try {
+        await app.start();
+        assert.equal(doc.querySelector('#name').value,'Ada');
+        assert.equal(app.data.getNode('name').attr.caption,'Customer');
+        app.data.setItem('name','Grace');
+        assert.equal((await server.resolveData('/')).getItem('name'),'Ada');
+    } finally { app.dispose();doc.defaultView.close(); }
 });

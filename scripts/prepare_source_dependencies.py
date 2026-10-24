@@ -21,7 +21,7 @@ def main():
     DEPENDENCIES.mkdir(parents=True, exist_ok=True)
     core = checkout("gramlot")
     examples = checkout("gramlot-examples")
-    install = ("npm", "install", "--ignore-scripts", "--package-lock=false", "--no-audit", "--no-fund")
+    install = ("npm", "install", "--install-links", "--ignore-scripts", "--package-lock=false", "--no-audit", "--no-fund")
     run(*install, cwd=core / "js")
     run(*install, cwd=core / "tools/gramlot-builder")
     run("npm", "run", "build", cwd=core / "js")

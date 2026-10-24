@@ -1,3 +1,4 @@
+import {fromTytx} from '@genrojs/tytx';
 import {GramlotServer, PageNotFound} from '@gramlot/gramlot/gramlot-server';
 
 /** One JS Page served inside a dedicated Worker; execution belongs to GramlotServer.
@@ -8,9 +9,10 @@ import {GramlotServer, PageNotFound} from '@gramlot/gramlot/gramlot-server';
  * and no CSS URL is returned. Otherwise the CSS is the theme of the page (themeCss), Page.css
  * and the stylesheet. */
 export class GramlotWorkerServer extends GramlotServer {
-    constructor(PageClass, {logic = null, stylesheet = null, inlineCss = false, ...options} = {}) {
+    constructor(PageClass, {logic = null, stylesheet = null, inlineCss = false, initialData = null, ...options} = {}) {
         super(options);
         this.PageClass = PageClass;
+        this.initialData = initialData;
         this.logic = logic;
         this.stylesheet = stylesheet;
         this.inlineCss = inlineCss;
@@ -30,6 +32,10 @@ export class GramlotWorkerServer extends GramlotServer {
             throw new TypeError('Standalone Page.css must be an array of strings');
         }
         return this.PageClass;
+    }
+
+    async resolveData(path) {
+        return this.initialData === null ? null : fromTytx(this.initialData);
     }
 
     /** Page.css URLs as written, then the same-name stylesheet and the page logic. */

@@ -1,8 +1,10 @@
 import {build as bundle} from 'esbuild';
+import {SourceBag} from '@genrojs/builders';
+import {fromTytx} from '@genrojs/tytx';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
 import * as core from '@gramlot/gramlot';
 import * as corePage from '@gramlot/gramlot/page';
-import {realpath, stat} from 'node:fs/promises';
+import {readFile, realpath, stat} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {basename, dirname, extname, isAbsolute, join, relative, sep} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -113,11 +115,19 @@ export async function inlineStylesheets(page, PageClass) {
 
 /** The Worker script: GramlotWorkerServer and the Page. The logic module runs in the window. */
 export async function workerBundle(page, options, {logic = null, stylesheet = null, inlineCss = false, collections = []} = {}) {
+    const dataFile = join(dirname(page), `${basename(page, extname(page))}_data.tytx`);
+    let initialData = null;
+    try { initialData = await readFile(dataFile, 'utf8'); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    if (initialData !== null) {
+        const data = fromTytx(initialData);
+        if (!(data instanceof corePage.Bag) || data instanceof SourceBag) throw new TypeError('Initial page data must be a Data Bag');
+    }
     const result = await bundle({...options, metafile: true, stdin: {
         resolveDir: dirname(page),
         contents: `import {GramlotWorkerServer} from ${JSON.stringify(workerServer)};
 import {Page} from ${JSON.stringify(page)};
-new GramlotWorkerServer(Page, ${JSON.stringify({logic, stylesheet, inlineCss, collections})});`,
+new GramlotWorkerServer(Page, ${JSON.stringify({logic, stylesheet, inlineCss, collections, initialData})});`,
     }});
     return {text: result.outputFiles[0].text, metafile: result.metafile};
 }

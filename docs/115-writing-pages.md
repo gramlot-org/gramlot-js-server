@@ -134,3 +134,12 @@ locale/timezone at startup. Masks use `{}`; migrate legacy `%s`.
 Example: `root.p('^amount', {format: '0.00', mask: 'Total: {}'})`.
 See the core's [formatting contract](https://gramlot.readthedocs.io/en/latest/docs/public/095-writing-pages.html#gc-095-125)
 for supported patterns, explicit dtype and current static-rendering limits.
+
+
+<a id="gs-115-040"></a>
+
+## 040 · Initial Data companion
+
+Block ID: **GS-115-040**.
+
+The optional `foo_data.tytx` beside the page supplies a typed initial Data Bag before browser defaults and rendering. No loader declaration is needed in main. Existing dataSetter, default and remote data mechanisms remain available. Invalid files fail loading; missing files leave behavior unchanged. Client edits do not write back to the file. The exporter embeds the serialized Bag in its Worker, freshly decoded for each main. It requires no fetch or filesystem API in the browser, including file-origin exports. Rebuild after editing the companion.

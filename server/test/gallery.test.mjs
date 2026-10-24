@@ -19,6 +19,9 @@ test('the gallery stages one route per example under the mount prefix', async ()
     try {
         assert.equal(app.galleryUrl, `${app.url}/js/`);
         assert.match(readFileSync(`${app.pages}/index.js`, 'utf8'), /serverlessDownloadUrl = "\/downloads\/gallery.zip"/);
+        const companion = `${app.pages}/pages/02-binding/01-paths_and_updates/foo_data.tytx`;
+        assert.ok(existsSync(companion));
+        assert.match(readFileSync(companion,'utf8'), /Ada Lovelace/);
         const index = await get('/js/');
         assert.equal(index.status, 200);
         assert.match(await index.text(), /<title>Gramlot examples<\/title>/);
@@ -34,6 +37,15 @@ test('the gallery stages one route per example under the mount prefix', async ()
         const main = JSON.parse((await get('/js/pages/01-html_elements/02-native_controls/01-forms').then(response => response.text()))
             .match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
         assert.deepEqual(main.resources.css.at(-1), '/js/pages/01-html_elements/02-native_controls/01-forms.css');
+        assert.deepEqual(main.resources.collections, []);
+        const textboxHtml = await get('/js/pages/04-input_components/01-text/01-textbox').then(response => response.text());
+        const textbox = JSON.parse(textboxHtml.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
+        assert.deepEqual(textbox.resources.collections.map(item => item.name), ['inputs', 'layout']);
+        for (const collection of textbox.resources.collections) {
+            const resource = await get(collection.url);
+            assert.equal(resource.status, 200);
+            assert.equal(resource.headers.get('cache-control'), 'public, max-age=31536000, immutable');
+        }
         assert.equal((await get('/js/pages/01-html_elements/02-native_controls/01-forms.css')).status, 200);
         const aux = await get('/js/pages/03-controllers/01-logic/03-named_logic_aux.js');
         assert.equal(await aux.text(), 'export * from "/js/pages/03-controllers/01-logic/03-named_logic.js";\n');

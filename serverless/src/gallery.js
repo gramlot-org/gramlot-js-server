@@ -82,7 +82,7 @@ export class Page extends GalleryPage {
 Page.registerEndpoint('navigation_section');
 `);
         const pages = {index: join(stage, 'index.js')};
-        for (const [routeKey, {page, stylesheet, logic, url:key}] of Object.entries(routes)) {
+        for (const [routeKey, {page, data, stylesheet, logic, url:key}] of Object.entries(routes)) {
             if (routeKey === 'index') continue;
             const relativeRoot = '../'.repeat(key.split('/').length);
             const galleryUrls = Object.fromEntries(Object.keys(routes).filter(route => route !== 'index')
@@ -97,6 +97,7 @@ export class Page extends Example {
     }
 }
 `);
+            if (data) await copyFile(data, join(stage, `${key}_data.tytx`));
             if (stylesheet) await copyFile(stylesheet, join(stage, `${key}.css`));
             // The window bundles the companion by its Logic export. `export *` would keep the page module and its
             // imports in the bundle, and a page may import names the window core lacks: only a logic module that

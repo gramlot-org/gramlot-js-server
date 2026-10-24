@@ -132,3 +132,17 @@ export class Logic { editor(node){return codeMirrorWithOptions(node,{datapath:'d
     assert.match(bundle,/GramlotStandalone/);assert.match(bundle,/codeMirrorWithOptions/);
     assert.doesNotMatch(bundle,/class GramlotBuilder/);
 });
+
+
+test('the Worker embeds the optional TYTX companion and rejects invalid data', async t => {
+    const dir = await folder(t), entry = join(dir,'foo.js');
+    await writeFile(entry, "import {Page as BasePage} from '@gramlot/gramlot/page'; export class Page extends BasePage {main(root){root.p('^name');}}");
+    const {Bag} = await import('@gramlot/gramlot/page');
+    const {toTytx} = await import('@genrojs/tytx');
+    const data = new Bag(); data.setItem('name','Companion sentinel');
+    await writeFile(join(dir,'foo_data.tytx'),toTytx(data));
+    const result=await workerBundle(entry,options);
+    assert.match(result.text,/Companion sentinel/);
+    await writeFile(join(dir,'foo_data.tytx'),toTytx({name:'not a Bag'}));
+    await assert.rejects(workerBundle(entry,options),/must be a Data Bag/);
+});
