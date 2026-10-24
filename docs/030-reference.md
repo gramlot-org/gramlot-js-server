@@ -62,8 +62,10 @@ Paths are shown with the default `GramlotServer` options and without mount prefi
 | `POST` | `/gramlot/close` | `{"pageId"}` | 200 `{"ok": true}`, always |
 | `GET` | any page path (`/`, `/orders`, `/orders/index.html`) | — | 200 `text/html`, the bootstrap document; `Content-Security-Policy` when configured; `Set-Cookie: gramlot_owner=…` |
 
-Every response of the adapter carries `Cache-Control: no-store`, except the
-runtime, which carries `Cache-Control: no-cache` and `X-Content-Type-Options: nosniff`.
+Page and RPC responses carry `Cache-Control: no-store`. The runtime carries
+`Cache-Control: no-cache` and `X-Content-Type-Options: nosniff`. Verified collection
+assets use fingerprinted URLs and `Cache-Control: public, max-age=31536000, immutable`;
+the process serves the bytes verified at startup. Other assets remain `no-store`.
 A page response sets the owner cookie `gramlot_owner` ([Configuration](020-configuration.md)).
 Every 405 carries an `Allow` header: `GET, HEAD` on the runtime, the theme files, the
 assets, the companions and the manifest, `POST` on rpc and close, `GET` on a page

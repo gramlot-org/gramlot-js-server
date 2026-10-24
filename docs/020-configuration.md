@@ -153,4 +153,33 @@ the file), assets, companions below the pages folder, pages.
 
 Block ID: **GN-120-035**.
 
-The application option `collections` is forwarded to the core server. Each entry has `grammar` (generated JSON object) and `module` (root-relative browser module URL), served through `assets`; the core guide [Components](https://gramlot.readthedocs.io/en/latest/docs/public/105-components.html) describes an entry. The gallery application explicitly selects inputs. Restart its process after rebuilding development assets.
+Declare optional prepared collections in `static gramlots = [inputs, layout]` on
+`Page`. Import their generated descriptors, including `name`, `buildId`, `grammar`,
+`module`, `css` and `dependencies`; do not import browser widget implementations
+just to declare server dependencies. Base-class declarations accumulate before
+subclass declarations. Dependencies name other declared records and are ordered
+before consumers. Missing dependencies, cycles and conflicting identities fail.
+Server-wide `collections` remain additive defaults for every page.
+
+At startup the file server imports candidate page modules beneath its pages root
+and discovers their declarations, without constructing pages or calling `main`.
+Hidden/private entries, symlinks and `_aux.js` companions are excluded; modules
+without a Page export are ignored, while an invalid Page export fails startup.
+These are trusted application imports and may run module-level code. The adapter
+requires each collection entry in `assets`, verifies its entire artifact and
+retains a fixed snapshot for the process lifetime. A custom neutral server uses
+its explicitly supplied server-wide collection registry.
+
+Each page bootstrap activates only its own graph; the registry of hosted files
+may contain more collections. The core reuses compiled grammars per builder class
+and ordered composition, while creating fresh Source, Data and authorization
+contexts. Fingerprinted asset GET/HEAD responses carry
+`Cache-Control: public, max-age=31536000, immutable`; page and RPC responses remain
+`no-store`. Unknown fingerprints return 404. Rebuilds produce new URLs. Restart
+the process after rebuilding a collection: changing package files never changes
+bytes already served under an existing build identity.
+
+The gallery shell selects inputs, layout, tree and editors; basic field lessons
+select inputs/layout, and Typst is selected only by its lesson. The core guide
+[Components](https://gramlot.readthedocs.io/en/latest/docs/public/105-components.html)
+describes the prepared collection contract.

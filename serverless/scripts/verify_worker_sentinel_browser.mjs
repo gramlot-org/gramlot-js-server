@@ -1,8 +1,8 @@
-/** Real browser: the core page avvio built as one standalone file under its CSP.
+/** Real browser: the local provider sentinel page built as one standalone file under its CSP.
  * Its Logic counts every call on globalThis.gramlotSentinel: the window runs the
  * _init formula, the Worker never runs the Logic. */
 import assert from 'node:assert/strict';
-import {mkdtemp, readFile, realpath, rm, writeFile} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -10,10 +10,8 @@ import {build} from '../src/build.js';
 
 const [playwrightEntry, engineName = 'chromium', executablePath] = process.argv.slice(2);
 if (!playwrightEntry) throw new Error('Usage: verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]');
-// The fixture exists only in a core checkout linked with npm install --no-save.
-// The workspace installs it in the node_modules of the repository root.
-const core = await realpath(fileURLToPath(new URL('../../node_modules/@gramlot/gramlot', import.meta.url)));
-const page = join(core, 'tests/fixtures/logic/avvio.js');
+// The integration owns its fixture; registry packages need not ship core tests.
+const page = fileURLToPath(new URL('../tests/fixtures/worker-sentinel/page.js', import.meta.url));
 const engine = (await import(pathToFileURL(resolve(playwrightEntry))))[engineName];
 const folder = await mkdtemp(join(tmpdir(), 'gramlot-serverless-sentinel-'));
 let browser;

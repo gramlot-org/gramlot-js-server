@@ -88,3 +88,12 @@ Block ID: **GN-115-025**.
 other extensions, escaping symlinks, encoded `..`: 404. Another method on a companion:
 405, `Allow: GET, HEAD`. Undecodable path: 400. Also: runtime `/assets/gramlot.js` and every file of
 `/themes/` from the installed core, files of `assets`. Nothing else ([Deployment](025-deployment.md)).
+
+
+<a id="gn-115-030"></a>
+
+## 030 · Initial Data companion
+
+Block ID: **GN-115-030**.
+
+The optional `foo_data.tytx` beside the page supplies a typed initial Data Bag before browser defaults and rendering. No loader declaration is needed in main. Existing dataSetter, default and remote data mechanisms remain available. Invalid files fail loading; missing files leave behavior unchanged. Client edits do not write back to the file. The gallery copies the Data companion beside its staged JavaScript wrapper.

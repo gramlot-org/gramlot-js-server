@@ -7,7 +7,7 @@ import {buildGallery} from '@gramlot/gramlot-examples';
 import {GramlotServer} from '@gramlot/gramlot/server';
 import {createDispatch} from '../src/fetch.mjs';
 
-test('HTTP resources verify startup, every read, identity, private metadata and methods', async t => {
+test('HTTP resources retain verified startup bytes, immutable identity, private metadata and methods', async t => {
     const gallery=buildGallery(), collection=gallery.collections.find(item=>item.name==='inputs');
     const root=await mkdtemp(join(tmpdir(),'gramlot-http-integrity-'));
     t.after(()=>rm(root,{recursive:true,force:true}));
@@ -18,7 +18,7 @@ test('HTTP resources verify startup, every read, identity, private metadata and 
     const request=(path=collection.module,method='GET')=>host.fetch(new Request('http://local/demo'+path,{method}));
     const response=await request();
     assert.equal(response.status,200);
-    assert.equal(response.headers.get('cache-control'),'no-store');
+    assert.equal(response.headers.get('cache-control'),'public, max-age=31536000, immutable');
     const bytes=await response.text();
     assert.equal(bytes,await readFile(entry,'utf8'));
     const head=await request(collection.module,'HEAD');
@@ -30,6 +30,8 @@ test('HTTP resources verify startup, every read, identity, private metadata and 
     assert.equal((await request(collection.module.replace(collection.buildId.slice(7),'0'.repeat(64)))).status,404);
     const implementation=join(root,'assets/collection.js');
     await writeFile(implementation,(await readFile(implementation,'utf8'))+'\n// tampered');
-    assert.equal((await request()).status,404);
+    assert.equal(await (await request()).text(),bytes);
+    const implementationUrl=collection.module.replace('index.js','collection.js');
+    assert.ok(!(await (await request(implementationUrl)).text()).endsWith('// tampered'));
     await assert.rejects(createDispatch({server:new GramlotServer({collections:[collection]}),assets}),/fingerprint mismatch/);
 });

@@ -44,7 +44,7 @@ export class Page extends Gallery {
 `);
     await writeFile(join(folder, 'index_aux.js'), `export {Logic} from ${JSON.stringify(`${prefix}/gallery/dist/gallery.js`)};\n`);
     const galleryUrls = Object.fromEntries(Object.entries(routes).filter(([key]) => key !== 'index').map(([key, route]) => [key, `${prefix}/${route.url}`]));
-    for (const [routeKey, {page, stylesheet, logic, url: key}] of Object.entries(routes)) {
+    for (const [routeKey, {page, data, stylesheet, logic, url: key}] of Object.entries(routes)) {
         if (routeKey === 'index') continue;
         await mkdir(dirname(join(folder, `${key}.js`)), {recursive:true});
         await writeFile(join(folder, `${key}.js`), `import {Page as Example} from ${JSON.stringify(pathToFileURL(page).href)};
@@ -56,6 +56,7 @@ export class Page extends Example {
     }
 }
 `);
+        if (data) await copyFile(data, join(folder, `${key}_data.tytx`));
         if (stylesheet) await copyFile(stylesheet, join(folder, `${key}.css`));
         if (logic) {
             const url = urlOf[logic];
@@ -78,8 +79,7 @@ export async function startGallery({runtime = 'node', catalogs = [], mountPath =
     const pages = await mkdtemp(join(tmpdir(), 'gramlot-gallery-'));
     try {
         const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix, serverlessDownloadUrl);
-        const {collections} = examples.buildGallery();
-        const app = await startServer({...options, pages, mountPath: prefix, assets, collections});
+        const app = await startServer({...options, pages, mountPath: prefix, assets});
         return {...app, pages, url: app.url, galleryUrl: `${app.url}${prefix}/`,
             async close() { await app.close(); await rm(pages, {recursive: true, force: true}); }};
     } catch (error) {

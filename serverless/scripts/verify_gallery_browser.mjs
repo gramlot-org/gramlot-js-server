@@ -84,9 +84,10 @@ try {
     await frame.locator('#final').waitFor();
     assert.equal(await frame.locator('#final').textContent(), '80');
     assert.equal(await page.getAttribute('#frame-c03', 'src'), `${galleryRoutes.c03}/index.html`);
-    await page.locator('.drawer[aria-label="Open bottom region"]').click();
-    await page.selectOption('#index-theme', 'dark');
-    await page.locator('.drawer[aria-label="Close bottom region"]').click();
+    await page.locator('#gallery-settings-button button').click();
+    await page.locator('#index-theme input').fill('Dark');
+    await page.locator('#index-theme').getByRole('option', {name:'Dark', exact:true}).click();
+    await page.locator('#gallery-settings-button button').click();
     await frame.locator('html[data-theme="dark"]').waitFor({state: 'attached'});
     assert.deepEqual(errors, [], 'gallery page');
     await page.close();
