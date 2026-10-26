@@ -27,7 +27,7 @@ const keys = [catalog].flatMap(file => JSON.parse(readFileSync(file, 'utf8')).fa
 const LOGIC = {
     async b08(page, text) {
         await page.click('#freeze');
-        assert.equal(await text('#frozen'), 'true');
+        assert.equal(await text('#frozen'), 'Structural updates frozen: true');
         await page.click('#add');
         await page.click('#removeLast');
         await page.click('#removeLast');

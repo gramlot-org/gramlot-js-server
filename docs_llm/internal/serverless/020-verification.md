@@ -167,3 +167,13 @@ consumer uses the same verified identity and rejects changed bytes. Public
 cookie ownership and dynamic runtime exports are preserved. Coordinated CI uses
 `scripts/prepare_source_dependencies.py`: main for public-source runs, develop
 for preview runs, with commit identities in logs and no first-party pins.
+
+
+Coordinated 0.3.17 qualification — 2026-10-26. Owner requested aligned publication
+of Node/Bun, serverless and create with core and examples. Final candidate checks:
+41 Node tests, 41 Bun tests, 49 serverless tests and 3 create tests pass. The Node
+gallery opens all 110 lessons, and standalone file/directory quickstart browser
+checks pass. Gallery logo paths use the shared transparent core asset. One Node
+cookie test had a transient consumed-Response error; its isolated rerun and the
+complete repeated suite passed. Publication is pending coordinated dependency
+availability and release gates.

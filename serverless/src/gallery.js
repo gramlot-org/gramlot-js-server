@@ -75,7 +75,7 @@ const directories = ${JSON.stringify(directories)};
 export class Page extends GalleryPage {
     static get navigation() { return Bag.fromTytx(directories['']); }
     navigation_section({directory}) { return Bag.fromTytx(directories[directory]); }
-    static logoUrl = 'assets/branding/gramlot-logo-dark.svg';
+    static logoUrl = 'assets/branding/svg/gramlot-horizontal-primary.svg';
     static introductionUrl = 'pages/00-index/index.html';
     static families = ${JSON.stringify(content)};
 }
