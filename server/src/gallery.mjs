@@ -39,7 +39,7 @@ async function stage(folder, {buildGallery, galleryPage}, catalogs, prefix, serv
 export class Page extends Gallery {
     static catalogs = ${JSON.stringify(catalogs)};
     static serverlessDownloadUrl = ${JSON.stringify(serverlessDownloadUrl)};
-    static logoUrl = ${JSON.stringify(`${prefix}/assets/branding/gramlot-logo-dark.svg`)};
+    static logoUrl = ${JSON.stringify(`${prefix}/assets/branding/svg/gramlot-horizontal-primary.svg`)};
 }
 `);
     await writeFile(join(folder, 'index_aux.js'), `export {Logic} from ${JSON.stringify(`${prefix}/gallery/dist/gallery.js`)};\n`);
