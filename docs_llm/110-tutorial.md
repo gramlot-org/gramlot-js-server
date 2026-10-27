@@ -8,6 +8,12 @@ Run by `serverless/tests/quickstart.test.js` and `serverless/scripts/verify_quic
 (headless Chromium); files in `serverless/examples/quickstart/`. New project:
 [No server: a tutorial](135-serverless-tutorial.md).
 
+This tutorial follows the host's runnable fixture, including its named Logic
+formula and explicit initial `dataSetter`. To learn the smallest field-and-binding
+example first, use [Your first page](https://gramlot.readthedocs.io/en/latest/docs/public/018-quickstart.html).
+In an application, use `default` for interface preferences and loaded Data for
+records; a setter is not required for every field.
+
 <a id="gs-110-005"></a>
 
 ## 005 · Folder layout

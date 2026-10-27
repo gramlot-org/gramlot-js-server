@@ -5,6 +5,15 @@ Document ID: **GN-105**. [Expanded version](../docs/005-introduction.md).
 Gramlot describes web interfaces in Python or JavaScript, bound to application
 state in the browser: [The Gramlot family](https://gramlot.readthedocs.io/en/latest/docs/public/055-family.html).
 
+Start with [the Node/Bun tutorial](010-tutorial.md) for a live server, or
+[the serverless tutorial](135-serverless-tutorial.md) for a browser/Worker export.
+Use [configuration](020-configuration.md) and [deployment](025-deployment.md)
+after the first page works.
+
+For HTML, components and binding, follow the
+[core learning route](https://gramlot.readthedocs.io/en/latest/docs/public/025-try.html).
+This manual explains hosting; it does not repeat the widget reference.
+
 <a id="gn-105-005"></a>
 
 ## 005 · What this adapter does

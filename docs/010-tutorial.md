@@ -8,6 +8,12 @@ test `server/test/quickstart.test.mjs` of this repository in CI.
 `npm create @gramlot site my-site` writes a project with the same layout and the
 scripts `npm start` and `npm run start:bun` ([@gramlot/create](https://www.npmjs.com/package/@gramlot/create)).
 
+This tutorial follows the host's runnable fixture, including its named Logic
+formula and explicit initial `dataSetter`. To learn the smallest field-and-binding
+example first, use [Your first page](https://gramlot.readthedocs.io/en/latest/docs/public/018-quickstart.html).
+In an application, use `default` for interface preferences and loaded Data for
+records; a setter is not required for every field.
+
 <a id="gn-110-005"></a>
 
 ## 005 · Folder layout
