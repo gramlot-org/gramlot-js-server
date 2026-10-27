@@ -73,7 +73,11 @@ export async function buildStaticGallery({output, catalogs = []}) {
 import {GalleryPage} from ${JSON.stringify(join(gallery, 'gallery-page.js'))};
 const directories = ${JSON.stringify(directories)};
 export class Page extends GalleryPage {
-    static get navigation() { return Bag.fromTytx(directories['']); }
+    static get navigation() {
+        const navigation = Bag.fromTytx(directories['']);
+        navigation.setItem('features', null, {title:'Features', key:'features', category:false});
+        return navigation;
+    }
     navigation_section({directory}) { return Bag.fromTytx(directories[directory]); }
     static logoUrl = 'assets/branding/svg/gramlot-horizontal-primary.svg';
     static introductionUrl = 'pages/00-index/index.html';

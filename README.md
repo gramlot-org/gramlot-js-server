@@ -14,7 +14,7 @@ for the core and the other repositories.
 ## What this repository is
 
 This repository runs JavaScript Gramlot pages. It holds three npm packages; the
-current release is 0.3.18, the same version for the three:
+current release is 0.3.19, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
