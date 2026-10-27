@@ -116,8 +116,8 @@ Override `manifest({baseUrl = './'} = {})` to extend the object returned by
 mount prefix. Keep the metadata public; no endpoint registration is needed.
 
 `IndexPage` and `IndexLogic` are exported from `@gramlot/gramlot/page` for grouped
-navigation, iframe tabs and a customizable footer. See the
+navigation, iframe tabs and configurable frame regions. See the
 [core authoring guide](https://github.com/gramlot-org/gramlot/blob/main/docs/public/095-writing-pages.md#gc-095-110).
 Install using HTTPS or localhost and keep the Node server running. The gallery
-footer explains browser installation and exposes the native prompt when offered.
+Settings panel explains browser installation and exposes the native prompt when offered.
 Safari on macOS Sonoma or later uses File → Add to Dock. No offline cache is added.
