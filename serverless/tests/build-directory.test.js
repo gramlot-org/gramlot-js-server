@@ -1,3 +1,4 @@
+import {Worker} from 'node:worker_threads';
 import test from 'node:test';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
@@ -189,7 +190,7 @@ test('collection code is shared once across routes and its generated asset is re
     const metadata={name:'example',grammar:'grammar.json',commands:'commands.json',
         module:'assets/index.js',css:[],dependencies:[],files:[...files.keys()]};
     const buildId=await collectionBuildId(metadata,files);
-    files.set('assets/index.js',Buffer.from(`export {default} from "./collection.js";\nexport const buildId = "${buildId}";\n`));
+    files.set('assets/index.js',Buffer.from(`export {default} from "./collection.js";\nexport * from "./collection.js";\nexport const buildId = "${buildId}";\n`));
     await mkdir(join(packageRoot,'assets'),{recursive:true});
     for(const [name,bytes] of files)await writeFile(join(packageRoot,name),bytes);
     const asset=join(packageRoot,'assets/index.js');
@@ -218,4 +219,92 @@ test('collection code is shared once across routes and its generated asset is re
         assert.ok(html.indexOf('assets/collections.js')<html.indexOf(`assets/workers/${route}.js`));
     }
     await assert.rejects(buildDirectory({pages:{index:page},output,assets:[{source:asset,target:'assets/collections.js'}]}),/conflict|reserved/i);
+});
+
+/** Execute the emitted bootstrap and its real Worker, without a DOM or HTTP. */
+async function openExport(output, route, baseURI = 'file:///gallery/') {
+    let accept;
+    const mounted = new Promise(resolve => { accept = resolve; });
+    const links = [];
+    const context = vm.createContext({URL, Blob, console, document: {baseURI,
+        createElement(tag) { assert.equal(tag, 'link'); return {}; }, head: {append(link) { links.push(link); }}},
+        GramlotStandalone: {async mount({workerUrl, modules}) {
+            const worker = await (await fetch(workerUrl)).text();
+            accept({worker, modules: Object.keys(modules)});
+            return {};
+        }}});
+    vm.runInContext(await readFile(join(output, 'assets/collections.js'), 'utf8'), context);
+    vm.runInContext(await readFile(join(output, `assets/workers/${route}.js`), 'utf8'), context);
+    const {worker, modules} = await mounted;
+    const instance = new Worker(`const {parentPort} = require('node:worker_threads');
+globalThis.self = {
+    addEventListener(name, handler) { parentPort.on('message', data => handler({data})); },
+    postMessage(message) { parentPort.postMessage(message); }
+};
+globalThis.WorkerGlobalScope = class {};
+${worker}`, {eval:true});
+    let result;
+    try {
+        result = await new Promise((resolve, reject) => {
+            instance.once('error', reject);
+            instance.once('message', resolve);
+            instance.postMessage({id:'open', open:true});
+        });
+    } finally { await instance.terminate(); }
+    assert.equal(result.error, undefined, JSON.stringify(result.error));
+    return {modules, resources: result.open.resources, links};
+}
+
+test('directory discovers Page.gramlots and activates only each route dependency graph', async t => {
+    const {folder, page, output} = await fixture(t);
+    const descriptors = [];
+    const assets = [];
+    for (const [name, dependencies] of [['foundation', []], ['widget', ['foundation']]]) {
+        const files = new Map([
+            ['grammar.json', Buffer.from('{}')], ['commands.json', Buffer.from('{}')],
+            ['assets/index.js', Buffer.from('')], ['assets/collection.js', Buffer.from('export default {};')],
+            ['assets/theme.css', Buffer.from(`/* ${name} */`)],
+        ]);
+        const metadata = {name, grammar:'grammar.json', commands:'commands.json', module:'assets/index.js',
+            css:['assets/theme.css'], dependencies, files:[...files.keys()]};
+        const buildId = await collectionBuildId(metadata, files);
+        files.set('assets/index.js', Buffer.from(`export {default} from "./collection.js";\nexport * from "./collection.js";\nexport const buildId = "${buildId}";\n`));
+        const prefix = `collections/${name}`;
+        await mkdir(join(folder, prefix, 'assets'), {recursive:true});
+        for (const [name, bytes] of files) {
+            const source = join(folder, prefix, name);
+            await writeFile(source, bytes);
+            assets.push({source, target:`${prefix}/${name}`});
+        }
+        descriptors.push({name, grammar:{}, module:`/${prefix}/assets/index.js`, buildId,
+            css:[`/${prefix}/assets/theme.css`], dependencies});
+    }
+    const selected = join(folder, 'selected.js');
+    await writeFile(selected, `import {Page as BasePage} from '@gramlot/gramlot/page';
+class Parent extends BasePage { static gramlots = [${JSON.stringify(descriptors[0])}]; }
+export class Page extends Parent { static gramlots = [${JSON.stringify(descriptors[1])}]; }`);
+    await buildDirectory({pages:{index:page, selected}, output, assets});
+    const plain = await openExport(output, 'index');
+    assert.deepEqual(plain.modules, []);
+    assert.equal(plain.resources.collections.length, 0);
+    const rich = await openExport(output, 'selected');
+    assert.deepEqual(rich.modules, descriptors.map(item => item.module));
+    assert.deepEqual(Array.from(rich.resources.collections, item => item.name), ['foundation', 'widget']);
+    assert.deepEqual(Array.from(rich.resources.css), ['/themes/gramlot-base/theme.css', ...descriptors.flatMap(item => item.css)]);
+    await assert.rejects(buildDirectory({pages:{index: selected}, output:join(folder,'missing'), assets:[]}), /Collection module asset not provided/);
+});
+
+
+test('installable directory keeps its manifest but links it only when hosted on the web', async t => {
+    const {page, output} = await fixture(t);
+    await writeFile(page, (await readFile(page, 'utf8')).replace('main(root)', "static installable = true; static appIcon = 'icon.png'; main(root)"));
+    await buildDirectory({pages:{index:page, child:page}, output});
+    const manifest = JSON.parse(await readFile(join(output, 'app.webmanifest'), 'utf8'));
+    assert.equal(manifest.start_url, './');
+    assert.deepEqual((await openExport(output, 'index')).links, []);
+    for (const baseURI of ['https://example.test/demo/index.html', 'http://localhost/demo/index.html']) {
+        assert.deepEqual((await openExport(output, 'index', baseURI)).links,
+            [{rel:'manifest', href:new URL('./app.webmanifest', baseURI).href}]);
+        assert.deepEqual((await openExport(output, 'child', baseURI)).links, []);
+    }
 });

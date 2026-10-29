@@ -25,7 +25,7 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     const manifest = JSON.parse(await readFile(join(output, 'app.webmanifest'), 'utf8'));
     assert.equal(manifest.start_url, './');
     assert.equal(manifest.icons[0].src, './assets/branding/app-icon.png');
-    assert.match(await readFile(join(output, 'index.html'), 'utf8'), /rel="manifest"/);
+    assert.doesNotMatch(await readFile(join(output, 'index.html'), 'utf8'), /rel="manifest"/);
     assert.doesNotMatch(await readFile(join(output, 'pages/00-html_svg/01-html_basics/01-hello_world/index.html'), 'utf8'), /rel="manifest"/);
     assert.ok((await stat(join(output, 'assets/branding/app-icon.png'))).isFile());
     const index = await readFile(join(output, 'assets/workers/index.js'), 'utf8');

@@ -154,4 +154,25 @@ as written, the page stylesheet and the logic URL.
 
 Block ID: **GS-120-090**.
 
-`buildDirectory({pages, output, assets, collections})` accepts application collections. Each entry contains `grammar` and a root-relative `module` URL. Include a bundled ES module asset at the matching target (without the leading slash). The exporter embeds its text with the page modules and passes the grammar to the Worker server. The gallery declares inputs and includes the asset itself; rebuild the directory to update it. The single-file build API takes no collections.
+Declare prepared descriptors in `Page.gramlots`. The directory exporter uses the
+core's inherited, dependency-first collection graph for each route. It verifies
+and bundles the union of those graphs once, but creates module URLs and activates
+only the collections required by the opened page. The optional `collections`
+argument to `buildDirectory({pages, output, assets, collections})` supplies explicit
+application-wide defaults; those intentionally apply to every route.
+
+Provide the original artifact files in `assets`, at the targets of the descriptor's
+root-relative module and CSS URLs. The exporter verifies their fingerprint and
+wrapper before deriving the file-origin bundle, preserving the original `buildId`.
+Missing assets, changed bytes and invalid dependencies fail the build. A prebundled
+replacement is not an accepted original artifact. Theme CSS precedes collection
+CSS and page CSS. Rebuild the export after changing an artifact.
+
+The gallery declares its shell collections separately from lesson declarations.
+For example, Typst is activated by its lesson, not by ordinary HTML pages. The
+single-file JavaScript build has no collection-asset argument; use directory
+export for pages with prepared collections.
+
+For an installable root, directory export retains `app.webmanifest`. Startup links
+it only under HTTP/HTTPS, where installation is supported; opening the same
+export via `file:` does not request the web manifest. Child routes do not link it.

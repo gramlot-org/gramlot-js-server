@@ -177,3 +177,39 @@ checks pass. Gallery logo paths use the shared transparent core asset. One Node
 cookie test had a transient consumed-Response error; its isolated rerun and the
 complete repeated suite passed. Publication is pending coordinated dependency
 availability and release gates.
+
+
+<a id="gs-020-040"></a>
+
+## 040 · Common-base qualification — 2026-10-29
+
+Block ID: **GS-020-040**.
+
+The owner approved consolidating the JavaScript server and serverless against the
+common local base before the separate Python compiled-page export phase. The
+integration starts from public main 1b84bdb in its own worktree. Original
+worktrees and their uncommitted work remain unchanged; Invoice is excluded.
+
+Directory export now discovers inherited Page.gramlots through the core registry,
+bundles the union once and activates only each route's collection dependency
+graph. Explicit buildDirectory collections remain global defaults. Artifact
+verification is retained. The gallery root uses its declared collections; Typst
+is loaded by the lesson that requests it. Regression tests execute the generated
+bootstrap and actual Worker, including dependency order and missing assets.
+
+Installable exports retain app.webmanifest but attach its link only on HTTP/HTTPS.
+A file-origin page does not request a web installation manifest. This resolves
+WebKit's file-origin manifest rejection without suppressing browser errors.
+
+Qualification: 41 Node server tests, 51 serverless tests and 3 create tests pass;
+41 server tests also pass on Bun. Chromium and WebKit both pass the Node gallery
+(125 examples), offline gallery (126 examples), offline quickstarts and installed
+host checks, including mount prefixes, CSP and lifecycle disposal. Both paired
+documentation views build. Tests use packed common core/examples artifacts rather
+than mixing duplicate linked core/Bag installations. No package version change,
+publication or deployment is part of this checkpoint.
+
+Evidence: /private/tmp/gramlot-js-consolidation-20261029/. Both original worktrees'
+HEADs, working states and all 65 dirty-file hashes match the pre-integration
+snapshot. Python-produced foo.glt.tytx loading is not implemented by this phase;
+it remains the next separately scoped integration.

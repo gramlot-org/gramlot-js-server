@@ -43,7 +43,7 @@ function coreModules() {
 export async function buildStaticGallery({output, catalogs = []}) {
     const {buildGallery, navigationDirectory, gallery} = await examplesPackage();
     const all = [...packageCatalog(), ...catalogs];
-    const {families, routes, assets, collections} = buildGallery({catalogs: all});
+    const {families, routes, assets} = buildGallery({catalogs: all});
     const stage = await mkdtemp(join(tmpdir(), 'gramlot-static-gallery-'));
     try {
         await symlink(coreModules(), join(stage, 'node_modules'), 'dir');
@@ -71,8 +71,10 @@ export async function buildStaticGallery({output, catalogs = []}) {
         await writeFile(join(stage, 'index_aux.js'), `export {Logic} from ${JSON.stringify(join(gallery, 'dist/gallery.js'))};\n`);
         await writeFile(join(stage, 'index.js'), `import {Bag} from '@gramlot/gramlot';
 import {GalleryPage} from ${JSON.stringify(join(gallery, 'gallery-page.js'))};
+import {collections} from ${JSON.stringify(join(gallery, 'collections.js'))};
 const directories = ${JSON.stringify(directories)};
 export class Page extends GalleryPage {
+    static gramlots = collections.filter(item => item.name !== 'typst');
     static get navigation() {
         const navigation = Bag.fromTytx(directories['']);
         navigation.setItem('features', null, {title:'Features', key:'features', category:false});
@@ -115,7 +117,7 @@ export class Page extends Example {
         const copied = Object.entries(assets)
             .filter(([url]) => url === '/gallery/gallery.css' || url.startsWith('/gallery/dist/') || url.startsWith('/gramlot/collections/') || url.startsWith('/assets/branding/'))
             .map(([url, {file}]) => ({source: file, target: url.slice(1)}));
-        return await buildDirectory({pages, output, assets: copied, collections});
+        return await buildDirectory({pages, output, assets: copied});
     } finally {
         await rm(stage, {recursive: true, force: true});
     }

@@ -58,6 +58,7 @@ async function open(context, url) {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
+    page.on('requestfailed', request => console.error('Failed request:', request.url(), request.failure()?.errorText));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     await page.goto(url);
     await page.waitForFunction(() => ['started', 'failed'].includes(window.gramlot?.state)).catch(error => { throw new Error(`${error.message}; ${errors.join('; ')}`); });
@@ -76,6 +77,7 @@ try {
     await context.route(/^https?:/, route => { external.push(route.request().url()); return route.abort(); });
 
     const {page, errors} = await open(context, pathToFileURL(join(output, 'index.html')).href);
+    assert.equal(await page.locator('link[rel=manifest]').count(), 0, 'file exports do not fetch a web-only manifest');
     await page.waitForFunction(() => document.querySelector('.index-logo')?.complete);
     assert.ok(await page.evaluate(() => document.querySelector('.index-logo').naturalWidth > 0), 'logo');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--gramlot-brand-blue').trim()), '#235db2');

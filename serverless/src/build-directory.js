@@ -1,3 +1,4 @@
+import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
 import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
@@ -100,7 +101,6 @@ function documentFor(route, PageClass) {
     head.meta({charset: 'utf-8'});
     head.meta({name: 'viewport', content: 'width=device-width,initial-scale=1'});
     head.title(PageClass.title);
-    if (route === 'index' && PageClass.installable === true) head.link({rel: 'manifest', href: './app.webmanifest'});
     const body = html.body();
     body.div({id: 'gramlot-root'});
     body.script(null, {src: `${relativeRoot}assets/standalone.js`});
@@ -109,12 +109,21 @@ function documentFor(route, PageClass) {
     return '<!doctype html>' + document.render();
 }
 
-function bootstrapFor(worker, modules, route) {
+function bootstrapFor(worker, modules, route, collectionUrls, installable) {
     const relativeRoot = route === 'index' ? './' : '../'.repeat(route.split('/').length);
-    return `(() => {
+    const manifest = installable ? `
+    if (['http:', 'https:'].includes(new URL(document.baseURI).protocol)) {
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = new URL('./app.webmanifest', document.baseURI).href;
+        document.head.append(link);
+    }
+` : '';
+    return `(() => {${manifest}
     const blob = text => URL.createObjectURL(new Blob([text], {type: 'text/javascript'}));
     const workerUrl = blob(${JSON.stringify(worker)});
-    const modules = Object.fromEntries(Object.entries({...${JSON.stringify(modules)}, ...gramlotCollectionModules}).map(([url, text]) => [url, blob(text)]));
+    const selected = Object.fromEntries(${JSON.stringify(collectionUrls)}.map(url => [url, gramlotCollectionModules[url]]));
+    const modules = Object.fromEntries(Object.entries({...${JSON.stringify(modules)}, ...selected}).map(([url, text]) => [url, blob(text)]));
     GramlotStandalone.mount({workerUrl, modules, assetRoot: new URL(${JSON.stringify(relativeRoot)}, document.baseURI).href})
         .then(app => { globalThis.gramlot = app; })
         .catch(error => { console.error(error); })
@@ -178,6 +187,9 @@ export async function buildDirectory({pages, output, assets = [], collections = 
         throw new Error('Pages and @gramlot/gramlot-serverless must resolve the same Gramlot core installation');
     }
     await regularFile(join(dirname(core.runtime), 'runtime-notices.json'), 'Runtime notices');
+    const registry = new GramlotServer({collections});
+    const declared = registry.collectionGraph(
+        Object.values(loaded).flatMap(({module}) => registry.pageCollections(module.Page)));
     const copies = [...assets];
     for (const [, {module}] of Object.entries(loaded)) {
         for (const url of pageStyleUrls(module.Page)) {
@@ -206,7 +218,7 @@ export async function buildDirectory({pages, output, assets = [], collections = 
         // Collection code (including optional WASM engines) is shared by every route.
         // A classic script keeps file-origin exports independent of module fetch.
         const collectionModules = {};
-        for (const collection of collections) {
+        for (const collection of declared) {
             const {module}=collection;
             const asset = copies.find(item => '/' + item.target === module);
             if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
@@ -224,7 +236,11 @@ export async function buildDirectory({pages, output, assets = [], collections = 
                 stylesheet: stylesheet ? `/assets/styles/${route}.css` : null, collections})).text;
             const modules = logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {};
             await mkdir(dirname(join(stage, 'assets/workers', `${route}.js`)), {recursive:true});
-            await writeFile(join(stage, 'assets/workers', `${route}.js`), bootstrapFor(worker, modules, route));
+            const PageClass = loaded[route].module.Page;
+            const collectionUrls = registry.pageCollections(PageClass).map(item => item.module);
+            const installable = route === 'index' && PageClass.installable === true;
+            await writeFile(join(stage, 'assets/workers', `${route}.js`),
+                bootstrapFor(worker, modules, route, collectionUrls, installable));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});
             await writeFile(htmlPath, documentFor(route, loaded[route].module.Page));
