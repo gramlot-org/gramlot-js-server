@@ -38,10 +38,11 @@ test('the gallery stages one route per example under the mount prefix', async ()
         const main = JSON.parse((await get('/js/pages/00-html_svg/02-native_controls/01-forms').then(response => response.text()))
             .match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
         assert.deepEqual(main.resources.css.at(-1), '/js/pages/00-html_svg/02-native_controls/01-forms.css');
-        assert.deepEqual(main.resources.collections, []);
+        assert.ok(main.resources.collections.some(item => item.name === 'grid'));
+        assert.ok(main.resources.collections.some(item => item.name === 'typst'));
         const textboxHtml = await get('/js/pages/01-inputs/01-text/01-textbox').then(response => response.text());
         const textbox = JSON.parse(textboxHtml.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
-        assert.deepEqual(textbox.resources.collections.map(item => item.name), ['inputs', 'layout']);
+        assert.deepEqual(textbox.resources.collections.map(item => item.name), main.resources.collections.map(item => item.name));
         for (const collection of textbox.resources.collections) {
             const resource = await get(collection.url);
             assert.equal(resource.status, 200);

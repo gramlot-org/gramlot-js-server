@@ -74,7 +74,7 @@ import {GalleryPage} from ${JSON.stringify(join(gallery, 'gallery-page.js'))};
 import {collections} from ${JSON.stringify(join(gallery, 'collections.js'))};
 const directories = ${JSON.stringify(directories)};
 export class Page extends GalleryPage {
-    static gramlots = collections.filter(item => item.name !== 'typst');
+    static gramlots = collections;
     static get navigation() {
         const navigation = Bag.fromTytx(directories['']);
         navigation.setItem('features', null, {title:'Features', key:'features', category:false});
@@ -95,7 +95,9 @@ Page.registerEndpoint('navigation_section');
                 .map(route => [route, `${relativeRoot}${routes[route].url}/index.html`]));
             await mkdir(dirname(join(stage, `${key}.js`)), {recursive:true});
             await writeFile(join(stage, `${key}.js`), `import {Page as Example} from ${JSON.stringify(page)};
+import {collections} from ${JSON.stringify(join(gallery, 'collections.js'))};
 export class Page extends Example {
+    static gramlots = collections;
     static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
         await super.main(root, ...args);

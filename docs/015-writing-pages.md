@@ -154,3 +154,17 @@ application assets belong to a front server or to the application
 Block ID: **GN-115-030**.
 
 The optional `foo_data.tytx` beside the page supplies a typed initial Data Bag before browser defaults and rendering. No loader declaration is needed in main. Existing dataSetter, default and remote data mechanisms remain available. Invalid files fail loading; missing files leave behavior unchanged. Client edits do not write back to the file. The gallery copies the Data companion beside its staged JavaScript wrapper.
+
+
+<a id="gn-115-035"></a>
+## Environment collections
+
+Block ID: **GN-115-035**.
+
+Configure the host's `collections` once or provide a shared Page base with
+`gramlots`. Each opened page inherits those collections without repeating imports.
+The host caches the environment Page composition and prepared grammar; it does
+not mutate application classes shared with another host. Explicit extra page
+collections still accumulate. The gallery supplies its environment selection.
+Component definitions load at bootstrap; external editor/compiler engines use
+verified dynamic module files and load only on first use on HTTP hosts.

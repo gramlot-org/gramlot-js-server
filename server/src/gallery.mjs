@@ -12,6 +12,7 @@ const RUNTIMES = {node: './node.mjs', bun: './bun.mjs'};
 async function examplesPackage() {
     try {
         return {buildGallery: (await import('@gramlot/gramlot-examples')).buildGallery,
+            collections: (await import('@gramlot/gramlot-examples/gallery/collections.js')).collections,
             galleryPage: fileURLToPath(import.meta.resolve('@gramlot/gramlot-examples/gallery/page.js'))};
     } catch (error) {
         if (error.code === 'ERR_MODULE_NOT_FOUND' && error.message.includes('@gramlot/gramlot-examples')) {
@@ -79,7 +80,8 @@ export async function startGallery({runtime = 'node', catalogs = [], mountPath =
     const pages = await mkdtemp(join(tmpdir(), 'gramlot-gallery-'));
     try {
         const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix, serverlessDownloadUrl);
-        const app = await startServer({...options, pages, mountPath: prefix, assets});
+        const app = await startServer({...options, pages, mountPath: prefix, assets,
+            collections: [...examples.collections, ...(options.collections ?? [])]});
         return {...app, pages, url: app.url, galleryUrl: `${app.url}${prefix}/`,
             async close() { await app.close(); await rm(pages, {recursive: true, force: true}); }};
     } catch (error) {
