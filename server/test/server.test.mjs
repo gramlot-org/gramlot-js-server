@@ -451,3 +451,19 @@ for (const [label, contentType, status] of [
         });
     }
 }
+
+test('optional Markdown asset follows runtime URL and mount prefix with GET/HEAD only', async () => {
+    const server=new TestServer({runtimeUrl:'/scripts/core.js'});
+    const app=await startServer({server,mountPath:'/app'});
+    try {
+        const html=await (await fetch(app.url+'/app/')).text();
+        assert.ok(html.includes('"@gramlot/gramlot/markdown":"/app/scripts/gramlot-markdown.js"'));
+        const url=app.url+'/app/scripts/gramlot-markdown.js';
+        const response=await fetch(url);assert.equal(response.status,200);
+        assert.match(response.headers.get('content-type'),/javascript/);
+        assert.equal(response.headers.get('cache-control'),'no-cache');
+        assert.ok((await response.text()).length>100000);
+        const head=await fetch(url,{method:'HEAD'});assert.equal(head.status,200);assert.equal(await head.text(),'');
+        assert.equal((await fetch(url,{method:'POST'})).status,405);
+    } finally {await app.close();}
+});

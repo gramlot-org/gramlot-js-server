@@ -132,3 +132,22 @@ checkout beside this repository with
 `npm install --no-save @gramlot/gramlot@file:../gramlot/js`; the CI job
 `core main` does the same. The 0.1.x archives remain unchanged. There is no
 compatibility wrapper for the former core standalone entries.
+
+
+<a id="gs-010-045"></a>
+## 045 · Shared Markdown under file origins
+
+Block ID: **GS-010-045**.
+
+Exports embed the packaged Markdown library once in the window runtime. The
+loader creates and imports a local blob only on first use, then revokes its URL;
+the module promise is retained as a runtime resource. Verified collection
+bundles resolve the shared parser through that loader, including ProseMirror's
+internal import. Parser options and HTML sanitization remain consumer-owned.
+
+Both single-file and directory runtime builds use the same embedding plugin.
+Opening a page with unused editor collections does not instantiate the parser.
+The file-origin browser regression checks no HTTP requests, one shared module,
+reactive sanitization, retained editor identity and Markdown undo on Chromium
+and WebKit. Native module loading is the sole hosted path; there is no CDN
+fallback. Publish runtime, exporter and collection artifacts together.

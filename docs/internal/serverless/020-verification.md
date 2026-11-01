@@ -46,6 +46,16 @@ checks out `gramlot-org/gramlot` at `main` beside the repository, links it with
 source-live, inline-code, quick start, page module and gallery browser checks. The `documentation` job runs `scripts/check_docs.py`,
 which validates the paired guides and builds both views with Sphinx.
 
+The shared-sanitizer regression is
+`serverless/scripts/verify_shared_sanitizer_browser.mjs PLAYWRIGHT [ENGINE]`
+(from the repository root). It builds a directory export with prepared layout
+and editor collections, opens it via `file://`, blocks HTTP(S), and verifies
+sanitized reactive drawer labels, Markdown preview and lazy Jodit updates without
+replacing the editor. The existing collection bridge exposes the runtime's
+`createDOMPurify` factory; component instances retain separate policies and hooks.
+This probe passes locally on Chromium and WebKit (2026-10-30); it is not yet
+part of the hosted workflow. The single-file quick-start check also passes.
+
 <a id="gs-020-010"></a>
 
 ## 010 · Status

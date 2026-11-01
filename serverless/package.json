@@ -32,6 +32,7 @@
     "src/worker-transport.js",
     "src/worker-server-adapter.js",
     "src/runtime-notices.js",
+    "src/markdown-bundle.js",
     "NOTICE",
     "gallery",
     "src/collection-bundle.js",

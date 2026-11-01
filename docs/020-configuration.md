@@ -183,3 +183,15 @@ The gallery shell selects inputs, layout, tree and editors; basic field lessons
 select inputs/layout, and Typst is selected only by its lesson. The core guide
 [Components](https://gramlot.readthedocs.io/en/latest/docs/public/105-components.html)
 describes the prepared collection contract.
+
+<a id="gn-120-040"></a>
+## 040 · Optional Markdown resource
+
+Block ID: **GN-120-040**.
+
+The core's `markdownUrl` is the sibling `gramlot-markdown.js` of `runtimeUrl`.
+The host serves this packaged asset with JavaScript media type and `no-cache`,
+using GET or HEAD; the bootstrap import map prefixes it with the mount path.
+Registering collections does not fetch the parser. It loads once when an editor,
+preview, guide or gallery description first needs Markdown. Deploy the matching
+core runtime, optional asset and prepared collections together.

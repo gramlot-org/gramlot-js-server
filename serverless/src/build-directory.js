@@ -2,6 +2,7 @@ import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
 import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
+import {markdownBundlePlugin} from './markdown-bundle.js';
 import {checkPage, loadPage, logicBundle, logicModule, pageStyleUrls, pageStylesheet, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {copyFile, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile} from 'node:fs/promises';
@@ -206,7 +207,7 @@ export async function buildDirectory({pages, output, assets = [], collections = 
     await mkdir(stage);
     try {
         await mkdir(join(stage, 'assets/workers'), {recursive: true});
-        const runtime = await bundle({...workerOptions, entryPoints: [standalone], globalName: 'GramlotStandalone'});
+        const runtime = await bundle({...workerOptions, entryPoints: [standalone], globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin()]});
         await writeFile(join(stage, 'assets/standalone.js'), runtime.outputFiles[0].text);
         await writeFile(join(stage, 'assets/runtime-notices.json'),
             JSON.stringify(await runtimeNotices(core.runtime), null, 2) + '\n');

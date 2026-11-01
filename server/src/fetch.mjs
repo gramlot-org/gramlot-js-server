@@ -65,6 +65,7 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
         }
     }
     const runtime = await readFile(runtimeAsset());
+    const markdown = await readFile(runtimeAsset("gramlot-markdown.js"));
     const ownerOf = ownerForRequest ?? (async request => cookieOwner(request));
     return {server, prefix, async fetch(request) {
         const url = new URL(request.url);
@@ -96,6 +97,11 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
                 if (error instanceof PageNotFound) return reply('Not found', 404);
                 throw error;
             }
+        }
+        if (path === server.markdownUrl) {
+            if (!reading) return refuse("GET, HEAD");
+            return reply(request.method === "HEAD" ? null : markdown, 200, COMPANION_TYPES[".js"],
+                {"Cache-Control":"no-cache", "X-Content-Type-Options":"nosniff"});
         }
         if (path === server.runtimeUrl) {
             if (!reading) return refuse('GET, HEAD');

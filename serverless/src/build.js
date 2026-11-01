@@ -1,5 +1,6 @@
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
+import {markdownBundlePlugin} from './markdown-bundle.js';
 import {checkPage, inlineStylesheets, loadPage, logicBundle, logicModule, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {readFile, writeFile, mkdir, rename, rm} from 'node:fs/promises';
@@ -36,7 +37,7 @@ export async function build({page, output}) {
     const styles = await Promise.all((await inlineStylesheets(input, module.Page)).map(file => readFile(file, 'utf8')));
     const worker = (await workerBundle(input, options, {logic: logic?.url ?? null, inlineCss: true})).text;
     const modules = logic ? {[logic.url]: await logicBundle(logic, options)} : {};
-    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', stdin: {
+    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin()], stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
 export * from './src/standalone.js';
