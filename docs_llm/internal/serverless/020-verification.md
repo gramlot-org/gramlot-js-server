@@ -223,3 +223,22 @@ Evidence: /private/tmp/gramlot-js-consolidation-20261029/. Both original worktre
 HEADs, working states and all 65 dirty-file hashes match the pre-integration
 snapshot. Python-produced foo.glt.tytx loading is not implemented by this phase;
 it remains the next separately scoped integration.
+
+
+<a id="gs-020-045"></a>
+## 045 · Shared Grid/Form collections in file exports — 2026-11-01
+
+Block ID: **GS-020-045**.
+
+The prepared Grid now depends on the inputs collection. Derived file-origin
+bundles retain declared `@gramlot/collections/*` imports instead of embedding
+another copy. Standalone startup maps those names to the verified derived blob
+modules before loading page collections, using the same native import-map
+mechanism as hosted pages. Undeclared collection imports fail during bundling.
+The existing window-runtime bridge also exposes the core `sourceTarget` primitive.
+
+The 53 serverless tests pass. The shared-sanitizer file probe now also edits a
+resident grid cell and verifies its Data value, in both Chromium and WebKit,
+with HTTP(S) blocked. Markdown remains lazy and shared, and the HTML/Markdown
+editor instance and undo checks still pass. This is local integration verification;
+no package publication, deployment or Python compiled-page export is included.

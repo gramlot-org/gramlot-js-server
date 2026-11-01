@@ -16,11 +16,11 @@ let browser;
 try {
     const gallery = buildGallery();
     const assets = Object.entries(gallery.assets)
-        .filter(([url]) => /^\/gramlot\/collections\/(inputs|layout|editors)\//.test(url))
+        .filter(([url]) => /^\/gramlot\/collections\/(inputs|layout|editors|grid)\//.test(url))
         .map(([url, {file}]) => ({source:file, target:url.slice(1)}));
     const output = join(folder, 'site');
     await buildDirectory({pages:{index:resolve(import.meta.dirname, '../tests/fixtures/shared-sanitizer/page.js'), plain:resolve(import.meta.dirname, '../tests/fixtures/shared-sanitizer/plain.js')},
-        output, assets, collections:gallery.collections.filter(({name}) => ['inputs', 'layout', 'editors'].includes(name))});
+        output, assets, collections:gallery.collections.filter(({name}) => ['inputs', 'layout', 'editors', 'grid'].includes(name))});
     const parserMarker='Wrong `markdown-it` preset';
     const runtimeText=await readFile(join(output,'assets/standalone.js'),'utf8');
     const libraryText=await readFile(runtimeAsset('gramlot-markdown.js'),'utf8');
@@ -51,7 +51,7 @@ try {
     await page.waitForFunction(() => globalThis.gramlot?.state === 'started');
     assert.equal(await page.evaluate(()=>window.markdownBlobs.length),0,'unused editors do not load Markdown');
     await page.goto(pathToFileURL(join(output, 'index.html')).href);
-    await page.waitForFunction(() => globalThis.gramlot?.state === 'started', null, {timeout:20000});
+    await page.waitForFunction(() => globalThis.gramlot?.state === 'started', null, {timeout:20000}).catch(error => {console.error(errors); throw error;});
     await page.waitForFunction(() => document.getElementById('html')?.engine);
     await page.evaluate(async () => {
         await document.getElementById('html').ready;
@@ -86,10 +86,17 @@ try {
         if(a!==b) throw new Error('Markdown module duplicated');
     });
     assert.equal(await page.evaluate(()=>window.markdownBlobs.length),1,'preview and editor share one lazy module');
+    const gridCell = page.locator('#editable-grid tr[data-row=r1] td[data-field=name]');
+    await gridCell.dblclick();
+    const cellInput = page.locator('#editable-grid gramlot-textbox input');
+    await cellInput.fill('After');
+    await cellInput.press('Enter');
+    await page.waitForFunction(() => gramlot.data.getItem('rows.r1.name') === 'After');
+    assert.equal(await gridCell.textContent(), 'After');
     assert.equal(page.workers().length, 1);
     assert.deepEqual(external, []);
     assert.deepEqual(errors, []);
-    console.log(`${engineName} PASS: file-origin Worker, prepared layout/editors, lazy Jodit, reactive sanitization, stable engine, no HTTP(S).`);
+    console.log(`${engineName} PASS: file-origin Worker, prepared layout/editors, lazy Jodit, reactive sanitization, stable engine, shared input collection in editable grid, no HTTP(S).`);
 } finally {
     await browser?.close();
     await rm(folder, {recursive:true, force:true});

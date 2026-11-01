@@ -57,6 +57,17 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
     try {
         const {pageId, title, resources, capabilities, nameSyntax, locale, timeZone, devices} = await transport.open(signal);
         document.title = title;
+        // Preserve the same declared dependency imports as hosted pages. The
+        // module URLs are the verified derived blobs supplied by the exporter.
+        const imports = Object.fromEntries((resources.collections ?? []).map(({name,url}) => {
+            if (!Object.hasOwn(modules,url)) throw new TypeError(`Standalone collection not provided: ${url}`);
+            return [`@gramlot/collections/${encodeURIComponent(name)}`,modules[url]];
+        }));
+        if (Object.keys(imports).length) {
+            const map = document.createElement('script');
+            map.type = 'importmap'; map.textContent = JSON.stringify({imports});
+            document.head.append(map);
+        }
         const bootstrap = new WorkerBootstrap({document, transport, config: {pageId, element, rootId, capabilities, nameSyntax, locale, timeZone, devices}, resources: {
             css: resources.css.map(href => styleUrl(href, root)),
             collections: (resources.collections ?? []).map(record => {

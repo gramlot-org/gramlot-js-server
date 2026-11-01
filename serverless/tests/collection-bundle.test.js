@@ -67,3 +67,11 @@ test('file-derived layout uses the window runtime factory and sanitizes reactive
     assert.equal(label.querySelector('em').textContent, 'Updated');
     assert.equal(label.querySelector('script'), null);
 });
+
+
+test('derived grid keeps its declared input dependency external', async () => {
+    const gallery = buildGallery(), collection = gallery.collections.find(c => c.name === 'grid');
+    const code = await collectionBundle(collection, gallery.assets[collection.module].file);
+    assert.match(code, /from "@gramlot\/collections\/inputs"/);
+    assert.doesNotMatch(code, /class EditingSession|class FieldState/);
+});
