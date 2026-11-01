@@ -119,7 +119,7 @@ test('Worker rejects unknown messages, invalid envelopes, unsupported pages and 
     const {transport} = channel(Hello);
     await assert.rejects(transport.request({operation: 'main'}), {name: 'TypeError', message: 'Unknown Worker message'});
     const {pageId, capabilities, nameSyntax} = await transport.open();
-    assert.deepEqual(capabilities, []);
+    assert.deepEqual(capabilities, ['upload']);
     assert.deepEqual(nameSyntax, NAME_SYNTAX.toJSON());
     await assert.rejects(transport.call('{'), {name: 'InvalidRequest'});
     await assert.rejects(transport.call(toTytx({id: 'r', pageId, contentType: 'source', name: 'main', params: null})),
@@ -328,7 +328,7 @@ Contract.registerEndpoint('check_endpoint_raise');
 test('GC-230 §205: the envelope part of the conformance list (items 10, 12-16) over postMessage', async () => {
     const {transport, server} = channel(Contract);
     const {pageId, capabilities} = await transport.open();
-    assert.deepEqual(capabilities, []);
+    assert.deepEqual(capabilities, ['upload']);
     // 10 · source/main: an envelope echoing id and contentType, the fragment document as a string.
     assert.equal(typeof (await call(transport, pageId, 'source', 'main')).value, 'string');
     // 12 · outcomes of an unknown page, fragment and endpoint, and of data/main.

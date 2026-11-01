@@ -10,7 +10,7 @@ import {GramlotServer, PageNotFound} from '@gramlot/gramlot/gramlot-server';
  * and the stylesheet. */
 export class GramlotWorkerServer extends GramlotServer {
     constructor(PageClass, {logic = null, stylesheet = null, inlineCss = false, initialData = null, ...options} = {}) {
-        super(options);
+        super({...options, uploadsEnabled:true});
         this.PageClass = PageClass;
         this.initialData = initialData;
         this.logic = logic;
@@ -19,6 +19,8 @@ export class GramlotWorkerServer extends GramlotServer {
         this.scope = self;
         this.scope.addEventListener('message', event => this.dispatch(event.data));
     }
+
+    get capabilities() { return [...super.capabilities, 'upload']; }
 
     /** The CSS URL of the theme of the page: none with inlineCss, where the document already holds it. */
     themeCss(PageClass) {
@@ -59,6 +61,24 @@ export class GramlotWorkerServer extends GramlotServer {
             if (message.open === true) {
                 const registered = await this.registerPage('/');
                 this.scope.postMessage({id, open: {...registered, capabilities: this.capabilities}});
+            } else if (message.upload) {
+                const {pageId, transferId, authorization, file} = message.upload;
+                if (!(file instanceof Blob)) throw new TypeError('Upload must contain a File');
+                const transfer = this.admitUpload({pageId, transferId, authorization});
+                try {
+                    if (file.size !== transfer.size) throw new RangeError('Upload size does not match declaration');
+                    const chunkSize = 256 * 1024;
+                    for (let offset = 0; offset < file.size; offset += chunkSize) {
+                        const bytes = new Uint8Array(await file.slice(offset, offset + chunkSize).arrayBuffer());
+                        await transfer.write(bytes);
+                        this.uploads.touch(transferId, pageId, null);
+                        this.scope.postMessage({id, progress: offset + bytes.byteLength});
+                    }
+                    this.scope.postMessage({id, outcome:await transfer.finish()});
+                } catch (error) {
+                    try { await transfer.abort(); } catch {}
+                    throw error;
+                }
             } else if (typeof message.text === 'string') {
                 this.scope.postMessage({id, text: await this.call(message.text)});
             } else {

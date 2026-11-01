@@ -8,8 +8,9 @@ export class WorkerTransport {
         this.receive = ({data}) => {
             const request = this.pending.get(data.id);
             if (!request) return;
+            if ('progress' in data) { request.progress?.(data.progress); return; }
             if (data.error) request.reject(Object.assign(new Error(data.error.message), {name: data.error.name}));
-            else request.resolve('text' in data ? data.text : data.open);
+            else request.resolve('text' in data ? data.text : 'outcome' in data ? data.outcome : data.open);
         };
         this.failed = event => this.dispose(new Error(event.message || 'Worker communication failed'));
         worker.addEventListener('message', this.receive);
@@ -21,13 +22,15 @@ export class WorkerTransport {
     open(signal) { return this.request({open: true}, signal); }
     /** Send the request envelope text; resolves with the response envelope text, as HttpTransport. */
     call(text, signal) { return this.request({text}, signal); }
+    /** Send one File to the Worker; progress counts bytes read by the target. */
+    upload(request, onProgress, signal) { return this.request({upload:request}, signal, onProgress); }
     /** The close message {pageId}, sent without waiting for an answer. */
     close(pageId) {
         if (this.closed) return;
         this.worker.postMessage({pageId});
     }
 
-    request(message, signal) {
+    request(message, signal, progress = null) {
         if (this.closed) return Promise.reject(new Error('Worker transport is disposed'));
         if (signal?.aborted) return Promise.reject(signal.reason);
         return new Promise((resolve, reject) => {
@@ -37,7 +40,7 @@ export class WorkerTransport {
                 signal?.removeEventListener('abort', abort);
                 callback(value);
             };
-            const request = {resolve: finish(resolve), reject: finish(reject)};
+            const request = {resolve: finish(resolve), reject: finish(reject), progress};
             const abort = () => request.reject(signal.reason);
             this.pending.set(id, request);
             signal?.addEventListener('abort', abort, {once: true});

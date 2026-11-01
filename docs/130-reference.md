@@ -191,3 +191,33 @@ entry in both Worker and window bundles. Use concrete exported URLs such as
 
 
 Development route update, 2026-10-20: explicit buildDirectory page maps may use slash-separated route segments, each following the existing lowercase route-identifier grammar. Empty segments and traversal remain invalid. The gallery uses nested routes for filesystem index pages and child pages; relative runtime/worker/frame paths reflect their depth. Its normal root Logic is staged as index_aux.js. Filesystem discovery is completed at export time and its one-level Bags are serialized through TYTX; browser expansion still requests individual directory Bags from the Worker.
+
+<a id="gs-130-040"></a>
+
+## 040 · Worker uploads
+
+Block ID: **GS-130-040**.
+
+The Worker advertises `upload` and receives the browser-selected File after the
+shared preparation request. It reads at most 256 KiB at a time, reports progress
+and returns the application target outcome. A JavaScript Page registers its
+operation with `Page.registerUpload('method')`; the method returns an
+`UploadTarget` imported from `@gramlot/gramlot/page`. It validates its untrusted
+metadata and chooses its destination. The target implements `write`, `finish`,
+`abort` and `status` and declares `maxBytes`.
+
+The Worker registry is in memory. Terminating the Worker loses its upload status
+and can interrupt cleanup; this cannot establish that an external destination
+is unsaved. The shared queue does not retry an uncertain outcome automatically.
+
+
+Browser page Logic may import `BrowserCameraProvider` from the shared Gramlot runtime and explicitly attach it to `page.dvc`. The provider and camera preview run in the window; the Worker continues to own page execution and upload operations. Capture requires a secure browser context and user permission.
+
+
+Worker upload qualification (2026-11-01): Chromium passes from a file-origin
+export, including attachments saved after their parent record. WebKit passes the
+same export served over HTTP, but file-origin upload fails with NotReadableError
+when its Worker reads the File. A native-only probe reproduces the problem; see
+[WebKit bug 258443](https://bugs.webkit.org/show_bug.cgi?id=258443). No alternate
+transfer protocol is implemented. Do not claim file-origin upload support on
+WebKit from the otherwise successful serverless tests.

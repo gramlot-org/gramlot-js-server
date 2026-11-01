@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {resolve} from 'node:path';
+import {buildDirectory} from '../src/build-directory.js';
+const [playwrightEntry,galleryEntry,engineName='chromium']=process.argv.slice(2);
+if (!playwrightEntry || !galleryEntry) throw new Error('Expected Playwright module and examples gallery module');
+const engines=await import(pathToFileURL(resolve(playwrightEntry)));
+const {buildGallery}=await import(pathToFileURL(resolve(galleryEntry)));
+const gallery=buildGallery(), entry=gallery.routes.attachment_manager;
+const collections=gallery.collections.filter(item=>item.name !== 'menu-trial');
+const assets=Object.entries(gallery.assets).filter(([url])=>url.startsWith('/gallery/dist/') || url.startsWith('/gramlot/collections/') || url.startsWith('/themes/')).map(([url,{file}])=>({source:file,target:url.slice(1)}));
+const folder=await mkdtemp(join(tmpdir(),'context-worker-'));let browser;
+try {const site=join(folder,'site');await buildDirectory({pages:{index:entry.page},output:site,collections,assets});
+ browser=await engines[engineName].launch({headless:true});const p=await browser.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(pathToFileURL(join(site,'index.html')).href);await p.waitForFunction(()=>globalThis.gramlot?.state==='started');
+ const manager=p.locator('#attachment-manager'),u=manager.locator('gramlot-uploader');await u.locator('input[type=file]').setInputFiles([{name:'first.txt',mimeType:'text/plain',buffer:Buffer.from('one')},{name:'second.txt',mimeType:'text/plain',buffer:Buffer.from('two')}]);
+ await p.waitForFunction(()=>globalThis.gramlot.data.getItem('attachmentsDemo.queue').getNodes().length===2);assert.equal(await u.locator('li').filter({hasText:'queued'}).count(),2);
+ await p.getByRole('button',{name:'Save record'}).click();await p.waitForFunction(()=>globalThis.gramlot.data.getItem('attachmentsDemo.queue').getNodes().filter(n=>n.value.getItem('status')==='completed').length===2);
+ await u.locator('input[type=file]').setInputFiles({name:'later.txt',mimeType:'text/plain',buffer:Buffer.from('three')});await p.waitForFunction(()=>globalThis.gramlot.data.getItem('attachmentsDemo.queue').getNodes().filter(n=>n.value.getItem('status')==='completed').length===3);
+ await manager.getByRole('button',{name:'first.txt',exact:true}).click();
+ await manager.locator('.preview pre').getByText('one',{exact:true}).waitFor();
+ await manager.getByRole('button',{name:'Remove attachment'}).click();
+ await manager.getByRole('button',{name:'first.txt',exact:true}).waitFor({state:'detached'});
+ assert.ok((await p.evaluate(()=>globalThis.gramlot.data.getItem('attachmentsDemo.context.recordId'))).startsWith('r_'));assert.deepEqual(errors,[]);console.log('PASS Worker: reusable manager queues, uploads, lists, previews and removes');
+}finally{await browser?.close();await rm(folder,{recursive:true,force:true})}
