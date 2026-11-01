@@ -242,3 +242,14 @@ resident grid cell and verifies its Data value, in both Chromium and WebKit,
 with HTTP(S) blocked. Markdown remains lazy and shared, and the HTML/Markdown
 editor instance and undo checks still pass. This is local integration verification;
 no package publication, deployment or Python compiled-page export is included.
+
+
+### Release 0.3.25 qualification — 2026-11-01
+
+Owner authorized the complete common release. Fresh checks: Node host 45 tests,
+serverless 59, project creation 3 and Bun 41; all pass. Chromium checks pass installed
+Node/Bun hosting, prefixed gallery and strict/permissive CSP. Single-file and directory
+exports, page modules and the static gallery work from file origin. Both documentation
+views build strictly. All three packed npm consumers install with core/examples 0.3.25.
+The shared Markdown module is present in the packaged core and remains lazy.
+Evidence: /private/tmp/gramlot-release-20261101/. Publication/deployment pending.

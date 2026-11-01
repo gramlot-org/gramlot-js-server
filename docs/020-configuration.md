@@ -196,8 +196,10 @@ Registering collections does not fetch the parser. It loads once when an editor,
 preview, guide or gallery description first needs Markdown. Deploy the matching
 core runtime, optional asset and prepared collections together.
 
-<a id="gn-020-visual-editor"></a>
-## Visual Editor documents
+<a id="gn-120-045"></a>
+## 045 · Visual Editor documents
+
+Block ID: **GN-120-045**.
 
 The gallery option `editorJavaScript` (CLI `--editor-javascript`) supplies one JS
 page to the Visual Editor. It is read-only unless `remoteEdit` (`--remote-edit`)
