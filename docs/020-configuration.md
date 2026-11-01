@@ -195,3 +195,23 @@ using GET or HEAD; the bootstrap import map prefixes it with the mount path.
 Registering collections does not fetch the parser. It loads once when an editor,
 preview, guide or gallery description first needs Markdown. Deploy the matching
 core runtime, optional asset and prepared collections together.
+
+<a id="gn-020-visual-editor"></a>
+## Visual Editor documents
+
+The gallery option `editorJavaScript` (CLI `--editor-javascript`) supplies one JS
+page to the Visual Editor. It is read-only unless `remoteEdit` (`--remote-edit`)
+is explicitly enabled. The adapter's VisualEditorDocuments service accepts a
+host-owned key/file map, not arbitrary browser paths.
+
+Save validates UTF-8, size, syntax and revision and atomically replaces the file;
+it does not execute the module. Preview requires editing permission and the saved
+revision, and runs Page.main in a bounded Node/Bun child process. The process is
+resource-bounded, not a security sandbox for untrusted code. Preview does not
+install target RPC endpoints or companion Logic.
+
+The serverless Worker supports the visual Source editor and shared SourceImport,
+without filesystem save/preview or a provider. The existing runtime export bridge
+shares VisualEditorLogic/SourcePicker rather than bundling another core instance.
+WebKit file-origin upload remains limited; HTTP WebKit and Chromium file export
+use the same protocol. No alternate File reader was added.

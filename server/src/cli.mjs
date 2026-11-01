@@ -4,7 +4,7 @@ import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 
 const usage = `Usage:
-  gramlot node gallery [--host HOST] [--port PORT] [--mount PATH] [--catalog CATALOG.json PAGES]... [--serverless-download URL]
+  gramlot node gallery [--host HOST] [--port PORT] [--mount PATH] [--catalog CATALOG.json PAGES]... [--serverless-download URL] [--editor-javascript FILE] [--remote-edit]
   gramlot bun gallery  [same options]
 
 The gallery of @gramlot/gramlot-examples on the Node or Bun host. --mount serves every URL
@@ -25,6 +25,8 @@ function galleryOptions(args) {
             if (!Number.isInteger(options.port) || options.port < 0 || options.port > 65535) throw new Error(`Invalid port\n\n${usage}`);
         } else if (name === '--mount') options.mountPath = value();
         else if (name === '--serverless-download') options.serverlessDownloadUrl = value();
+        else if (name === '--editor-javascript') options.editorJavaScript = resolve(value());
+        else if (name === '--remote-edit') options.remoteEdit = true;
         else if (name === '--catalog') options.catalogs.push([resolve(value()), resolve(value())]);
         else throw new Error(`Unknown option ${name}\n\n${usage}`);
     }

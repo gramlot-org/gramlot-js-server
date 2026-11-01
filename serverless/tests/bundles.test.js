@@ -48,7 +48,7 @@ test('the Logic export of the page module is the logic; its bundle takes the cor
 test('the window core module exports every name of the core page entry, so a Logic imports Bag and createDecimal', async () => {
     // The names are read from the core entry; the window runtime (standalone.js) exports each of them.
     assert.deepEqual(pageNames, Object.keys(await import('@gramlot/gramlot/page')));
-    for (const name of ['Page', 'IndexPage', 'IndexLogic', 'mountIndexPage', 'Bag', 'BagNode', 'createDecimal', 'ServerAdapter']) {
+    for (const name of ['Page', 'IndexPage', 'IndexLogic', 'mountIndexPage', 'Bag', 'BagNode', 'createDecimal', 'ServerAdapter', 'VisualEditor', 'SourceImport']) {
         assert.ok(pageNames.includes(name), name);
     }
     const {metafile} = await bundle({...options, format: 'esm', metafile: true, entryPoints: [join(root, 'src/standalone.js')]});
@@ -145,4 +145,16 @@ test('the Worker embeds the optional TYTX companion and rejects invalid data', a
     assert.match(result.text,/Companion sentinel/);
     await writeFile(join(dir,'foo_data.tytx'),toTytx({name:'not a Bag'}));
     await assert.rejects(workerBundle(entry,options),/must be a Data Bag/);
+});
+
+test('Visual Editor re-export uses the window Logic and SourcePicker, without another runtime', async t => {
+    const fixture = join(root, 'tests/fixtures/visual-editor-preview.mjs');
+    const previous = globalThis.GramlotStandalone;
+    globalThis.GramlotStandalone = await import('../src/standalone.js');
+    t.after(() => { globalThis.GramlotStandalone = previous; });
+    const logic = await logicModule(fixture, await loadPage(fixture));
+    const code = await logicBundle(logic, options);
+    const module = await import(`data:text/javascript,${encodeURIComponent(code)}`);
+    assert.equal(module.Logic, globalThis.GramlotStandalone.VisualEditorLogic);
+    assert.doesNotMatch(code, /class SourcePicker|class GramlotBuilder/);
 });

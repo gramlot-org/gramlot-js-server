@@ -1,8 +1,9 @@
+import {VisualEditorDocuments} from './visual-editor.mjs';
 /** The gallery of @gramlot/gramlot-examples on the Node or Bun host (GE-010 §025). */
 import {copyFile, mkdir, mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {dirname, join} from 'node:path';
+import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
 const JAVASCRIPT = 'text/javascript; charset=utf-8';
@@ -33,7 +34,7 @@ function runtimeCatalog(runtime) {
  * subclass that appends frame.js, its stylesheet <key>.css and <key>_aux.js, which re-exports every
  * name of the logic module from its URL (`export *`): Logic when the module exports it, no Logic when it
  * does not, as the core allows. Returns the assets, with each logic module as JavaScript. */
-async function stage(folder, {buildGallery, galleryPage}, catalogs, prefix, serverlessDownloadUrl) {
+async function stage(folder, {buildGallery, galleryPage}, catalogs, prefix, serverlessDownloadUrl, editorJavaScript, remoteEdit) {
     const {routes, assets} = buildGallery({catalogs});
     const urlOf = Object.fromEntries(Object.entries(assets).map(([url, {file}]) => [file, url]));
     await writeFile(join(folder, 'index.js'), `import {Page as Gallery} from ${JSON.stringify(pathToFileURL(galleryPage).href)};
@@ -48,15 +49,23 @@ export class Page extends Gallery {
     for (const [routeKey, {page, data, stylesheet, logic, url: key}] of Object.entries(routes)) {
         if (routeKey === 'index') continue;
         await mkdir(dirname(join(folder, `${key}.js`)), {recursive:true});
+        const codeEditor = routeKey === 'visual_source' && editorJavaScript !== null;
+        const fileMap = codeEditor ? JSON.stringify({page:resolve(editorJavaScript)}) : null;
         await writeFile(join(folder, `${key}.js`), `import {Page as Example} from ${JSON.stringify(pathToFileURL(page).href)};
+${codeEditor ? `import {VisualEditorDocuments} from ${JSON.stringify(new URL('./visual-editor.mjs', import.meta.url).href)};` : ''}
 export class Page extends Example {
+    ${codeEditor ? `editorDocuments = new VisualEditorDocuments({files:${fileMap}, remoteEdit:${JSON.stringify(remoteEdit)}});
+    editor_document_save(params) { return this.editorDocuments.save(params); }
+    editor_document_preview(root, params) { return this.editorDocuments.preview(root, params); }` : ''}
     static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
+        ${codeEditor ? `this.codeDocument = await this.editorDocuments.document('page');` : ''}
         await super.main(root, ...args);
         root.script({src: ${JSON.stringify(`${prefix}/gallery/dist/frame.js`)}});
     }
 }
 `);
+        if (codeEditor) await writeFile(join(folder, `${key}.js`), `Page.registerEndpoint('editor_document_save');\nPage.registerSource('editor_document_preview');\n`, {flag:'a'});
         if (data) await copyFile(data, join(folder, `${key}_data.tytx`));
         if (stylesheet) await copyFile(stylesheet, join(folder, `${key}.css`));
         if (logic) {
@@ -71,15 +80,16 @@ export class Page extends Example {
 
 /** Serve the gallery: the common families, the catalogue of this package for the runtime and
  * catalogs ([catalog.json, pages folder] pairs). mountPath is the prefix of every URL. */
-export async function startGallery({runtime = 'node', catalogs = [], mountPath = '', serverlessDownloadUrl = null, ...options} = {}) {
+export async function startGallery({runtime = 'node', catalogs = [], mountPath = '', serverlessDownloadUrl = null, editorJavaScript = null, remoteEdit = false, ...options} = {}) {
     if (!Object.hasOwn(RUNTIMES, runtime)) throw new TypeError(`Unknown runtime: ${runtime}`);
+    if (editorJavaScript !== null) await new VisualEditorDocuments({files:{page:editorJavaScript}, remoteEdit}).document('page');
     const examples = await examplesPackage();
     const {startServer} = await import(RUNTIMES[runtime]);
     const trimmed = mountPath.replace(/^\/+|\/+$/g, '');
     const prefix = trimmed ? `/${trimmed}` : '';
     const pages = await mkdtemp(join(tmpdir(), 'gramlot-gallery-'));
     try {
-        const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix, serverlessDownloadUrl);
+        const assets = await stage(pages, examples, [...runtimeCatalog(runtime), ...catalogs], prefix, serverlessDownloadUrl, editorJavaScript, remoteEdit);
         const app = await startServer({...options, pages, mountPath: prefix, assets,
             collections: [...examples.collections, ...(options.collections ?? [])]});
         return {...app, pages, url: app.url, galleryUrl: `${app.url}${prefix}/`,
