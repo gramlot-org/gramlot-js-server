@@ -162,3 +162,19 @@ when its Worker reads the File. A native-only probe reproduces the problem; see
 [WebKit bug 258443](https://bugs.webkit.org/show_bug.cgi?id=258443). No alternate
 transfer protocol is implemented. Do not claim file-origin upload support on
 WebKit from the otherwise successful serverless tests.
+
+
+The following Chromium probes exercise real Worker transfers from file-origin
+exports. Run from the repository root after building the core collections:
+
+- `node serverless/scripts/verify_upload_browser.mjs PLAYWRIGHT`: bounded chunks,
+  byte progress, per-file metadata and the reconciled outcome in one HTML file.
+- `node serverless/scripts/verify_upload_ui_browser.mjs PLAYWRIGHT GALLERY`: file
+  selection and manual upload through the shared widget in a directory export.
+- `node serverless/scripts/verify_upload_after_save_browser.mjs PLAYWRIGHT GALLERY`:
+  files stay queued until the record-save signal, then carry the record context
+  separately from per-file metadata.
+
+`PLAYWRIGHT` is the absolute path to Playwright's module; `GALLERY` is the absolute
+path to the examples gallery module exporting `buildGallery`. These checks do not
+claim WebKit file-origin upload support or enable a public HTTP upload endpoint.

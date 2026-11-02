@@ -253,3 +253,27 @@ exports, page modules and the static gallery work from file origin. Both documen
 views build strictly. All three packed npm consumers install with core/examples 0.3.25.
 The shared Markdown module is present in the packaged core and remains lazy.
 Evidence: /private/tmp/gramlot-release-20261101/. Publication/deployment pending.
+
+
+<a id="gs-020-050"></a>
+## 050 · Uploader residual verification — 2026-11-02
+
+Block ID: **GS-020-050**.
+
+Reviewed the original Uploader serverless worktree against the common base.
+Its runtime changes are already integrated or superseded by the common lifecycle,
+initial Data, collection dependency and shared Markdown implementations. Restored
+three missing browser probes documented in GS-130 §040: transport, manual widget
+upload, and upload after record save. Their existing fixture pages were already
+present. All three pass in Chromium with fresh file-origin exports.
+
+The whole serverless suite reports 56 passes and three failures, reproduced on
+the unmodified common baseline: the grid-derived bundle and two gallery exports
+cannot import `toTytx` from the collection-to-runtime bridge. This is a separate
+common-base defect; the restored probes do not alter that bridge or runtime code.
+Do not treat this checkpoint as a passing release gate. The earlier WebKit
+file-origin File-read limitation remains documented in GS-130 §040.
+
+Original files, local changes and Git history are preserved in verified private
+archives before retirement. No package release, deployment or Invoice change.
+Evidence: private gramlot-cleanup-20261102/uploader-core-server-consolidation/.
