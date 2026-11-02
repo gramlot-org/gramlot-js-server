@@ -19,7 +19,7 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     const families = JSON.parse(await readFile(catalog, 'utf8')).families;
     const common = buildGallery().routes;
     const url = key => common[key].url;
-    assert.deepEqual(result.routes, ['index', ...Object.entries(common).filter(([key]) => key !== 'index').map(([, route]) => route.url), 'pages/serverless_pages/02_registration'].sort());
+    assert.deepEqual([...result.routes].sort(), ['index', ...Object.entries(common).filter(([key]) => key !== 'index').map(([, route]) => route.url), 'pages/serverless_pages/02_registration'].sort());
     await assert.rejects(stat(join(output, 'serverless-01/index.html')), {code: 'ENOENT'});
     assert.ok((await stat(join(output, 'assets/styles/pages/serverless_pages/02_registration.css'))).isFile());
     const manifest = JSON.parse(await readFile(join(output, 'app.webmanifest'), 'utf8'));

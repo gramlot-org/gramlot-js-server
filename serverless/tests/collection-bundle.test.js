@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,cp,readFile,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,cp,readFile,writeFile,rm,realpath} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {buildGallery} from '@gramlot/gramlot-examples';
@@ -75,3 +75,48 @@ test('derived grid keeps its declared input dependency external', async () => {
     assert.match(code, /from "@gramlot\/collections\/inputs"/);
     assert.doesNotMatch(code, /class EditingSession|class FieldState/);
 });
+
+async function runtimeFixture(t, source) {
+    const root = await realpath(await mkdtemp(join(tmpdir(), 'gramlot-runtime-exports-')));
+    t.after(() => rm(root, {recursive:true, force:true}));
+    const files = new Map([
+        ['grammar.json', Buffer.from('{}')], ['commands.json', Buffer.from('{}')],
+        ['assets/index.js', Buffer.from('')], ['assets/collection.js', Buffer.from(source + '\nexport default {};')],
+    ]);
+    const metadata = {name:'probe', grammar:'grammar.json', commands:'commands.json',
+        module:'assets/index.js', css:[], dependencies:[], files:[...files.keys()]};
+    const buildId = await core.collectionBuildId(metadata, files);
+    files.set('assets/index.js', Buffer.from(`export {default} from "./collection.js";\nexport * from "./collection.js";\nexport const buildId = "${buildId}";\n`));
+    await mkdir(join(root, 'assets'));
+    for (const [name, bytes] of files) await writeFile(join(root, name), bytes);
+    return collectionBundle({name:'probe', grammar:{}, module:'/probe/assets/index.js',
+        buildId, css:[], dependencies:[]}, join(root, 'assets/index.js'));
+}
+
+test('derived collections use the window codec and public class identities', async t => {
+    const code = await runtimeFixture(t, `
+        import {Bag, toTytx, fromTytx} from '@gramlot/gramlot';
+        import {ComponentCollection} from '@gramlot/gramlot/components';
+        import {Page} from '@gramlot/gramlot/page';
+        export {Bag, toTytx, ComponentCollection, Page};
+        export const roundTrip = value => fromTytx(toTytx(value));
+    `);
+    const previous = globalThis.GramlotStandalone;
+    globalThis.GramlotStandalone = core;
+    t.after(() => {globalThis.GramlotStandalone = previous;});
+    const module = await import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
+    for (const name of ['Bag', 'toTytx', 'ComponentCollection', 'Page']) {
+        assert.equal(module[name], core[name]);
+    }
+    const result = module.roundTrip(new core.Bag({amount:42, active:true}));
+    assert.ok(result instanceof core.Bag);
+    assert.equal(result.getItem('amount'), 42);
+    assert.equal(result.getItem('active'), true);
+});
+
+for (const entry of ['components', 'page']) {
+    test(`derived collection rejects core-only exports from /${entry}`, async t => {
+        await assert.rejects(runtimeFixture(t,
+            `export {toTytx} from '@gramlot/gramlot/${entry}';`), /No matching export.*toTytx/);
+    });
+}

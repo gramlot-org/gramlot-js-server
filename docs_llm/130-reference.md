@@ -68,6 +68,12 @@ logic module sources as Blob URLs revoked after start. Directory:
 [GS-120-010](120-configuration.md); `assets/workers/<route>.js` calls
 `GramlotStandalone.mount({workerUrl, modules, assetRoot})`.
 
+Prepared collection bundles import the actual public exports of
+`@gramlot/gramlot`, `/components` and `/page` from the window's shared runtime.
+Each entry keeps its own export surface: a name available in core is not
+implicitly available through `/components` or `/page`. Artifact verification and
+declared collection dependency checks still apply before bundling.
+
 <a id="gs-130-025"></a>
 
 ## 025 · Verification scripts

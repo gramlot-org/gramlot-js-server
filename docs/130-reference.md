@@ -116,6 +116,12 @@ Directory: see [GS-120-010](120-configuration.md). The bootstrap
 `GramlotStandalone.mount({workerUrl, modules, assetRoot})` with the document's
 directory as `assetRoot`.
 
+Prepared collection bundles import the actual public exports of
+`@gramlot/gramlot`, `/components` and `/page` from the window's shared runtime.
+Each entry keeps its own export surface: a name available in core is not
+implicitly available through `/components` or `/page`. Artifact verification and
+declared collection dependency checks still apply before bundling.
+
 <a id="gs-130-025"></a>
 
 ## 025 · Verification scripts
@@ -131,6 +137,7 @@ Block ID: **GS-130-025**.
 | `serverless/scripts/verify_export_browser.mjs HTML PLAYWRIGHT EXECUTABLE TEXT [METHOD] [ENGINE]` | An exported file: `main`, live Source edits, optional `remoteSource`, Worker termination, no HTTP(S) |
 | `serverless/scripts/verify_inline_browser.mjs HTML PLAYWRIGHT [EXECUTABLE] [ENGINE]` | An exported file with inline code (`examples/inline-code`): formula, controller, `==`, `_if`/`_else`, `action`, `connect_onclick` and a remote Source, no CSP violation, no HTTP(S) |
 | `serverless/scripts/verify_worker_sentinel_browser.mjs PLAYWRIGHT [ENGINE] [EXECUTABLE]` | The core fixture `avvio` (Page and Logic in one module) under the policy of the single file: the Logic runs in the window only, a tampered copy blocked (needs a linked core checkout) |
+| `serverless/scripts/verify_shared_sanitizer_browser.mjs PLAYWRIGHT [ENGINE]` | File-origin grid editing and Data updates, shared runtime and lazy Markdown, editor identity and sanitization, with HTTP(S) blocked |
 | `scripts/check_docs.py` | Paired guides and Sphinx build of both views |
 
 <a id="gs-130-030"></a>

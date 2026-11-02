@@ -1,7 +1,16 @@
 /** Derive a file-origin bundle only from the verified original byte snapshot. */
 import {relative, sep} from 'node:path';
 import {build} from 'esbuild';
+import * as core from '@gramlot/gramlot';
+import * as components from '@gramlot/gramlot/components';
+import * as page from '@gramlot/gramlot/page';
 import {readCollectionArtifact} from './collection-artifact.js';
+
+const runtimeEntries = {
+    '@gramlot/gramlot': core,
+    '@gramlot/gramlot/components': components,
+    '@gramlot/gramlot/page': page,
+};
 
 export async function collectionBundle(collection, entry) {
     const {root, content} = await readCollectionArtifact(collection, entry);
@@ -15,9 +24,9 @@ export async function collectionBundle(collection, entry) {
             builder.onResolve({filter:/^@gramlot\/gramlot\/markdown$/},()=>({path:'markdown',namespace:'shared-markdown'}));
             builder.onLoad({filter:/.*/,namespace:'shared-markdown'},()=>({contents:
                 'export default (await globalThis.GramlotStandalone.loadMarkdown()).default;',loader:'js'}));
-            builder.onResolve({filter:/^@gramlot\/gramlot(?:\/components|\/page)?$/},()=>({path:'runtime',namespace:'shared-runtime'}));
-            builder.onLoad({filter:/.*/,namespace:'shared-runtime'},()=>({contents:
-                'export const {Bag, Page, FramePage, Gramlot, GramlotBuilder, defineComponent, defineCollection, ComponentCollection, NativeControl, ChoiceGroup, Labelbox, FieldState, createDOMPurify, loadMarkdown, sourceTarget} = globalThis.GramlotStandalone;',loader:'js'}));
+            builder.onResolve({filter:/^@gramlot\/gramlot(?:\/components|\/page)?$/},args=>({path:args.path,namespace:'shared-runtime'}));
+            builder.onLoad({filter:/.*/,namespace:'shared-runtime'},args=>({contents:
+                `export const {${Object.keys(runtimeEntries[args.path]).join(', ')}} = globalThis.GramlotStandalone;`,loader:'js'}));
             // All bytes come from the verified snapshot, including the wrapper.
             builder.onLoad({filter:/.*/},args=>{
                 const key=relative(root,args.path).split(sep).join('/');

@@ -277,3 +277,32 @@ file-origin File-read limitation remains documented in GS-130 §040.
 Original files, local changes and Git history are preserved in verified private
 archives before retirement. No package release, deployment or Invoice change.
 Evidence: private gramlot-cleanup-20261102/uploader-core-server-consolidation/.
+
+
+<a id="gs-020-055"></a>
+## 055 · Complete shared runtime exports — 2026-11-02
+
+Block ID: **GS-020-055**.
+
+The owner approved correcting the collection/runtime bridge defect identified
+in GS-020 §050. File-origin derived collections now expose the actual installed
+public exports for core, components and page, separately, instead of a fixed
+list. `toTytx` reaches the grid from the existing window runtime; no second codec,
+component library or runtime is bundled. Verified artifact bytes and declared
+collection dependency checks remain unchanged.
+
+Regressions exercise codec/class identity and a typed Bag round trip, reject
+core-only imports from the components/page entries, and bundle the real grid.
+The gallery inventory test compares equally sorted route lists, retaining exact
+membership and multiplicity rather than depending on locale collation.
+
+All 62 serverless tests pass, including the three previously blocked checks.
+Fresh file-origin exports pass in Chromium and WebKit: editable grid cells update
+Data, prepared collection imports resolve, HTML/Markdown engine identity and undo
+are preserved, and Markdown stays lazy/shared. HTTP(S) is blocked in both probes.
+Both paired documentation views build strictly. The existing esbuild import.meta
+warning in the core server assets module remains; it does not fail these checks.
+The separate WebKit file-origin Uploader limitation remains as documented.
+
+No package publication, deployment, Invoice change or active-preview restart.
+Evidence: private gramlot-cleanup-20261102/runtime-bridge-consolidation/.
