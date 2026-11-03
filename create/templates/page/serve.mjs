@@ -1,10 +1,10 @@
-/** npm start (Node) and npm run start:bun (Bun): the pages of this folder on http://127.0.0.1:8080/. */
+/** npm start (Node) and npm run start:bun (Bun): the page of the folder pages on http://127.0.0.1:8080/. */
 import {fileURLToPath} from 'node:url';
 
 const {startServer} = await import(globalThis.Bun ? '@gramlot/gramlot-js-server/bun' : '@gramlot/gramlot-js-server/node');
 // The adapter serves the base theme of every page (/themes/gramlot-base/theme.css) by itself.
 const app = await startServer({
-    pages: fileURLToPath(new URL('./', import.meta.url)),
+    pages: fileURLToPath(new URL('./pages/', import.meta.url)),
     hostname: process.env.HOST ?? '127.0.0.1', port: Number(process.env.PORT ?? 8080),
 });
 console.log(`${app.url}/`);

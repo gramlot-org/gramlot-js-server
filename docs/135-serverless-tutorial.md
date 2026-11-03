@@ -44,15 +44,16 @@ fetches the core and the two packages. Without the word `page` the command asks
 
 ```text
 iscrizione/
-├── index.js       the page: Page and Logic
-├── index.css      its stylesheet
+├── pages/
+│   ├── index.js   the page: Page and Logic
+│   └── index.css  its stylesheet
 ├── serve.mjs      the same page with a server (section 035)
 ├── package.json   npm run build, npm start, npm run start:bun
 ├── README.md
 └── .gitignore     node_modules/ and the built index.html
 ```
 
-`index.js` builds a form whose fields write the data under the path `modulo`:
+`pages/index.js` builds a form whose fields write the data under the path `modulo`:
 
 ```javascript
 const form = root.div({datapath: 'modulo'});
@@ -96,7 +97,7 @@ npm run build
 Built /…/iscrizione/index.html: 1827710 bytes, sha256 946972b4…
 ```
 
-`npm run build` runs `gramlot-serverless build index.js -o index.html`. The file
+`npm run build` runs `gramlot-serverless build pages/index.js -o index.html`. The file
 `index.html` holds the page, its stylesheet and the core theme, the Gramlot
 runtime and the Web Worker in which the page runs. Mario opens it with a
 double-click: the form appears, and the summary follows what he types.
@@ -217,9 +218,8 @@ npm run start:bun    # Bun
 `http://127.0.0.1:8080/`. The pages do not change. What changes is where `main`
 runs: on the server, which can read files, use a database,
 keep secrets and gather the registrations of everybody in one place.
-`Logic` still runs in the browser. `serve.mjs` is for development: the page
-template serves the project folder, `node_modules` included
-([Deployment](025-deployment.md)). The server guides start at
+`Logic` still runs in the browser. `serve.mjs` is for development: it serves the folder
+`pages` ([Deployment](025-deployment.md)). The server guides start at
 [Introduction](005-introduction.md).
 
 **Learning path.** After this environment's setup, follow

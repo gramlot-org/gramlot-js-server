@@ -34,7 +34,7 @@ are served by [gramlot-py-server](https://github.com/gramlot-org/gramlot-py-serv
 Node.js 22 or later:
 
 ```sh
-npm create @gramlot page my-form    # index.js: one page, built to one file
+npm create @gramlot page my-form    # pages/index.js: one page, built to one file
 npm create @gramlot site my-site    # pages/: a site, built to a folder
 ```
 
@@ -48,8 +48,7 @@ npm start            # the same pages on http://127.0.0.1:8080/ (Node.js)
 npm run start:bun    # the same with Bun
 ```
 
-`npm start` is for development: the page template serves the project folder,
-`node_modules` included. To publish, use the output of `npm run build`.
+`npm start` is for development: both templates serve the folder `pages`. To publish, use the output of `npm run build`.
 
 The file `index.html` (or the folder `dist/`) opens with a double-click, travels by
 mail or sits on any static web site. The templates hold a form whose data leave

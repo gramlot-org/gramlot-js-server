@@ -77,7 +77,7 @@ test('the command: gallery needs one output; --catalog needs two values', () => 
 
 test('the registration example remains the page template', async () => {
     const pages = join(root, 'gallery/pages/serverless_pages');
-    for (const [page, source] of [['02_registration.js', '../create/templates/page/index.js'], ['02_registration.css', '../create/templates/page/index.css']]) {
+    for (const [page, source] of [['02_registration.js', '../create/templates/page/pages/index.js'], ['02_registration.css', '../create/templates/page/pages/index.css']]) {
         assert.equal(await readFile(join(pages, page), 'utf8'), await readFile(join(root, source), 'utf8'), page);
     }
 });
