@@ -1,6 +1,6 @@
 {
   "name": "@gramlot/gramlot-serverless",
-  "version": "0.3.27",
+  "version": "0.3.28",
   "description": "No server: Gramlot pages open from one HTML file or a static directory; the page runs in a Web Worker of the browser.",
   "license": "Apache-2.0",
   "repository": {
@@ -36,7 +36,8 @@
     "NOTICE",
     "gallery",
     "src/collection-bundle.js",
-    "src/collection-artifact.js"
+    "src/collection-artifact.js",
+    "src/collection-assets.js"
   ],
   "scripts": {
     "test": "node --test tests/*.test.js",
@@ -44,7 +45,9 @@
   },
   "dependencies": {
     "@genrojs/builders": ">=0.6.0",
-    "esbuild": "0.28.2"
+    "acorn": "^8.19.0",
+    "esbuild": "0.28.2",
+    "mime-types": "^3.0.2"
   },
   "peerDependencies": {
     "@gramlot/gramlot": ">=0.3.26",

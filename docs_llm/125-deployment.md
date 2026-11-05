@@ -58,3 +58,17 @@ Block ID: **GS-125-020**.
 3. Logic in `Logic` or short inline code; no server-only import.
 4. The export opens from `file://` without console errors.
 5. The runtime notices travel with the export.
+
+<a id="gs-125-025"></a>
+
+## 025 · Collection resources in file exports
+
+Block ID: **GS-125-025**.
+
+The exporter verifies the complete prepared collection fingerprint before bundling.
+Literal module-relative resource URLs are embedded as data URLs from that verified
+byte snapshot, with their original media type and contents. They remain readable
+when the resulting module runs from a Blob URL, including license documents.
+Missing resources, paths outside the snapshot, dynamic paths and unknown media
+types stop the build. The exporter neither fetches replacements nor skips integrity
+checks. Component configurations and collection identities remain unchanged.

@@ -8,7 +8,7 @@ import {GramlotServer} from '@gramlot/gramlot/server';
 import {createDispatch} from '../src/fetch.mjs';
 
 test('HTTP resources retain verified startup bytes, immutable identity, private metadata and methods', async t => {
-    const gallery=buildGallery(), collection=gallery.collections.find(item=>item.name==='inputs');
+    const gallery=buildGallery(), collection=gallery.collections.find(item=>item.name==='menu-trial');
     const root=await mkdtemp(join(tmpdir(),'gramlot-http-integrity-'));
     t.after(()=>rm(root,{recursive:true,force:true}));
     await cp(dirname(dirname(gallery.assets[collection.module].file)),root,{recursive:true});

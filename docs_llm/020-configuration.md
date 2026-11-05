@@ -106,7 +106,8 @@ with that type; `HEAD` headers only; other methods 405. Key without `/`, or no
 
 Block ID: **GN-120-035**.
 
-Declare optional prepared collections in `static gramlots = [inputs, layout]` on
+GramlotServer provides all packaged standard collections automatically.
+Declare custom prepared collections in `static gramlots = [customCollection]` on
 `Page`. Import their generated descriptors, including `name`, `buildId`, `grammar`,
 `module`, `css` and `dependencies`; do not import browser widget implementations
 just to declare server dependencies. Base-class declarations accumulate before
@@ -119,7 +120,8 @@ and discovers their declarations, without constructing pages or calling `main`.
 Hidden/private entries, symlinks and `_aux.js` companions are excluded; modules
 without a Page export are ignored, while an invalid Page export fails startup.
 These are trusted application imports and may run module-level code. The adapter
-requires each collection entry in `assets`, verifies its entire artifact and
+resolves standard entries from the core package and requires custom collection
+entries in `assets`, verifies each entire artifact and
 retains a fixed snapshot for the process lifetime. A custom neutral server uses
 its explicitly supplied server-wide collection registry.
 
@@ -170,3 +172,11 @@ without filesystem save/preview or a provider. The existing runtime export bridg
 shares VisualEditorLogic/SourcePicker rather than bundling another core instance.
 WebKit file-origin upload remains limited; HTTP WebKit and Chromium file export
 use the same protocol. No alternate File reader was added.
+
+
+Standard collections are server-owned defaults for every site, not gallery or
+launcher configuration. Their entry files come from `standardCollectionAssets()`
+and retain the existing artifact fingerprint checks. External engines remain lazy
+in hosted pages. Directory and single-file exports embed the standard bundles
+for file-origin use; the single-file import map uses a generated CSP nonce while
+the runtime script remains hash-authorized. No `unsafe-inline` script policy is added.

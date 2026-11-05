@@ -9,7 +9,7 @@ import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
 import {WorkerServerAdapter} from '../src/worker-server-adapter.js';
 import {WorkerTransport} from '../src/worker-transport.js';
 import {Gramlot, ServerAdapter} from '@gramlot/gramlot';
-import {mount} from '../src/standalone.js';
+import {mount, records} from './standard-collections.js';
 
 const BASE_THEME = '/themes/gramlot-base/theme.css';
 
@@ -114,7 +114,7 @@ test('Worker rejects unknown messages, invalid envelopes, unsupported pages and 
     }
     class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
     const styled = channel(Styled);
-    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: [], collections: []});
+    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: [], collections: records});
     styled.transport.dispose();
     const {transport} = channel(Hello);
     await assert.rejects(transport.request({operation: 'main'}), {name: 'TypeError', message: 'Unknown Worker message'});
@@ -289,7 +289,7 @@ test('the Worker returns the theme, Page.css, then the same-name stylesheet, and
     class Listed extends Hello { static css = [BASE_THEME, '/theme.css']; }
     const linked = channel(Styled, {stylesheet: '/assets/styles/index.css', logic: '/index.js'});
     assert.deepEqual((await linked.transport.open()).resources,
-        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}], collections: []});
+        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}], collections: records});
     linked.transport.dispose();
     for (const [PageClass, css] of [[Compact, ['/themes/gramlot-compact/theme.css', '/theme.css']],
         [Bare, ['/theme.css']], [Listed, [BASE_THEME, '/theme.css']]]) {
@@ -302,7 +302,7 @@ test('the Worker returns the theme, Page.css, then the same-name stylesheet, and
     base.transport.dispose();
     for (const PageClass of [Styled, Compact, Listed]) {
         const inline = channel(PageClass, {stylesheet: '/assets/styles/index.css', inlineCss: true});
-        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: [], collections: []}, PageClass.name);
+        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: [], collections: records}, PageClass.name);
         inline.transport.dispose();
     }
 });

@@ -7,7 +7,7 @@ import {logicBundle} from '../src/bundles.js';
 import {JSDOM} from 'jsdom';
 import {Page} from '../examples/quickstart/page.js';
 import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
-import {mount} from '../src/standalone.js';
+import {mount, records} from './standard-collections.js';
 
 // The README quick start, run through mount with the page module's Logic imported by the window.
 // The Worker is a structured-clone channel; the real export is opened by

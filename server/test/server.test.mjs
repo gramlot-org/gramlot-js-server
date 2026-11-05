@@ -142,7 +142,7 @@ test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 
         assert.deepEqual(argument.config, {pageId: argument.config.pageId, rpcUrl: '/app/gramlot/rpc',
             closeUrl: '/app/gramlot/close', rootId: 'gramlot-root', capabilities: [], nameSyntax: NAME_SYNTAX.toJSON()});
         assert.deepEqual(argument.resources, {
-            collections: [], css: ['/app/themes/gramlot-base/theme.css', '/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css',
+            collections: new GramlotServer().collections.map(({name,module,buildId})=>({name,url:"/app"+module,buildId})), css: ['/app/themes/gramlot-base/theme.css', '/app/themes/theme.css', 'local.css', 'https://cdn.example/remote.css',
                 '/app/assets/app.css', '/app/index.css'],
             js: [{url: '/app/index_aux.js', group: null}],
         });
@@ -216,7 +216,7 @@ export class Logic { greeting(kwargs) { return 'Hello, ' + kwargs.name; } }
     const app = await startServer({pages: folder});
     try {
         const {argument} = bootstrap(await (await fetch(app.url + '/single')).text());
-        assert.deepEqual(argument.resources, {collections: [], css: ['/themes/gramlot-base/theme.css'], js: [{url: '/single.js', group: null}]});
+        assert.deepEqual(argument.resources, {collections: new GramlotServer().collections.map(({name,module,buildId})=>({name,url:module,buildId})), css: ['/themes/gramlot-base/theme.css'], js: [{url: '/single.js', group: null}]});
         const response = await fetch(app.url + '/single.js');
         assert.equal(response.status, 200);
         assert.ok(response.headers.get('content-type').startsWith('text/javascript'));
@@ -307,8 +307,8 @@ for (const [label, options] of [['without a mount prefix', {}],
     ['with a mount prefix and a policy', {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]]) {
     test(`GC-230: checkProtocol passes on the conformance page, ${label}`, async () => {
         const pages = fileURLToPath(new URL('./fixtures/conformance/', import.meta.url));
-        const app = await startServer({pages, pageTtl: 1, ...options});
-        try { await checkProtocol(app.url + (options.mountPath ?? ''), '/', {pageTtl: 1}); }
+        const app = await startServer({pages, pageTtl: 3, ...options});
+        try { await checkProtocol(app.url + (options.mountPath ?? ''), '/', {pageTtl: 3}); }
         finally { await app.close(); }
     });
 }
@@ -319,31 +319,31 @@ test('GC-230 §135: each browser is its own owner by the cookie gramlot_owner; o
         const app = await startServer({pages, mountPath});
         try {
             const first = await fetch(app.url + path);
+            const firstConfig = bootstrap(await first.text()).argument.config;
             const [setCookie, ...others] = first.headers.getSetCookie();
             assert.deepEqual(others, []);
             const [pair, ...attributes] = setCookie.split('; ');
             assert.match(pair, /^gramlot_owner=[A-Za-z0-9_-]{32}$/);
             assert.deepEqual(attributes, [`Path=${mountPath || '/'}`, 'HttpOnly', 'SameSite=Lax']);
-            const call = async (opened, cookie) => {
-                const {pageId, rpcUrl} = bootstrap(await opened.clone().text()).argument.config;
+            const call = async ({pageId, rpcUrl}, cookie) => {
                 const response = await fetch(app.url + rpcUrl, {method: 'POST',
                     headers: {'content-type': 'application/json', ...(cookie ? {cookie} : {})},
                     body: toTytx({id: 'r1', pageId, contentType: 'source', name: 'main', params: {}})});
                 return JSON.parse(await response.text());
             };
-            assert.match((await call(first, pair)).value, /Hello/);
-            assert.equal((await call(first)).error.code, 'page_expired');
-            assert.equal((await call(first, `${pair}x`)).error.code, 'page_expired');
-            assert.equal((await call(first, 'gramlot_owner=')).error.code, 'page_expired');
+            assert.match((await call(firstConfig, pair)).value, /Hello/);
+            assert.equal((await call(firstConfig)).error.code, 'page_expired');
+            assert.equal((await call(firstConfig, `${pair}x`)).error.code, 'page_expired');
+            assert.equal((await call(firstConfig, 'gramlot_owner=')).error.code, 'page_expired');
             // The browser that sends its cookie again keeps its value; a browser without one gets another.
             const again = await fetch(app.url + path, {headers: {cookie: pair}});
             assert.equal(ownerCookie(again), pair);
-            assert.match((await call(again, pair)).value, /Hello/);
+            assert.match((await call(bootstrap(await again.text()).argument.config, pair)).value, /Hello/);
             const other = await fetch(app.url + path);
             assert.notEqual(ownerCookie(other), pair);
-            assert.equal((await call(first, ownerCookie(other))).error.code, 'page_expired');
+            assert.equal((await call(firstConfig, ownerCookie(other))).error.code, 'page_expired');
             // A close message without the cookie of the page leaves it open.
-            const {pageId, closeUrl} = bootstrap(await first.text()).argument.config;
+            const {pageId, closeUrl} = firstConfig;
             const close = cookie => fetch(app.url + closeUrl, {method: 'POST',
                 headers: {'content-type': 'application/json', ...(cookie ? {cookie} : {})}, body: JSON.stringify({pageId})});
             assert.equal((await close()).status, 200);
