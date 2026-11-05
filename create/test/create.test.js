@@ -11,6 +11,8 @@ import {fileURLToPath} from 'node:url';
 const here = fileURLToPath(new URL('./', import.meta.url));
 const cli = fileURLToPath(new URL('../src/cli.js', import.meta.url));
 const version = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
+// The core floor of a new project is the one the adapter requires.
+const serverPeers = JSON.parse(await readFile(new URL('../../server/package.json', import.meta.url), 'utf8')).peerDependencies;
 
 async function workspace(t) {
     const folder = await mkdtemp(join(here, '.project-'));
@@ -35,19 +37,20 @@ async function start(project, runtime) {
 
 const runtimes = ['node', ...(spawnSync('bun', ['--version']).error ? [] : ['bun'])];
 
-test('page: index.js with Page and Logic, the scripts, built to one file and served', async t => {
+test('page: pages/index.js with Page and Logic, the scripts, built to one file and served without node_modules', async t => {
     const folder = await workspace(t);
     const result = create(folder, ['page', 'My Form']);
     assert.equal(result.status, 0, result.stderr);
     const project = join(folder, 'My Form');
-    assert.deepEqual((await readdir(project)).sort(), ['.gitignore', 'README.md', 'index.css', 'index.js', 'package.json', 'serve.mjs']);
+    assert.deepEqual((await readdir(project)).sort(), ['.gitignore', 'README.md', 'package.json', 'pages', 'serve.mjs']);
+    assert.deepEqual((await readdir(join(project, 'pages'))).sort(), ['index.css', 'index.js']);
     const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'));
     assert.equal(manifest.name, 'my-form');
-    assert.deepEqual(manifest.scripts, {build: 'gramlot-serverless build index.js -o index.html',
+    assert.deepEqual(manifest.scripts, {build: 'gramlot-serverless build pages/index.js -o index.html',
         start: 'node serve.mjs', 'start:bun': 'bun serve.mjs'});
-    assert.deepEqual(manifest.dependencies, {'@gramlot/gramlot': '>=0.3.6',
+    assert.deepEqual(manifest.dependencies, {'@gramlot/gramlot': serverPeers['@gramlot/gramlot'],
         '@gramlot/gramlot-js-server': `>=${version}`, '@gramlot/gramlot-serverless': `>=${version}`});
-    const page = await import(join(project, 'index.js'));
+    const page = await import(join(project, 'pages/index.js'));
     assert.equal(typeof page.Page, 'function');
     assert.equal(page.Logic.prototype.summary({name: 'Ada', email: 'ada@example.org'}), 'Ada <ada@example.org>');
     assert.match(await readFile(join(project, 'README.md'), 'utf8'), /^# my-form/);
@@ -58,6 +61,10 @@ test('page: index.js with Page and Logic, the scripts, built to one file and ser
     assert.match(html, /"\/index\.js":/);
     assert.match(html, /--gramlot-brand-blue/);
     assert.match(html, /#buttons \{/);
+    // npm install writes node_modules in the project: a module there that Node.js cannot import
+    // (the core imports codemirror-lang-typst, which imports a .wasm file) stays out of the pages.
+    await mkdir(join(project, 'node_modules/dependency'), {recursive: true});
+    await writeFile(join(project, 'node_modules/dependency/index.js'), "import 'codemirror-lang-typst';\n");
     for (const runtime of runtimes) {
         const app = await start(project, runtime);
         try {

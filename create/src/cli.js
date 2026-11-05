@@ -6,7 +6,7 @@ import {basename, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const usage = `Usage:
-  npm create @gramlot page <folder>    index.js: one page, built to index.html
+  npm create @gramlot page <folder>    pages/index.js: one page, built to index.html
   npm create @gramlot site <folder>    pages/: a site, built to dist/
   npm create @gramlot <folder>         asks: page or site?`;
 const own = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
@@ -16,12 +16,12 @@ function manifest(name, template) {
     return {
         name, version: '0.1.0', private: true, type: 'module',
         scripts: {
-            build: template === 'page' ? 'gramlot-serverless build index.js -o index.html' : 'gramlot-serverless build pages -o dist',
+            build: template === 'page' ? 'gramlot-serverless build pages/index.js -o index.html' : 'gramlot-serverless build pages -o dist',
             start: 'node serve.mjs',
             'start:bun': 'bun serve.mjs',
         },
         dependencies: {
-            '@gramlot/gramlot': '>=0.3.6',
+            '@gramlot/gramlot': '>=0.3.26',
             '@gramlot/gramlot-js-server': `>=${own.version}`,
             '@gramlot/gramlot-serverless': `>=${own.version}`,
         },

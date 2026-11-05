@@ -1,6 +1,6 @@
 # {{name}}
 
-One Gramlot page: `index.js` exports `Page`, which builds the page, and `Logic`,
+One Gramlot page: `pages/index.js` exports `Page`, which builds the page, and `Logic`,
 the methods the page calls in the browser. `index.css` is its stylesheet.
 
 ```sh
@@ -14,5 +14,5 @@ npm run start:bun    # the same with Bun
 in it stay in the browser of whoever fills it in; the buttons send them by email,
 save them to a file or download them (`gramlot.utl.inout`).
 
-`npm start` is for development: `serve.mjs` serves this folder, `node_modules`
-included. To publish the page, use `index.html` from `npm run build`.
+`npm start` is for development: `serve.mjs` serves the folder `pages`. To publish the
+page, use `index.html` from `npm run build`.
