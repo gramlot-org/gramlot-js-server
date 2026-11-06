@@ -200,7 +200,8 @@ npm test -w create                                     # both templates built an
 python scripts/check_docs.py                           # paired guides and Sphinx build
 ```
 
-CI runs the packages against the released core and, as an informational job,
+CI runs only on request (manual dispatch, or `Publish release` with
+`full_tests`). It runs the packages against the released core and, as an informational job,
 against the core's `main` checkout, and builds the documentation; coverage goes
 to Codecov. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
 The internal notes, including the history of the earlier PoC server, are in

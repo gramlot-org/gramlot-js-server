@@ -8,6 +8,11 @@ name: Publish release
 
 on:
   workflow_dispatch:
+    inputs:
+      full_tests:
+        description: Run the full test suite before building
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -40,13 +45,15 @@ jobs:
 
   verify:
     needs: validate
+    if: ${{ inputs.full_tests }}
     permissions:
       contents: read
       id-token: write
     uses: ./.github/workflows/tests.yml
 
   build:
-    needs: verify
+    needs: [validate, verify]
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,6 +71,7 @@ jobs:
 
   github-release:
     needs: build
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -86,6 +94,7 @@ jobs:
 
   npm:
     needs: github-release
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     environment: release
     permissions:

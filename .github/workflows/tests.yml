@@ -4,10 +4,8 @@ name: tests
 # serverless/ (exporter whose pages run in a browser Web Worker) and create/
 # (npm create @gramlot).
 
+# Full suite only on request: run by hand or from Publish release with full_tests.
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
   workflow_dispatch:
   workflow_call:
 
