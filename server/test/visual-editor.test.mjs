@@ -65,7 +65,8 @@ test('concurrent saves have one winner; saving never executes the module; previe
     await assert.rejects(service.preview(new GramlotBuilder().root,{key:'page',revision:saved.revision,data_root:'data'}), /changed/);
 });
 
-test('configured gallery exposes document commands only on its editor and serves saved preview over RPC', async t => {
+// The test stages the whole gallery: under bun test it can exceed the default timeout of 5 s.
+test('configured gallery exposes document commands only on its editor and serves saved preview over RPC', {timeout: 30000}, async t => {
     const {file,service} = await fixture(t);
     const document = await service.document('page');
     const runtime = globalThis.Bun ? 'bun' : 'node';

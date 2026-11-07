@@ -324,10 +324,11 @@ test('/themes/* is served by a plain GramlotServer too, under the prefix; the pa
     } finally { await app.close(); }
 });
 
-// The check of the renewal of a page (item 18) takes 2.5 times the pageTtl of the server.
+// The check of the renewal of a page (item 18) takes 2.5 times the pageTtl of the server: more than the
+// default timeout of 5 s of bun test, hence the explicit timeout.
 for (const [label, options] of [['without a mount prefix', {}],
     ['with a mount prefix and a policy', {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]]) {
-    test(`GC-230: checkProtocol passes on the conformance page, ${label}`, async () => {
+    test(`GC-230: checkProtocol passes on the conformance page, ${label}`, {timeout: 30000}, async () => {
         const pages = fileURLToPath(new URL('./fixtures/conformance/', import.meta.url));
         const app = await startServer({pages, pageTtl: 3, ...options});
         try { await checkProtocol(app.url + (options.mountPath ?? ''), '/', {pageTtl: 3}); }
