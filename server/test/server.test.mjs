@@ -164,7 +164,7 @@ test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 
 for (const [name, policy] of [['strict', STRICT_CSP], ['permissive', PERMISSIVE_CSP]]) {
     test(`${name} CSP: the application policy is sent with the bootstrap nonce of each opening`, async () => {
         const {folder, pages} = await pagesFolder();
-        const app = await startServer({pages, contentSecurityPolicy: policy});
+        const app = await startServer({pages, contentSecurityPolicy: policy, librarySource: 'local'});
         try {
             const first = await fetch(app.url + '/'), second = await fetch(app.url + '/');
             const nonces = [];
@@ -180,6 +180,28 @@ for (const [name, policy] of [['strict', STRICT_CSP], ['permissive', PERMISSIVE_
         } finally { await app.close(); await rm(folder, {recursive: true}); }
     });
 }
+
+for (const source of ['cdn', 'local']) {
+    test(`library source ${source}: it reaches the policy and the document`, async () => {
+        const {folder, pages} = await pagesFolder();
+        const app = await startServer({pages, contentSecurityPolicy: STRICT_CSP, librarySource: source});
+        try {
+            const response = await fetch(app.url + '/');
+            const html = await response.text();
+            const policy = response.headers.get('content-security-policy');
+            assert.ok(policy.includes(`'nonce-${bootstrap(html).nonce}'`));
+            assert.equal(policy.includes('https://cdn.jsdelivr.net'), source === 'cdn');
+            assert.ok(html.includes(`<html data-gramlot-library-source="${source}">`));
+        } finally { await app.close(); await rm(folder, {recursive: true}); }
+    });
+}
+
+test('an unknown library source is refused', async () => {
+    const {folder, pages} = await pagesFolder();
+    try {
+        await assert.rejects(startServer({pages, librarySource: 'unpkg'}), /library source must be 'cdn' or 'local'/);
+    } finally { await rm(folder, {recursive: true}); }
+});
 
 test('companions and Page.css files below the pages folder; every other file 404', async () => {
     const {folder, pages} = await pagesFolder();

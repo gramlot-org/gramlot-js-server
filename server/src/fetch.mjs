@@ -49,9 +49,11 @@ const notModified = (request, {etag, modified}) => {
  * Logic reaches the browser, the companions and Page.css files placed there). assets maps a URL path (without the prefix) to {file, type}:
  * application files served by GET and HEAD. Order: runtime, themes, assets, companions, pages. A GET of
  * <path>/index.html opens the page <path>, and /index.html the index, as a static host does (openPage).
- * contentSecurityPolicy is the application's policy, sent on each HTML page with {nonce} replaced by the
- * bootstrap nonce. Every 405 carries an Allow header. The runtime, the Markdown runtime and the files of
- * the core themes are revalidated files: they answer Cache-Control no-cache with a strong ETag (the SHA-256
+ * contentSecurityPolicy is the application's policy, sent on each HTML page as server.contentSecurityPolicy
+ * composes it: {nonce} replaced by the bootstrap nonce and the origins of the third-party libraries added
+ * (the core option librarySource, 'cdn' or 'local', reaches the server with the other options). Every 405
+ * carries an Allow header. The runtime, the Markdown runtime and the files of the core themes are revalidated
+ * files: they answer Cache-Control no-cache with a strong ETag (the SHA-256
  * of the content) and Last-Modified, and 304 with no body when If-None-Match matches the ETag or, without
  * If-None-Match, If-Modified-Since is not older than the file. The ETag of the runtimes is computed at
  * startup, that of a theme file once for each path, modification time and size. The collection files
@@ -189,7 +191,7 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
             const issued = ownerForRequest === null ? owner ?? randomBytes(24).toString('base64url') : owner;
             const {html, nonce} = await server.openPage(path, {owner: issued, prefix});
             const headers = contentSecurityPolicy === null ? {}
-                : {'Content-Security-Policy': contentSecurityPolicy.replaceAll('{nonce}', nonce)};
+                : {'Content-Security-Policy': server.contentSecurityPolicy(contentSecurityPolicy, nonce)};
             if (ownerForRequest === null) {
                 headers['Set-Cookie'] = `${OWNER_COOKIE}=${issued}; Path=${prefix || '/'}; HttpOnly; SameSite=Lax`;
             }

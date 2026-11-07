@@ -19,7 +19,7 @@ Block ID: **GN-120-005**.
 | `port` | number | `0` | Listening port; `0` selects a free port, reported in `app.url` |
 | `mountPath` | string | `''` | Mount prefix: added once to the root-relative bootstrap URLs and carried by every request path |
 | `assets` | object | `{}` | Application files: URL path (without the prefix) → `{file, type}`, served by `GET` and `HEAD` |
-| `contentSecurityPolicy` | string or null | `null` | Policy sent on HTML pages, `{nonce}` replaced by the bootstrap nonce |
+| `contentSecurityPolicy` | string or null | `null` | Policy sent on HTML pages, composed by `server.contentSecurityPolicy(policy, nonce)`: `{nonce}` replaced by the bootstrap nonce and the library origins added; see section 015 |
 | `ownerForRequest` | `async (request) => owner` | `null`: the cookie `gramlot_owner` | Identity of the request, compared on rpc and close; replaces the cookie |
 | `onError` | `(error) => void` | `console.error` | Receives unexpected errors; the response is 500 |
 | `runtimeUrl` | string | `'/assets/gramlot.js'` | `GramlotServer` option: URL of the runtime |
@@ -29,6 +29,7 @@ Block ID: **GN-120-005**.
 | `pageTtl` | number | `1800` | `GramlotServer` option: seconds a registered page stays open without a call; opening it and every call to it start the period again |
 | `maxPages` | integer | `1000` | `GramlotServer` option: registered pages at most; above it, 503 |
 | `cssTheme` | string or `false` | `'gramlot-base'` | `GramlotServer` option: the base theme of every page, the name of a folder of the core themes; `false` loads none. A page replaces it with `static css_theme` |
+| `librarySource` | `'cdn'` or `'local'` | `'cdn'` | `GramlotServer` option: where the pages take the third-party libraries of the components; see section 015 |
 | `collections` | array | `[]` | `GramlotServer` option: the component collections of the application; see section 035 |
 | `reload` | boolean or `null` | `null` | `GramlotFileServer` option: import a page module again when its file changes; `null` takes the value from `GRAMLOT_DEV` |
 
@@ -70,8 +71,10 @@ the path unchanged ([Deployment](025-deployment.md)).
 Block ID: **GN-120-015**.
 
 The application chooses the policy; Gramlot defines two profiles. The adapter
-writes the header on HTML pages only, with the nonce of that opening in place of
-`{nonce}`; the runtime, the companions and the error responses carry no header.
+writes the header on HTML pages only, composed by the core
+`server.contentSecurityPolicy(policy, nonce)`: the nonce of that opening in place
+of `{nonce}` and the origins of the third-party libraries added. The runtime, the
+companions and the error responses carry no header.
 
 | Profile | `contentSecurityPolicy` | Pages that run |
 | --- | --- | --- |
@@ -90,6 +93,19 @@ allows 'unsafe-eval'
 
 Nothing is written to the Data. With `contentSecurityPolicy: null` no header is
 sent and the browser applies no policy; inline code runs.
+
+`librarySource` says where the components take their third-party libraries, for
+example ECharts. With `'cdn'` (the default) the libraries that have a CDN copy
+load from jsDelivr (`https://cdn.jsdelivr.net`) at the exact version of the core
+manifest. The import map carries the integrity of each CDN module, and the core
+adds the jsDelivr origin to `script-src` (else `default-src`) and to `connect-src`
+(else `default-src`). A policy without such a directive leaves that kind
+unrestricted. The strict profile is sent as
+`script-src 'nonce-…' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'`.
+With `'local'` the libraries load from the copies served with the collections and
+the policy is sent as configured. The bootstrap `<html>` carries
+`data-gramlot-library-source` with the value of the option. Another value raises
+`TypeError` when the server is built.
 
 <a id="gn-120-020"></a>
 

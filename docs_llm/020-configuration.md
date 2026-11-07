@@ -18,7 +18,7 @@ Block ID: **GN-120-005**.
 | `port` | number | `0` | Port; `0` = free port, see `app.url` |
 | `mountPath` | string | `''` | Prefix added once to root-relative bootstrap URLs; carried by request paths |
 | `assets` | object | `{}` | URL path → `{file, type}`, `GET`/`HEAD` |
-| `contentSecurityPolicy` | string/null | `null` | Header on HTML pages, `{nonce}` replaced |
+| `contentSecurityPolicy` | string/null | `null` | Header on HTML pages via `server.contentSecurityPolicy(policy, nonce)`: `{nonce}` replaced, library origins added |
 | `ownerForRequest` | `async (request) => owner` | `null`: cookie `gramlot_owner` | Identity compared on rpc/close; replaces the cookie |
 | `onError` | function | `console.error` | Unexpected errors; response 500 |
 | `runtimeUrl`, `rpcUrl`, `closeUrl` | string | `/assets/gramlot.js`, `/gramlot/rpc`, `/gramlot/close` | `GramlotServer` URLs |
@@ -26,6 +26,7 @@ Block ID: **GN-120-005**.
 | `pageTtl` | number | `1800` | Seconds a page stays registered without a call (opening and each call start the period again) |
 | `maxPages` | integer | `1000` | Registry capacity; above: 503 |
 | `cssTheme` | string or `false` | `'gramlot-base'` | Base theme of every page (core themes folder); `false` none; a page replaces it with `static css_theme` |
+| `librarySource` | `'cdn'`/`'local'` | `'cdn'` | Third-party libraries of the components from jsDelivr or the local copies; see 015 |
 | `collections` | array | `[]` | Component collections (section 035) |
 | `reload` | boolean or `null` | `null` | `GramlotFileServer`: re-import a changed page module; `null` → from `GRAMLOT_DEV` |
 
@@ -65,6 +66,13 @@ Strict + inline declaration → `EvalError` `<tag> '<label>' '<attribute>': inli
 code blocked by the Content Security Policy of the page (no 'unsafe-eval'); move
 the code to named logic (a method of the page's class Logic) or serve the page with the permissive CSP profile …`;
 nothing written. `null`: no header, inline runs.
+
+`librarySource: 'cdn'` (default): CDN libraries from `https://cdn.jsdelivr.net` at the
+manifest version, integrity in the import map, origin added to `script-src` (else
+`default-src`) and `connect-src` (else `default-src`); no such directive → that kind
+unrestricted. Strict profile sent as `script-src 'nonce-…' https://cdn.jsdelivr.net;
+object-src 'none'; base-uri 'none'`. `'local'`: local copies, policy as configured.
+`<html data-gramlot-library-source>` carries the value; another value → `TypeError`.
 
 <a id="gn-120-020"></a>
 
