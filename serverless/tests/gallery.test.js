@@ -21,7 +21,7 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     assert.equal(common.e01.presentation, 'content');
     assert.equal(common['grid-10'].presentation, undefined);
     const helloWorker = await readFile(join(output, 'assets/workers/pages/00-html_svg/01-html_basics/01-hello_world.js'), 'utf8');
-    const gridWorker = await readFile(join(output, 'assets/workers/pages/05-grid_editable/10_editing.js'), 'utf8');
+    const gridWorker = await readFile(join(output, 'assets/workers/pages/05-grid/13_editing.js'), 'utf8');
     assert.ok(helloWorker.includes('example-page stack'), 'the content frame is exported');
     assert.ok(gridWorker.includes('super.main(root, ...args)'), 'full-space pages keep their root');
     const editorWorker = await readFile(join(output, 'assets/workers/pages/06-editors/03-html.js'), 'utf8');
