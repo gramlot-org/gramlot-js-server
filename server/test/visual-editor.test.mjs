@@ -71,7 +71,7 @@ test('configured gallery exposes document commands only on its editor and serves
     const runtime = globalThis.Bun ? 'bun' : 'node';
     const app = await startGallery({runtime,editorJavaScript:file,remoteEdit:true});
     t.after(()=>app.close());
-    const opened = await fetch(app.url+'/pages/07-tools/02-advanced/01-visual_source');
+    const opened = await fetch(app.url+'/pages/07-tools/02-visual_source');
     const cookie = opened.headers.get('set-cookie').split(';',1)[0];
     const html = await opened.text();
     const {config} = JSON.parse(html.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
