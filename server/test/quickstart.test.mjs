@@ -15,7 +15,12 @@ test('quick start: the Hello page opens, its Source binds the field and the form
         const html = await opened.text();
         assert.match(html, /<title>Hello<\/title>/);
         const {config, resources} = JSON.parse(html.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
-        assert.deepEqual(resources, {collections: [], css: ['/themes/gramlot-base/theme.css', '/index.css'], js: [{url: '/index.js', group: null}]});
+        assert.ok(resources.collections.some(item=>item.name==='audio'));
+        for (const collection of resources.collections) {
+            const response = await fetch(app.url + collection.url);
+            assert.equal(response.status,200,collection.name);
+        }
+        assert.deepEqual({...resources,collections:[]}, {collections: [], css: ['/themes/gramlot-base/theme.css', '/index.css'], js: [{url: '/index.js', group: null}]});
         const cookie = opened.headers.getSetCookie()[0].split(';')[0];
         const main = await fetch(app.url + config.rpcUrl, {method: 'POST', headers: {'content-type': 'application/json', cookie},
             body: toTytx({id: 'r1', pageId: config.pageId, contentType: 'source', name: 'main', params: {}})});

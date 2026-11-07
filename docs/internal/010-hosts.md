@@ -85,7 +85,7 @@ Block ID: **GN-010-010**.
 
 Run `npm test -w server` for the real Node listener contract
 (`server/test/server.test.mjs`, `quickstart.test.mjs` and `gallery.test.mjs`) and, in
-`server/`, `bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs`
+`server/`, `bun test --timeout 30000 test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs`
 for Bun. The browser harness `server/test/browser.mjs` starts `browser-host.mjs` with the
 given runtime and accepts an installed Playwright module and Chromium executable; run it
 in `server/`:

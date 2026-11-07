@@ -14,7 +14,7 @@ for the core and the other repositories.
 ## What this repository is
 
 This repository runs JavaScript Gramlot pages. It holds three npm packages; the
-current release is 0.3.27, the same version for the three:
+current release is 0.3.28, the same version for the three:
 
 | Package | Directory | Use it when |
 | --- | --- | --- |
@@ -193,13 +193,14 @@ Follow [Update packaged galleries and exports](docs/010-tutorial.md#gn-110-035) 
 ```sh
 npm install
 npm test -w server                                     # Node contract, quick-start and gallery tests
-(cd server && bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs)   # the same on Bun
+(cd server && bun test --timeout 30000 test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs)   # the same on Bun
 npm test -w serverless                                 # exporter and static gallery tests
 npm test -w create                                     # both templates built and started
 python scripts/check_docs.py                           # paired guides and Sphinx build
 ```
 
-CI runs the packages against the released core and, as an informational job,
+CI runs only on request (manual dispatch, or `Publish release` with
+`full_tests`). It runs the packages against the released core and, as an informational job,
 against the core's `main` checkout, and builds the documentation; coverage goes
 to Codecov. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
 The internal notes, including the history of the earlier PoC server, are in

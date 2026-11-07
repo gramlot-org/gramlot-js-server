@@ -61,6 +61,16 @@ test('the window core module exports every name of the core page entry, so a Log
     assert.doesNotMatch(module, /class GramlotBuilder/);
 });
 
+test('Logic imports the page layout collection without bundling a second copy', async t => {
+    const path = await folder(t);
+    const file = join(path, 'layout-logic.js');
+    await writeFile(file, "import layout from '@gramlot/collections/layout'; import tree from '@gramlot/collections/tree'; export class Logic { getCollections() { return [layout, tree]; } }");
+    const module = await logicBundle({file, url:'/layout-logic.js'}, options);
+    assert.match(module, /from [\"']@gramlot\/collections\/layout[\"']/);
+    assert.match(module, /from [\"']@gramlot\/collections\/tree[\"']/);
+    assert.doesNotMatch(module, /class ComponentCollection/);
+});
+
 test('a Logic with typed literals runs against the core of the window', async t => {
     globalThis.GramlotStandalone = await import('../src/standalone.js');
     t.after(() => { delete globalThis.GramlotStandalone; });

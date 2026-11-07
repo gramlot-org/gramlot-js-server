@@ -70,7 +70,7 @@ The earlier sibling-PoC server was removed on 2026-10-01 (GN-005).
 Block ID: **GN-010-010**.
 
 Node contract: `npm test -w server` (`server/test/server.test.mjs`,
-`quickstart.test.mjs`, `gallery.test.mjs`); Bun, in `server/`: `bun test
+`quickstart.test.mjs`, `gallery.test.mjs`); Bun, in `server/`: `bun test --timeout 30000
 test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs`. Browser harness
 `server/test/browser.mjs` (starts `browser-host.mjs`), run in `server/` with Playwright and
 Chromium:

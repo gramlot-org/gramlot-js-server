@@ -46,7 +46,7 @@ export class Page extends Gallery {
 `);
     await writeFile(join(folder, 'index_aux.js'), `export {Logic} from ${JSON.stringify(`${prefix}/gallery/dist/gallery.js`)};\n`);
     const galleryUrls = Object.fromEntries(Object.entries(routes).filter(([key]) => key !== 'index').map(([key, route]) => [key, `${prefix}/${route.url}`]));
-    for (const [routeKey, {page, data, stylesheet, logic, url: key}] of Object.entries(routes)) {
+    for (const [routeKey, {page, data, stylesheet, logic, presentation, url: key}] of Object.entries(routes)) {
         if (routeKey === 'index') continue;
         await mkdir(dirname(join(folder, `${key}.js`)), {recursive:true});
         const codeEditor = routeKey === 'visual_source' && editorJavaScript !== null;
@@ -60,7 +60,7 @@ export class Page extends Example {
     static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
         ${codeEditor ? `this.codeDocument = await this.editorDocuments.document('page');` : ''}
-        await super.main(root, ...args);
+        await super.main(${presentation === 'content' ? "root.main({class: 'example-page stack'})" : 'root'}, ...args);
         root.script({src: ${JSON.stringify(`${prefix}/gallery/dist/frame.js`)}});
     }
 }

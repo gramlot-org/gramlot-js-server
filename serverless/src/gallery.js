@@ -88,7 +88,7 @@ export class Page extends GalleryPage {
 Page.registerEndpoint('navigation_section');
 `);
         const pages = {index: join(stage, 'index.js')};
-        for (const [routeKey, {page, data, stylesheet, logic, url:key}] of Object.entries(routes)) {
+        for (const [routeKey, {page, data, stylesheet, logic, presentation, url:key}] of Object.entries(routes)) {
             if (routeKey === 'index') continue;
             const relativeRoot = '../'.repeat(key.split('/').length);
             const galleryUrls = Object.fromEntries(Object.keys(routes).filter(route => route !== 'index')
@@ -100,7 +100,7 @@ export class Page extends Example {
     static gramlots = collections;
     static galleryUrls = ${JSON.stringify(galleryUrls)};
     async main(root, ...args) {
-        await super.main(root, ...args);
+        await super.main(${presentation === 'content' ? "root.main({class: 'example-page stack'})" : 'root'}, ...args);
         root.script({src: ${JSON.stringify(relativeRoot + 'gallery/dist/frame.js')}});
     }
 }

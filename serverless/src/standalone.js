@@ -46,7 +46,7 @@ class WorkerBootstrap extends PageBootstrap {
  * modules maps each JS resource URL returned by the Worker to the URL the window
  * imports; logic modules never pass through the Worker. */
 export async function mount({workerUrl, modules = {}, element = null, rootId = 'gramlot-root',
-                             document = globalThis.document, signal, assetRoot = null} = {}) {
+                             document = globalThis.document, signal, assetRoot = null, nonce = null} = {}) {
     if (!workerUrl) throw new TypeError('Standalone mount requires a Worker URL');
     const root = exportRoot(assetRoot);
     const transport = new WorkerTransport(new Worker(workerUrl));
@@ -65,6 +65,7 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
         }));
         if (Object.keys(imports).length) {
             const map = document.createElement('script');
+            if (nonce !== null) map.nonce = nonce;
             map.type = 'importmap'; map.textContent = JSON.stringify({imports});
             document.head.append(map);
         }

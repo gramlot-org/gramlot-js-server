@@ -176,3 +176,11 @@ export for pages with prepared collections.
 For an installable root, directory export retains `app.webmanifest`. Startup links
 it only under HTTP/HTTPS, where installation is supported; opening the same
 export via `file:` does not request the web manifest. Child routes do not link it.
+
+
+Standard collections are server-owned defaults for every site, not gallery or
+launcher configuration. Their entry files come from `standardCollectionAssets()`
+and retain the existing artifact fingerprint checks. External engines remain lazy
+in hosted pages. Directory and single-file exports embed the standard bundles
+for file-origin use; the single-file import map uses a generated CSP nonce while
+the runtime script remains hash-authorized. No `unsafe-inline` script policy is added.

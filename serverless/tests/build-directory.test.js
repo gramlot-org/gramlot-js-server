@@ -9,6 +9,8 @@ import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildDirectory, folderPages} from '../src/build-directory.js';
 import {collectionBuildId} from '@gramlot/gramlot';
+import {GramlotServer} from '@gramlot/gramlot/server';
+const standard = new GramlotServer().collections;
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -208,8 +210,8 @@ test('collection code is shared once across routes and its generated asset is re
     vm.runInContext(shared,context);
     vm.runInContext(await readFile(join(output,'assets/workers/index.js'),'utf8'),context);
     await new Promise(resolve=>setTimeout(resolve,0));
-    assert.deepEqual(mounted.map(([key]) => key), ['/components/example/assets/index.js']);
-    const exported = await import('data:text/javascript;base64,' + Buffer.from(mounted[0][1]).toString('base64'));
+    assert.deepEqual(mounted.map(([key]) => key), [...standard.map(item=>item.module), '/components/example/assets/index.js']);
+    const exported = await import('data:text/javascript;base64,' + Buffer.from(mounted.find(([key])=>key==='/components/example/assets/index.js')[1]).toString('base64'));
     assert.deepEqual(exported.default, {sentinel:'sharedCompilerBytes'});
 
     for(const route of ['index','second']){
@@ -285,11 +287,11 @@ class Parent extends BasePage { static gramlots = [${JSON.stringify(descriptors[
 export class Page extends Parent { static gramlots = [${JSON.stringify(descriptors[1])}]; }`);
     await buildDirectory({pages:{index:page, selected}, output, assets});
     const plain = await openExport(output, 'index');
-    assert.deepEqual(plain.modules, []);
-    assert.equal(plain.resources.collections.length, 0);
+    assert.deepEqual(plain.modules, standard.map(item=>item.module));
+    assert.deepEqual(Array.from(plain.resources.collections,item=>item.name), standard.map(item=>item.name));
     const rich = await openExport(output, 'selected');
-    assert.deepEqual(rich.modules, descriptors.map(item => item.module));
-    assert.deepEqual(Array.from(rich.resources.collections, item => item.name), ['foundation', 'widget']);
+    assert.deepEqual(rich.modules, [...standard, ...descriptors].map(item => item.module));
+    assert.deepEqual(Array.from(rich.resources.collections, item => item.name), [...standard.map(item=>item.name), 'foundation', 'widget']);
     assert.deepEqual(Array.from(rich.resources.css), ['/themes/gramlot-base/theme.css', ...descriptors.flatMap(item => item.css)]);
     await assert.rejects(buildDirectory({pages:{index: selected}, output:join(folder,'missing'), assets:[]}), /Collection module asset not provided/);
 });

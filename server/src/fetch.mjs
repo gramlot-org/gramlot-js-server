@@ -1,9 +1,10 @@
+import {fileURLToPath} from 'node:url';
 import {readCollectionArtifact} from './collection-artifact.mjs';
 /** Gramlot server protocol (GC-230) over Request/Response, shared by the Node and Bun socket bridges. */
 import {randomBytes} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {extname} from 'node:path';
-import {GramlotFileServer, InvalidRequest, PageNotFound, ServerCapacity, runtimeAsset} from '@gramlot/gramlot/server';
+import {GramlotFileServer, InvalidRequest, PageNotFound, ServerCapacity, runtimeAsset, standardCollectionAssets} from '@gramlot/gramlot/server';
 
 const OWNER_COOKIE = 'gramlot_owner';
 const COMPANION_TYPES = {'.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8'};
@@ -50,11 +51,13 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
         }
     }
     // A fixed registry is verified before the host accepts requests.
+    const standardAssets = new Map(standardCollectionAssets().map(({url,file})=>[url,fileURLToPath(file)]));
     const collectionResources = new Map();
     const declarations = [...server.collections];
     if (files) for await (const PageClass of server.iterPageClasses()) declarations.push(...server.pageCollections(PageClass));
     for (const collection of server.collectionGraph(declarations)) {
-        const entry = assets[collection.module]?.file;
+        const entry = standardAssets.has(collection.module)
+            ? standardAssets.get(collection.module) : assets[collection.module]?.file;
         if (!entry) throw new Error(`Missing collection resource: ${collection.name}`);
         const expected = `/gramlot/collections/${encodeURIComponent(collection.name)}/${collection.buildId.slice(7)}/assets/index.js`;
         if (collection.module !== expected) throw new Error('Collection URL must contain its verified identity');

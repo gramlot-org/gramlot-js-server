@@ -5,6 +5,7 @@ import * as core from '@gramlot/gramlot';
 import * as components from '@gramlot/gramlot/components';
 import * as page from '@gramlot/gramlot/page';
 import {readCollectionArtifact} from './collection-artifact.js';
+import {embedCollectionAssets} from './collection-assets.js';
 
 const runtimeEntries = {
     '@gramlot/gramlot': core,
@@ -31,7 +32,7 @@ export async function collectionBundle(collection, entry) {
             builder.onLoad({filter:/.*/},args=>{
                 const key=relative(root,args.path).split(sep).join('/');
                 if(!content.has(key))throw new Error(`Unverified collection dependency: ${key}`);
-                return {contents:content.get(key),loader:'js'};
+                return {contents:embedCollectionAssets(content.get(key).toString('utf8'),key,content),loader:'js'};
             });
         }}]});
     return result.outputFiles[0].text;

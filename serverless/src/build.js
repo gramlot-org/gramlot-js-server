@@ -1,3 +1,5 @@
+import {GramlotServer, standardCollectionAssets} from '@gramlot/gramlot/server';
+import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {markdownBundlePlugin} from './markdown-bundle.js';
@@ -18,8 +20,8 @@ const sha256 = text => createHash('sha256').update(text);
  * 'unsafe-inline'; 'unsafe-eval' lets the page compile the inline code of the Source it receives from
  * its Worker, the only inline code the core runs. Named logic runs as well. Connections stay open
  * (`connect-src *`) until the page can declare its own CSP. */
-function policy(script) {
-    return `default-src 'none'; script-src 'sha256-${sha256(script).digest('base64')}' 'unsafe-eval' blob:; worker-src blob:; ` +
+function policy(script, nonce) {
+    return `default-src 'none'; script-src 'sha256-${sha256(script).digest('base64')}' 'nonce-${nonce}' 'unsafe-eval' blob:; worker-src blob:; ` +
         "style-src 'unsafe-inline'; img-src data: blob:; connect-src *; base-uri 'none'; form-action 'none'";
 }
 
@@ -37,6 +39,13 @@ export async function build({page, output}) {
     const styles = await Promise.all((await inlineStylesheets(input, module.Page)).map(file => readFile(file, 'utf8')));
     const worker = (await workerBundle(input, options, {logic: logic?.url ?? null, inlineCss: true})).text;
     const modules = logic ? {[logic.url]: await logicBundle(logic, options)} : {};
+    const standardAssets = new Map(standardCollectionAssets().map(({url,file})=>[url,fileURLToPath(file)]));
+    for (const collection of new GramlotServer().pageCollections(module.Page)) {
+        const entry = standardAssets.get(collection.module);
+        if (!entry) throw new Error(`Single-file export requires a packaged standard collection: ${collection.name}`);
+        modules[collection.module] = await collectionBundle(collection,entry);
+    }
+    const nonce = randomUUID();
     const runtime = (await bundle({...options, globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin()], stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
@@ -44,7 +53,7 @@ export * from './src/standalone.js';
 const blob = text => URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
 const workerUrl = blob(${JSON.stringify(worker)});
 const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));
-mount({workerUrl, modules}).then(app => { globalThis.gramlot=app; })
+mount({workerUrl, modules, nonce:${JSON.stringify(nonce)}}).then(app => { globalThis.gramlot=app; })
     .catch(error => { console.error(error); })
     .finally(() => { for (const url of [workerUrl, ...Object.values(modules)]) URL.revokeObjectURL(url); });`,
     }})).outputFiles[0].text;
@@ -56,7 +65,7 @@ mount({workerUrl, modules}).then(app => { globalThis.gramlot=app; })
     const head = html.head();
     head.meta({charset: 'utf-8'});
     head.meta({name: 'viewport', content: 'width=device-width,initial-scale=1'});
-    head.meta({'http-equiv': 'Content-Security-Policy', content: policy(script)});
+    head.meta({'http-equiv': 'Content-Security-Policy', content: policy(script, nonce)});
     head.title(basename(input, extname(input)));
     // Page.css and foo.css, in load order; the policy allows inline styles only.
     for (const text of styles) head.style(text.replace(/<\/style/gi, '<\\/style'));

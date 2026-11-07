@@ -20,6 +20,7 @@ export const pageNames = Object.keys(corePage).filter(name => name !== 'default'
 const windowCore = {
     name: 'gramlot-window-core',
     setup(build) {
+        build.onResolve({filter: /^@gramlot\/collections\/(?:layout|tree)$/}, args => ({path: args.path, external: true}));
         build.onResolve({filter: /^@gramlot\/gramlot(?:\/page)?$/}, args => ({path: args.path.endsWith('/page') ? 'page' : 'core', namespace: 'gramlot-window-core'}));
         build.onLoad({filter: /.*/, namespace: 'gramlot-window-core'}, args => ({
             contents: `export const {${(args.path === 'page' ? pageNames : Object.keys(core)).join(', ')}} = globalThis.GramlotStandalone;`, loader: 'js',

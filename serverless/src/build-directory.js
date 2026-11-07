@@ -1,3 +1,4 @@
+import {standardCollectionAssets} from '@gramlot/gramlot/server';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
 import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
@@ -192,6 +193,10 @@ export async function buildDirectory({pages, output, assets = [], collections = 
     const declared = registry.collectionGraph(
         Object.values(loaded).flatMap(({module}) => registry.pageCollections(module.Page)));
     const copies = [...assets];
+    for (const {url,file} of standardCollectionAssets()) {
+        const target = url.slice(1);
+        if (!copies.some(asset=>asset.target===target)) copies.push({source:fileURLToPath(file),target});
+    }
     for (const [, {module}] of Object.entries(loaded)) {
         for (const url of pageStyleUrls(module.Page)) {
             const target = url.slice(1);

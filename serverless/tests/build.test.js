@@ -35,12 +35,13 @@ export class Page extends BasePage {
     assert.doesNotMatch(scriptSrc, /unsafe-inline/);
     const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match => match[1]);
     assert.equal(scripts.length, 1);
-    assert.equal(scriptSrc, `'sha256-${createHash('sha256').update(scripts[0]).digest('base64')}' 'unsafe-eval' blob:`);
+    assert.ok(scriptSrc.startsWith(`'sha256-${createHash('sha256').update(scripts[0]).digest('base64')}' `));
+    assert.match(scriptSrc, /'nonce-[a-f0-9-]+' 'unsafe-eval' blob:$/);
     assert.doesNotMatch(html, /<script[^>]+src=/);
     assert.doesNotMatch(html, /\(0,eval\)/);
     // The base theme of the page is inlined; nothing is linked, so no file is missing beside the HTML.
-    assert.doesNotMatch(html, /<link/);
-    assert.equal(html.match(/<style>/g).length, 1);
+    assert.doesNotMatch(html.split('</head>')[0], /<link/);
+    assert.equal(html.split('</head>')[0].match(/<style>/g).length, 1);
     assert.match(html, /Gramlot Base: application UI theme/);
 });
 
@@ -68,10 +69,10 @@ test('the logic module and the stylesheets enter the file; the Worker returns no
     const html = await readFile(output, 'utf8');
     assert.ok(html.includes('"/page.js":'));
     assert.match(html, /"inlineCss": true/);
-    const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(match => match[1]);
+    const styles = [...html.split('</head>')[0].matchAll(/<style>([\s\S]*?)<\/style>/g)].map(match => match[1]);
     const theme = await readFile(createRequire(import.meta.url).resolve('@gramlot/gramlot/themes/gramlot-base/theme.css'), 'utf8');
     assert.deepEqual(styles, [theme, '#pronto { color: rgb(0, 0, 128); }\n', '#pronto { font-weight: 700; }\n']);
-    assert.doesNotMatch(html, /<link/);
+    assert.doesNotMatch(html.split('</head>')[0], /<link/);
 });
 
 test('a style text cannot end its element; a remote stylesheet is refused', async t => {

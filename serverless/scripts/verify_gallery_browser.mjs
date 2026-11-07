@@ -24,6 +24,12 @@ const keys = Object.keys(routes);
 
 // One behaviour per page with named logic, from scripts/verify_pages_browser.mjs of gramlot-examples.
 const LOGIC = {
+    async 'grid-charts'(page) {
+        await page.locator('#sales-chart-view svg').waitFor();
+        await page.getByRole('button', {name:'Chart settings', exact:true}).click();
+        await page.locator('#sales-chart-engine').selectOption('plotly');
+        await page.locator('#sales-chart-view .js-plotly-plot').waitFor();
+    },
     async b08(page, text) {
         await page.click('#freeze');
         assert.equal(await text('#frozen'), 'Structural updates frozen: true');

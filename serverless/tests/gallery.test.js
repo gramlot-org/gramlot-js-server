@@ -18,6 +18,14 @@ test('the static gallery: index, one route per example, stylesheets, logic modul
     const result = await buildStaticGallery({output});
     const families = JSON.parse(await readFile(catalog, 'utf8')).families;
     const common = buildGallery().routes;
+    assert.equal(common.e01.presentation, 'content');
+    assert.equal(common['grid-10'].presentation, undefined);
+    const helloWorker = await readFile(join(output, 'assets/workers/pages/00-html_svg/01-html_basics/01-hello_world.js'), 'utf8');
+    const gridWorker = await readFile(join(output, 'assets/workers/pages/05-grid_editable/10_editing.js'), 'utf8');
+    assert.ok(helloWorker.includes('example-page stack'), 'the content frame is exported');
+    assert.ok(gridWorker.includes('super.main(root, ...args)'), 'full-space pages keep their root');
+    const editorWorker = await readFile(join(output, 'assets/workers/pages/06-editors/03-html.js'), 'utf8');
+    assert.ok(editorWorker.includes('super.main(root, ...args)'), 'editors keep their root');
     const url = key => common[key].url;
     assert.deepEqual([...result.routes].sort(), ['index', ...Object.entries(common).filter(([key]) => key !== 'index').map(([, route]) => route.url), 'pages/serverless_pages/02_registration'].sort());
     await assert.rejects(stat(join(output, 'serverless-01/index.html')), {code: 'ENOENT'});

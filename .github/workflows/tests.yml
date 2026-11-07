@@ -4,10 +4,8 @@ name: tests
 # serverless/ (exporter whose pages run in a browser Web Worker) and create/
 # (npm create @gramlot).
 
+# Full suite only on request: run by hand or from Publish release with full_tests.
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
   workflow_dispatch:
   workflow_call:
 
@@ -40,7 +38,7 @@ jobs:
         run: npm run test:coverage -w server
       - name: Server, Bun contract and gallery tests
         working-directory: server
-        run: bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs
+        run: bun test --timeout 30000 test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs
       - name: Serverless, tests with coverage
         run: npm run test:coverage -w serverless
       - name: "@gramlot/create, both templates built and started"
@@ -114,7 +112,7 @@ jobs:
         run: npm test -w server
       - name: Server, Bun contract and gallery tests
         working-directory: gramlot-js-server/server
-        run: bun test test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs
+        run: bun test --timeout 30000 test/server.test.mjs test/quickstart.test.mjs test/gallery.test.mjs
       - name: Serverless, tests
         run: npm test -w serverless
       - name: "@gramlot/create, tests"

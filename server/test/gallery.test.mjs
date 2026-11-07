@@ -18,6 +18,12 @@ test('the gallery stages one route per example under the mount prefix', async ()
     const get = path => fetch(app.url + path);
     try {
         assert.equal(app.galleryUrl, `${app.url}/js/`);
+        const framed = readFileSync(`${app.pages}/pages/00-html_svg/01-html_basics/01-hello_world.js`, 'utf8');
+        const full = readFileSync(`${app.pages}/pages/05-grid_editable/10_editing.js`, 'utf8');
+        assert.ok(framed.includes("super.main(root.main({class: 'example-page stack'}), ...args)"));
+        assert.ok(full.includes('super.main(root, ...args)'));
+        const editor = readFileSync(`${app.pages}/pages/06-editors/03-html.js`, 'utf8');
+        assert.ok(editor.includes('super.main(root, ...args)'));
         assert.ok(readFileSync(`${app.pages}/index.js`, "utf8").includes('logoUrl = "/js/assets/branding/svg/gramlot-horizontal-primary.svg"'));
         assert.match(readFileSync(`${app.pages}/index.js`, 'utf8'), /serverlessDownloadUrl = "\/downloads\/gallery.zip"/);
         const companion = `${app.pages}/pages/02-binding/01-paths_and_updates/foo_data.tytx`;
