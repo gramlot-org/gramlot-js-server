@@ -1,8 +1,8 @@
 import {fileURLToPath} from 'node:url';
 import {readCollectionArtifact} from './collection-artifact.mjs';
 /** Gramlot server protocol (GC-230) over Request/Response, shared by the Node and Bun socket bridges. */
-import {randomBytes} from 'node:crypto';
-import {readFile} from 'node:fs/promises';
+import {createHash, randomBytes} from 'node:crypto';
+import {readFile, stat} from 'node:fs/promises';
 import {extname} from 'node:path';
 import {GramlotFileServer, InvalidRequest, PageNotFound, ServerCapacity, runtimeAsset, standardCollectionAssets} from '@gramlot/gramlot/server';
 
@@ -20,6 +20,26 @@ const MEDIA_TYPES = {
 const cookieOwner = request => (request.headers.get('cookie') ?? '').split(';').map(part => part.trim())
     .find(part => part.startsWith(`${OWNER_COOKIE}=`))?.slice(OWNER_COOKIE.length + 1) || null;
 
+/** The validators of a revalidated file: a strong ETag, the SHA-256 of its bytes, and Last-Modified,
+ * its modification time. */
+const validatorsOf = (bytes, mtime) => ({
+    etag: `"${createHash('sha256').update(bytes).digest('hex')}"`,
+    modified: new Date(Math.floor(mtime.getTime() / 1000) * 1000).toUTCString(),
+});
+
+/** Whether the conditions of request select the copy the browser already has. If-None-Match uses the
+ * weak comparison; If-Modified-Since counts only without If-None-Match, and a date that cannot be parsed
+ * is ignored. */
+const notModified = (request, {etag, modified}) => {
+    const match = request.headers.get('if-none-match');
+    if (match) {
+        const tags = match.split(',').map(tag => tag.trim().replace(/^W\//, ''));
+        return tags.includes('*') || tags.includes(etag);
+    }
+    const since = Date.parse(request.headers.get('if-modified-since') ?? '');
+    return !Number.isNaN(since) && Date.parse(modified) <= since;
+};
+
 /** mountPath is the mount prefix: openPage adds it to the browser URLs and every request
  * path carries it; the adapter removes it, answers 404 outside it and redirects the prefix
  * without its final slash. For any GramlotServer, GET and HEAD serve the file of its themeFile
@@ -30,8 +50,12 @@ const cookieOwner = request => (request.headers.get('cookie') ?? '').split(';').
  * application files served by GET and HEAD. Order: runtime, themes, assets, companions, pages. A GET of
  * <path>/index.html opens the page <path>, and /index.html the index, as a static host does (openPage).
  * contentSecurityPolicy is the application's policy, sent on each HTML page with {nonce} replaced by the
- * bootstrap nonce. Every 405 carries an Allow header; the runtime answers Cache-Control no-cache and the
- * other responses no-store.
+ * bootstrap nonce. Every 405 carries an Allow header. The runtime, the Markdown runtime and the files of
+ * the core themes are revalidated files: they answer Cache-Control no-cache with a strong ETag (the SHA-256
+ * of the content) and Last-Modified, and 304 with no body when If-None-Match matches the ETag or, without
+ * If-None-Match, If-Modified-Since is not older than the file. The ETag of the runtimes is computed at
+ * startup, that of a theme file once for each path, modification time and size. The collection files
+ * answer public, max-age=31536000, immutable; the other responses no-store.
  * The owner of a request is the application's, ownerForRequest(request), when it is given. Without it each
  * browser is its own owner through the cookie gramlot_owner, which a page response sets (Path of the mount
  * prefix, HttpOnly, SameSite=Lax, a session cookie) and the browser sends back. POST of rpcUrl passes the
@@ -68,13 +92,23 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
         }
     }
     const runtime = await readFile(runtimeAsset());
+    const runtimeValidators = validatorsOf(runtime, (await stat(runtimeAsset())).mtime);
     const markdown = await readFile(runtimeAsset("gramlot-markdown.js"));
+    const markdownValidators = validatorsOf(markdown, (await stat(runtimeAsset("gramlot-markdown.js"))).mtime);
+    // The validators of the theme files: filename -> {stamp: mtime and size, validators}.
+    const themeValidators = new Map();
     const ownerOf = ownerForRequest ?? (async request => cookieOwner(request));
     return {server, prefix, async fetch(request) {
         const url = new URL(request.url);
         const reply = (body, status, type = 'text/plain; charset=utf-8', headers = {}) =>
             new Response(body, {status, headers: {'Content-Type': type, 'Cache-Control': 'no-store', ...headers}});
         const refuse = allow => reply('Method not allowed', 405, undefined, {Allow: allow});
+        // A revalidated file: 304 when the browser copy is current, else 200; read() gives the bytes.
+        const revalidated = async (validators, read, type, headers = {}) => {
+            const common = {'Cache-Control': 'no-cache', ETag: validators.etag, 'Last-Modified': validators.modified, ...headers};
+            if (notModified(request, validators)) return reply(null, 304, type, common);
+            return reply(request.method === 'HEAD' ? null : await read(), 200, type, common);
+        };
         const reading = ['GET', 'HEAD'].includes(request.method);
         if (prefix && url.pathname === prefix) return reply(null, 301, undefined, {Location: `${prefix}/${url.search}`});
         if (prefix && !url.pathname.startsWith(`${prefix}/`)) return reply('Not found', 404);
@@ -103,19 +137,27 @@ export async function createDispatch({pages, server = null, ownerForRequest = nu
         }
         if (path === server.markdownUrl) {
             if (!reading) return refuse("GET, HEAD");
-            return reply(request.method === "HEAD" ? null : markdown, 200, COMPANION_TYPES[".js"],
-                {"Cache-Control":"no-cache", "X-Content-Type-Options":"nosniff"});
+            return revalidated(markdownValidators, () => markdown, COMPANION_TYPES['.js'],
+                {'X-Content-Type-Options': 'nosniff'});
         }
         if (path === server.runtimeUrl) {
             if (!reading) return refuse('GET, HEAD');
-            return reply(request.method === 'HEAD' ? null : runtime, 200, COMPANION_TYPES['.js'],
-                {'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff'});
+            return revalidated(runtimeValidators, () => runtime, COMPANION_TYPES['.js'],
+                {'X-Content-Type-Options': 'nosniff'});
         }
         if (path.startsWith('/themes/')) {
             const filename = await server.themeFile(path);
             if (filename) {
                 if (!reading) return refuse('GET, HEAD');
-                return reply(request.method === 'HEAD' ? null : await readFile(filename), 200,
+                const {mtime, mtimeMs, size} = await stat(filename);
+                const stamp = `${mtimeMs}:${size}`;
+                let known = themeValidators.get(filename), bytes = null;
+                if (known?.stamp !== stamp) {
+                    bytes = await readFile(filename);
+                    known = {stamp, validators: validatorsOf(bytes, mtime)};
+                    themeValidators.set(filename, known);
+                }
+                return revalidated(known.validators, async () => bytes ?? readFile(filename),
                     MEDIA_TYPES[extname(filename).toLowerCase()] ?? 'application/octet-stream');
             }
         }

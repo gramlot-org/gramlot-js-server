@@ -45,7 +45,7 @@ In order, each path under `mountPath`:
 | `POST` | `/gramlot/close` | `{pageId}` | 200 `{"ok":true}` |
 | `GET` | page path, `<path>/index.html` | — | 200 HTML bootstrap, CSP header when configured, `Set-Cookie: gramlot_owner` |
 
-Page/RPC and ordinary assets use `Cache-Control: no-store`; runtime uses `no-cache` with `X-Content-Type-Options: nosniff`. Verified collection files use fingerprinted URLs and `public, max-age=31536000, immutable`, serving the bytes verified at startup.
+Page/RPC and ordinary assets use `Cache-Control: no-store`; runtime adds `X-Content-Type-Options: nosniff`. Runtime, Markdown runtime and theme files use `no-cache` with a strong `ETag` (SHA-256 of the content; runtimes at startup, theme files once per path, mtime and size) and `Last-Modified`; a matching `If-None-Match`, or without it an `If-Modified-Since` not older than the file, answers 304 with no body. Verified collection files use fingerprinted URLs and `public, max-age=31536000, immutable`, serving the bytes verified at startup.
 A page response sets the cookie `gramlot_owner`. Every 405 has `Allow`: `GET, HEAD` runtime, themes,
 assets, companions, manifest; `POST` rpc, close; `GET` page (`HEAD` on a page: 405). Rules of the
 public [server protocol](https://gramlot.readthedocs.io/en/latest/docs/public/101-server-protocol.html), Part B.

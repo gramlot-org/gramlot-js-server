@@ -145,8 +145,8 @@ describes the prepared collection contract.
 Block ID: **GN-120-040**.
 
 The core's `markdownUrl` is the sibling `gramlot-markdown.js` of `runtimeUrl`.
-The host serves this packaged asset with JavaScript media type and `no-cache`,
-using GET or HEAD; the bootstrap import map prefixes it with the mount path.
+The host serves this packaged asset with JavaScript media type, `no-cache`, `ETag`
+and `Last-Modified`, using GET or HEAD, and answers 304 to a matching condition; the bootstrap import map prefixes it with the mount path.
 Registering collections does not fetch the parser. It loads once when an editor,
 preview, guide or gallery description first needs Markdown. Deploy the matching
 core runtime, optional asset and prepared collections together.
