@@ -19,7 +19,7 @@ test('the gallery stages one route per example under the mount prefix', async ()
     try {
         assert.equal(app.galleryUrl, `${app.url}/js/`);
         const framed = readFileSync(`${app.pages}/pages/00-html_svg/01-html_basics/01-hello_world.js`, 'utf8');
-        const full = readFileSync(`${app.pages}/pages/05-grid_editable/10_editing.js`, 'utf8');
+        const full = readFileSync(`${app.pages}/pages/05-grid/13_editing.js`, 'utf8');
         assert.ok(framed.includes("super.main(root.main({class: 'example-page stack'}), ...args)"));
         assert.ok(full.includes('super.main(root, ...args)'));
         const editor = readFileSync(`${app.pages}/pages/06-editors/03-html.js`, 'utf8');

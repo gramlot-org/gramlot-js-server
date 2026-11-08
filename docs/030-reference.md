@@ -63,7 +63,12 @@ Paths are shown with the default `GramlotServer` options and without mount prefi
 | `GET` | any page path (`/`, `/orders`, `/orders/index.html`) | — | 200 `text/html`, the bootstrap document; `Content-Security-Policy` when configured; `Set-Cookie: gramlot_owner=…` |
 
 Page and RPC responses carry `Cache-Control: no-store`. The runtime carries
-`Cache-Control: no-cache` and `X-Content-Type-Options: nosniff`. Verified collection
+`X-Content-Type-Options: nosniff`. The runtime, the Markdown runtime and the theme
+files carry `Cache-Control: no-cache`, a strong `ETag` (the SHA-256 of the content)
+and `Last-Modified`. A `GET` or `HEAD` of one of them whose `If-None-Match` matches the
+`ETag`, or without `If-None-Match` whose `If-Modified-Since` is not older than the
+file, answers 304 with no body. The `ETag` of the runtimes is computed at startup,
+that of a theme file once for each path, modification time and size. Verified collection
 assets use fingerprinted URLs and `Cache-Control: public, max-age=31536000, immutable`;
 the process serves the bytes verified at startup. Other assets remain `no-store`.
 A page response sets the owner cookie `gramlot_owner` ([Configuration](020-configuration.md)).

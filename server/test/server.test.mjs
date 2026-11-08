@@ -164,7 +164,7 @@ test('mount prefix: bootstrap URLs carry it once; requests carry it, outside it 
 for (const [name, policy] of [['strict', STRICT_CSP], ['permissive', PERMISSIVE_CSP]]) {
     test(`${name} CSP: the application policy is sent with the bootstrap nonce of each opening`, async () => {
         const {folder, pages} = await pagesFolder();
-        const app = await startServer({pages, contentSecurityPolicy: policy});
+        const app = await startServer({pages, contentSecurityPolicy: policy, librarySource: 'local'});
         try {
             const first = await fetch(app.url + '/'), second = await fetch(app.url + '/');
             const nonces = [];
@@ -180,6 +180,28 @@ for (const [name, policy] of [['strict', STRICT_CSP], ['permissive', PERMISSIVE_
         } finally { await app.close(); await rm(folder, {recursive: true}); }
     });
 }
+
+for (const source of ['cdn', 'local']) {
+    test(`library source ${source}: it reaches the policy and the document`, async () => {
+        const {folder, pages} = await pagesFolder();
+        const app = await startServer({pages, contentSecurityPolicy: STRICT_CSP, librarySource: source});
+        try {
+            const response = await fetch(app.url + '/');
+            const html = await response.text();
+            const policy = response.headers.get('content-security-policy');
+            assert.ok(policy.includes(`'nonce-${bootstrap(html).nonce}'`));
+            assert.equal(policy.includes('https://cdn.jsdelivr.net'), source === 'cdn');
+            assert.ok(html.includes(`<html data-gramlot-library-source="${source}">`));
+        } finally { await app.close(); await rm(folder, {recursive: true}); }
+    });
+}
+
+test('an unknown library source is refused', async () => {
+    const {folder, pages} = await pagesFolder();
+    try {
+        await assert.rejects(startServer({pages, librarySource: 'unpkg'}), /library source must be 'cdn' or 'local'/);
+    } finally { await rm(folder, {recursive: true}); }
+});
 
 test('companions and Page.css files below the pages folder; every other file 404', async () => {
     const {folder, pages} = await pagesFolder();
@@ -302,10 +324,11 @@ test('/themes/* is served by a plain GramlotServer too, under the prefix; the pa
     } finally { await app.close(); }
 });
 
-// The check of the renewal of a page (item 18) takes 2.5 times the pageTtl of the server.
+// The check of the renewal of a page (item 18) takes 2.5 times the pageTtl of the server: more than the
+// default timeout of 5 s of bun test, hence the explicit timeout.
 for (const [label, options] of [['without a mount prefix', {}],
     ['with a mount prefix and a policy', {mountPath: '/app', contentSecurityPolicy: STRICT_CSP}]]) {
-    test(`GC-230: checkProtocol passes on the conformance page, ${label}`, async () => {
+    test(`GC-230: checkProtocol passes on the conformance page, ${label}`, {timeout: 30000}, async () => {
         const pages = fileURLToPath(new URL('./fixtures/conformance/', import.meta.url));
         const app = await startServer({pages, pageTtl: 3, ...options});
         try { await checkProtocol(app.url + (options.mountPath ?? ''), '/', {pageTtl: 3}); }
@@ -354,7 +377,7 @@ test('GC-230 §135: each browser is its own owner by the cookie gramlot_owner; o
     }
 });
 
-test('every 405 lists the methods of the URL in Allow; the runtime is no-cache, the other responses no-store', async () => {
+test('every 405 lists the methods of the URL in Allow; the runtime and the themes are no-cache, the other responses no-store', async () => {
     const {folder, pages} = await pagesFolder();
     const logo = join(folder, 'logo.svg');
     await writeFile(logo, '<svg/>');
@@ -381,7 +404,8 @@ test('every 405 lists the methods of the URL in Allow; the runtime is no-cache, 
         }
         const cache = async path => (await send('GET', path)).headers.get('cache-control');
         assert.equal(await cache('/assets/gramlot.js'), 'no-cache');
-        for (const path of ['/', '/themes/gramlot-base/theme.css', '/img/logo.svg', '/index.css', '/missing']) {
+        assert.equal(await cache('/themes/gramlot-base/theme.css'), 'no-cache');
+        for (const path of ['/', '/img/logo.svg', '/index.css', '/missing']) {
             assert.equal(await cache(path), 'no-store', path);
         }
         assert.equal((await send('GET', '/assets/gramlot.js')).headers.get('x-content-type-options'), 'nosniff');
@@ -451,6 +475,60 @@ for (const [label, contentType, status] of [
         });
     }
 }
+
+test('the runtime, the Markdown runtime and the themes answer 200 with ETag, then 304 to their validators', async () => {
+    const {folder, pages} = await pagesFolder();
+    const app = await startServer({pages, mountPath: '/app'});
+    try {
+        for (const path of ['/assets/gramlot.js', '/assets/gramlot-markdown.js', '/themes/gramlot-base/theme.css']) {
+            const url = app.url + '/app' + path;
+            const first = await fetch(url);
+            assert.equal(first.status, 200, path);
+            assert.ok((await first.arrayBuffer()).byteLength > 0, path);
+            assert.equal(first.headers.get('cache-control'), 'no-cache', path);
+            const etag = first.headers.get('etag');
+            assert.match(etag, /^"[0-9a-f]{64}"$/, path);
+            const modified = first.headers.get('last-modified');
+            assert.match(modified, / GMT$/, path);
+            for (const headers of [{'if-none-match': etag}, {'if-none-match': `"other", W/${etag}`},
+                {'if-none-match': '*'}, {'if-modified-since': modified}]) {
+                const again = await fetch(url, {headers});
+                assert.equal(again.status, 304, `${path} ${JSON.stringify(headers)}`);
+                assert.equal(await again.text(), '', path);
+                assert.equal(again.headers.get('etag'), etag, path);
+                assert.equal(again.headers.get('cache-control'), 'no-cache', path);
+            }
+            const head = await fetch(url, {method: 'HEAD', headers: {'if-none-match': etag}});
+            assert.equal(head.status, 304, path);
+            for (const headers of [{'if-none-match': '"other"'}, {'if-modified-since': 'Mon, 01 Jan 2001 00:00:00 GMT'},
+                {'if-modified-since': 'not a date'}, {'if-none-match': '"other"', 'if-modified-since': modified}]) {
+                const fresh = await fetch(url, {headers});
+                assert.equal(fresh.status, 200, `${path} ${JSON.stringify(headers)}`);
+                assert.ok((await fresh.arrayBuffer()).byteLength > 0, path);
+            }
+        }
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
+});
+
+test('a theme file changed on disk gets a new ETag', async () => {
+    const folder = await mkdtemp(join(tmpdir(), 'gramlot-theme-'));
+    const file = join(folder, 'theme.css');
+    await writeFile(file, 'h1 {}');
+    class ThemeServer extends TestServer {
+        async themeFile(path) { return path === '/themes/local/theme.css' ? file : null; }
+    }
+    const app = await startServer({server: new ThemeServer()});
+    try {
+        const url = app.url + '/themes/local/theme.css';
+        const etag = (await fetch(url)).headers.get('etag');
+        assert.equal((await fetch(url, {headers: {'if-none-match': etag}})).status, 304);
+        await writeFile(file, 'h1 { color: teal; }');
+        const changed = await fetch(url, {headers: {'if-none-match': etag}});
+        assert.equal(changed.status, 200);
+        assert.equal(await changed.text(), 'h1 { color: teal; }');
+        assert.notEqual(changed.headers.get('etag'), etag);
+    } finally { await app.close(); await rm(folder, {recursive: true}); }
+});
 
 test('optional Markdown asset follows runtime URL and mount prefix with GET/HEAD only', async () => {
     const server=new TestServer({runtimeUrl:'/scripts/core.js'});
