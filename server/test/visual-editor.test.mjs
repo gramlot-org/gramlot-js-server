@@ -65,13 +65,14 @@ test('concurrent saves have one winner; saving never executes the module; previe
     await assert.rejects(service.preview(new GramlotBuilder().root,{key:'page',revision:saved.revision,data_root:'data'}), /changed/);
 });
 
-test('configured gallery exposes document commands only on its editor and serves saved preview over RPC', async t => {
+// The test stages the whole gallery: under bun test it can exceed the default timeout of 5 s.
+test('configured gallery exposes document commands only on its editor and serves saved preview over RPC', {timeout: 30000}, async t => {
     const {file,service} = await fixture(t);
     const document = await service.document('page');
     const runtime = globalThis.Bun ? 'bun' : 'node';
     const app = await startGallery({runtime,editorJavaScript:file,remoteEdit:true});
     t.after(()=>app.close());
-    const opened = await fetch(app.url+'/pages/07-tools/02-advanced/01-visual_source');
+    const opened = await fetch(app.url+'/pages/07-tools/02-visual_source');
     const cookie = opened.headers.get('set-cookie').split(';',1)[0];
     const html = await opened.text();
     const {config} = JSON.parse(html.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
