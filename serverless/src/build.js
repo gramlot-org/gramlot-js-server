@@ -1,8 +1,9 @@
-import {GramlotServer, standardCollectionAssets} from '@gramlot/gramlot/server';
+import {GramlotServer, collectionAssets} from '@gramlot/gramlot/server';
 import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {markdownBundlePlugin} from './markdown-bundle.js';
+import {absentPackagePlugin} from './absent-packages.js';
 import {checkPage, inlineStylesheets, loadPage, logicBundle, logicModule, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {readFile, writeFile, mkdir, rename, rm} from 'node:fs/promises';
@@ -39,14 +40,15 @@ export async function build({page, output}) {
     const styles = await Promise.all((await inlineStylesheets(input, module.Page)).map(file => readFile(file, 'utf8')));
     const worker = (await workerBundle(input, options, {logic: logic?.url ?? null, inlineCss: true})).text;
     const modules = logic ? {[logic.url]: await logicBundle(logic, options)} : {};
-    const standardAssets = new Map(standardCollectionAssets().map(({url,file})=>[url,fileURLToPath(file)]));
+    const coreAssets = new Map(collectionAssets().map(({url,file})=>[url,fileURLToPath(file)]));
+    // The standard collections and those the page declares in Page.gramlots: an undeclared typst stays out.
     for (const collection of new GramlotServer().pageCollections(module.Page)) {
-        const entry = standardAssets.get(collection.module);
-        if (!entry) throw new Error(`Single-file export requires a packaged standard collection: ${collection.name}`);
+        const entry = coreAssets.get(collection.module);
+        if (!entry) throw new Error(`Single-file export requires a collection packaged with the core: ${collection.name}`);
         modules[collection.module] = await collectionBundle(collection,entry);
     }
     const nonce = randomUUID();
-    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin()], stdin: {
+    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin(), absentPackagePlugin], stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
 export * from './src/standalone.js';
