@@ -238,8 +238,13 @@ use the same protocol. No alternate File reader was added.
 
 
 Standard collections are server-owned defaults for every site, not gallery or
-launcher configuration. Their entry files come from `standardCollectionAssets()`
-and retain the existing artifact fingerprint checks. External engines remain lazy
-in hosted pages. Directory and single-file exports embed the standard bundles
-for file-origin use; the single-file import map uses a generated CSP nonce while
+launcher configuration. A page adds a collection packaged with the core but outside
+the standard set (`typst`) in `Page.gramlots`. The entry files of both come from
+`collectionAssets()` and retain the existing artifact fingerprint checks; custom
+collections come from `assets`. The server and the exports serve only the
+collections of the page graph, so the typst WebAssembly reaches only the pages that
+declare it (gramlot-org/gramlot#84). External engines remain lazy in hosted pages.
+Directory and single-file exports embed the bundles of that graph for file-origin
+use; the window runtime of an export leaves out big.js and @xmldom/xmldom, which the
+Worker keeps; the single-file import map uses a generated CSP nonce while
 the runtime script remains hash-authorized. No `unsafe-inline` script policy is added.
