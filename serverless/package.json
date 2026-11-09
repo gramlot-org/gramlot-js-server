@@ -37,7 +37,8 @@
     "gallery",
     "src/collection-bundle.js",
     "src/collection-artifact.js",
-    "src/collection-assets.js"
+    "src/collection-assets.js",
+    "src/absent-packages.js"
   ],
   "scripts": {
     "test": "node --test tests/*.test.js",
