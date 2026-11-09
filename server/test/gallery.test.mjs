@@ -45,7 +45,12 @@ test('the gallery stages one route per example under the mount prefix', async ()
             .match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
         assert.deepEqual(main.resources.css.at(-1), '/js/pages/00-html_svg/02-native_controls/01-forms.css');
         assert.ok(main.resources.collections.some(item => item.name === 'grid'));
-        assert.ok(main.resources.collections.some(item => item.name === 'typst'));
+        // typst is outside the standard set (gramlot-org/gramlot#84): only its lesson declares it.
+        assert.ok(!main.resources.collections.some(item => item.name === 'typst'));
+        const typstHtml = await get('/js/pages/06-editors/05-typst').then(response => response.text());
+        const typst = JSON.parse(typstHtml.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
+        const typstCollection = typst.resources.collections.find(item => item.name === 'typst');
+        assert.equal((await get(typstCollection.url)).status, 200);
         const textboxHtml = await get('/js/pages/01-inputs/01-text/01-textbox').then(response => response.text());
         const textbox = JSON.parse(textboxHtml.match(/new PageBootstrap\((.*)\)\.run\(\)/s)[1]);
         assert.deepEqual(textbox.resources.collections.map(item => item.name), main.resources.collections.map(item => item.name));

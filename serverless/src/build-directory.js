@@ -1,4 +1,5 @@
-import {standardCollectionAssets} from '@gramlot/gramlot/server';
+import {collectionAssets} from '@gramlot/gramlot/server';
+import {absentPackagePlugin} from './absent-packages.js';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
 import {collectionBundle} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
@@ -193,7 +194,11 @@ export async function buildDirectory({pages, output, assets = [], collections = 
     const declared = registry.collectionGraph(
         Object.values(loaded).flatMap(({module}) => registry.pageCollections(module.Page)));
     const copies = [...assets];
-    for (const {url,file} of standardCollectionAssets()) {
+    // The collections of the page graph only: the standard set and those the pages declare in Page.gramlots.
+    const coreAssets = new Map(collectionAssets().map(({url,file})=>[url,file]));
+    for (const {module: url} of declared) {
+        const file = coreAssets.get(url);
+        if (!file) continue;
         const target = url.slice(1);
         if (!copies.some(asset=>asset.target===target)) copies.push({source:fileURLToPath(file),target});
     }
@@ -212,7 +217,7 @@ export async function buildDirectory({pages, output, assets = [], collections = 
     await mkdir(stage);
     try {
         await mkdir(join(stage, 'assets/workers'), {recursive: true});
-        const runtime = await bundle({...workerOptions, entryPoints: [standalone], globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin()]});
+        const runtime = await bundle({...workerOptions, entryPoints: [standalone], globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin(), absentPackagePlugin]});
         await writeFile(join(stage, 'assets/standalone.js'), runtime.outputFiles[0].text);
         await writeFile(join(stage, 'assets/runtime-notices.json'),
             JSON.stringify(await runtimeNotices(core.runtime), null, 2) + '\n');
