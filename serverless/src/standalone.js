@@ -63,6 +63,11 @@ export async function mount({workerUrl, modules = {}, element = null, rootId = '
             if (!Object.hasOwn(modules,url)) throw new TypeError(`Standalone collection not provided: ${url}`);
             return [`@gramlot/collections/${encodeURIComponent(name)}`,modules[url]];
         }));
+        // loadLibrary imports the local copy of a third-party library as @gramlot/libraries/<name> (GC-325 §160).
+        for (const [name, url] of Object.entries(resources.libraries ?? {})) {
+            if (!Object.hasOwn(modules, url)) throw new TypeError(`Standalone library not provided: ${url}`);
+            imports[`@gramlot/libraries/${name}`] = modules[url];
+        }
         if (Object.keys(imports).length) {
             const map = document.createElement('script');
             if (nonce !== null) map.nonce = nonce;
