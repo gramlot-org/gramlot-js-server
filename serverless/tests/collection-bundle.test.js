@@ -41,7 +41,7 @@ test('artifact tampering stops derived bundling',async t=>{
     await assert.rejects(collectionBundle(collection,join(root,'assets/index.js')),/fingerprint mismatch/);
 });
 
-test('file-derived layout uses the window runtime factory and sanitizes reactive drawer labels', async t => {
+test('file-derived layout reads the runtime collection and sanitizes reactive drawer labels', async t => {
     const {JSDOM} = await import('jsdom');
     const {window} = new JSDOM('<main id="gramlot-root"></main>');
     t.after(() => window.close());
@@ -53,12 +53,10 @@ test('file-derived layout uses the window runtime factory and sanitizes reactive
     const collection = collections.find(c => c.name === 'layout');
     const code = await collectionBundle(collection, fileURLToPath(files[collection.module]));
     assert.doesNotMatch(code, /DOMPurify \d+\./);
-    let calls = 0;
+    // Since core 0.3.38 the artifact reads layout from the runtime, which sanitizes the labels.
+    assert.match(code, /sharedModules\["\.\/components\/layout\.js"\]/);
     const previous = globalThis.GramlotStandalone;
-    globalThis.GramlotStandalone = {...core, createDOMPurify(view) {
-        assert.equal(view, window); calls++;
-        return core.createDOMPurify(view);
-    }};
+    globalThis.GramlotStandalone = core;
     t.after(() => {globalThis.GramlotStandalone = previous;});
     const {default: layout} = await import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
     const app = new core.Gramlot({document:window.document, transport:false, collections:[layout]});
@@ -71,7 +69,6 @@ test('file-derived layout uses the window runtime factory and sanitizes reactive
     app.src.startSource(builder.toTytx());
     await new Promise(resolve => setTimeout(resolve, 0));
     const label = window.document.getElementById('border').shadowRoot.querySelector('.separator[data-side=right] button');
-    assert.equal(calls, 1);
     assert.equal(label.querySelector('b').textContent, 'Safe');
     assert.equal(label.querySelector('[onerror]'), null);
     app.data.setItem('caption', '<em>Updated</em><script>bad()</script>');
@@ -83,7 +80,8 @@ test('file-derived layout uses the window runtime factory and sanitizes reactive
 test('derived grid keeps its declared input dependency external', async () => {
     const collection = collections.find(c => c.name === 'grid');
     const code = await collectionBundle(collection, fileURLToPath(files[collection.module]));
-    assert.match(code, /from "@gramlot\/collections\/inputs"/);
+    // Since core 0.3.38 the runtime carries the standard collections: the artifact reads grid from it.
+    assert.match(code, /sharedModules\["\.\/components\/grid\.js"\]/);
     assert.doesNotMatch(code, /class EditingSession|class FieldState/);
 });
 

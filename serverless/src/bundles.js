@@ -1,4 +1,6 @@
 import {build as bundle} from 'esbuild';
+import {absentPackagePlugin, libraryPlugin} from '@gramlot/gramlot/build-plugins';
+import {coreAssetPlugin} from './collection-assets.js';
 import {SourceBag} from '@genrojs/builders';
 import {fromTytx} from '@genrojs/tytx';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
@@ -124,7 +126,8 @@ export async function workerBundle(page, options, {logic = null, stylesheet = nu
         const data = fromTytx(initialData);
         if (!(data instanceof corePage.Bag) || data instanceof SourceBag) throw new TypeError('Initial page data must be a Data Bag');
     }
-    const result = await bundle({...options, metafile: true, stdin: {
+    // The Worker keeps @xmldom/xmldom (it has no DOMParser); the libraries of components load only in the window.
+    const result = await bundle({...options, metafile: true, plugins: [libraryPlugin, coreAssetPlugin], stdin: {
         resolveDir: dirname(page),
         contents: `import {GramlotWorkerServer} from ${JSON.stringify(workerServer)};
 import {Page} from ${JSON.stringify(page)};
@@ -135,7 +138,7 @@ new GramlotWorkerServer(Page, ${JSON.stringify({logic, stylesheet, inlineCss, co
 
 /** The Logic export of the logic module as one ES module, imported by the window only. */
 export async function logicBundle(logic, options) {
-    return (await bundle({...options, format: 'esm', plugins: [windowCore], stdin: {
+    return (await bundle({...options, format: 'esm', plugins: [windowCore, absentPackagePlugin, libraryPlugin], stdin: {
         resolveDir: dirname(logic.file),
         contents: `export {Logic} from ${JSON.stringify(logic.file)};`,
     }})).outputFiles[0].text;

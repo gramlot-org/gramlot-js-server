@@ -187,5 +187,11 @@ collections of the page graph, so the typst WebAssembly reaches only the pages t
 declare it (gramlot-org/gramlot#84). External engines remain lazy in hosted pages.
 Directory and single-file exports embed the bundles of that graph for file-origin
 use; the window runtime of an export leaves out big.js and @xmldom/xmldom, which the
-Worker keeps; the single-file import map uses a generated CSP nonce while
+Worker keeps, and the third-party libraries of the components (ECharts, uPlot, Jodit,
+xterm and the others), as the core runtime does. The exports embed the module
+`assets/libraries/<name>.js` of each library of the page graph, taken from the
+verified artifact of its collection, and `mount` maps it to `@gramlot/libraries/<name>`
+in the import map, where `loadLibrary` imports it on first use. The directory export
+embeds them as well, in `assets/collections.js`, because a page opened from `file://`
+cannot import a module file. The single-file import map uses a generated CSP nonce while
 the runtime script remains hash-authorized. No `unsafe-inline` script policy is added.

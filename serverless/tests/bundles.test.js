@@ -5,6 +5,7 @@ import {createRequire} from 'node:module';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build as bundle} from 'esbuild';
+import {absentPackagePlugin, libraryPlugin} from '@gramlot/gramlot/build-plugins';
 import {inlineStylesheets, loadPage, logicBundle, logicModule, pageNames, workerBundle} from '../src/bundles.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -51,7 +52,8 @@ test('the window core module exports every name of the core page entry, so a Log
     for (const name of ['Page', 'IndexPage', 'IndexLogic', 'mountIndexPage', 'Bag', 'BagNode', 'createDecimal', 'ServerAdapter', 'VisualEditor', 'SourceImport']) {
         assert.ok(pageNames.includes(name), name);
     }
-    const {metafile} = await bundle({...options, format: 'esm', metafile: true, entryPoints: [join(root, 'src/standalone.js')]});
+    const {metafile} = await bundle({...options, format: 'esm', metafile: true, entryPoints: [join(root, 'src/standalone.js')],
+        plugins: [absentPackagePlugin, libraryPlugin]});
     const [{exports}] = Object.values(metafile.outputs);
     assert.deepEqual(pageNames.filter(name => !exports.includes(name)), []);
     const logic = await logicModule(typedLiterals, await loadPage(typedLiterals));

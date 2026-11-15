@@ -1,9 +1,10 @@
 import {GramlotServer, collectionAssets} from '@gramlot/gramlot/server';
-import {collectionBundle} from './collection-bundle.js';
+import {collectionBundle, libraryBundles} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {markdownBundlePlugin} from './markdown-bundle.js';
-import {absentPackagePlugin} from './absent-packages.js';
+import {absentPackagePlugin, libraryPlugin} from '@gramlot/gramlot/build-plugins';
+import {coreAssetPlugin} from './collection-assets.js';
 import {checkPage, inlineStylesheets, loadPage, logicBundle, logicModule, workerBundle} from './bundles.js';
 import {HtmlBuilder} from '@genrojs/builders';
 import {readFile, writeFile, mkdir, rename, rm} from 'node:fs/promises';
@@ -42,22 +43,28 @@ export async function build({page, output}) {
     const modules = logic ? {[logic.url]: await logicBundle(logic, options)} : {};
     const coreAssets = new Map(collectionAssets().map(({url,file})=>[url,fileURLToPath(file)]));
     // The standard collections and those the page declares in Page.gramlots: an undeclared typst stays out.
-    for (const collection of new GramlotServer().pageCollections(module.Page)) {
+    const server = new GramlotServer();
+    const collections = server.pageCollections(module.Page);
+    for (const collection of collections) {
         const entry = coreAssets.get(collection.module);
         if (!entry) throw new Error(`Single-file export requires a collection packaged with the core: ${collection.name}`);
         modules[collection.module] = await collectionBundle(collection,entry);
     }
+    const libraries = await libraryBundles(server, collections, coreAssets);
+    Object.assign(modules, libraries);
     const nonce = randomUUID();
-    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin(), absentPackagePlugin], stdin: {
+    const runtime = (await bundle({...options, globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin(), absentPackagePlugin, libraryPlugin, coreAssetPlugin], stdin: {
         resolveDir: packageRoot,
         contents: `import {mount} from './src/standalone.js';
 export * from './src/standalone.js';
 const blob = text => URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
 const workerUrl = blob(${JSON.stringify(worker)});
 const modules = Object.fromEntries(Object.entries(${JSON.stringify(modules)}).map(([url, text]) => [url, blob(text)]));
+// A library loads on first use, after the start: its module stays available for the life of the page.
+const libraries = new Set(${JSON.stringify(Object.keys(libraries))});
 mount({workerUrl, modules, nonce:${JSON.stringify(nonce)}}).then(app => { globalThis.gramlot=app; })
     .catch(error => { console.error(error); })
-    .finally(() => { for (const url of [workerUrl, ...Object.values(modules)]) URL.revokeObjectURL(url); });`,
+    .finally(() => { for (const url of [workerUrl, ...Object.entries(modules).filter(([key]) => !libraries.has(key)).map(([, url]) => url)]) URL.revokeObjectURL(url); });`,
     }})).outputFiles[0].text;
     // Prevent the HTML parser from ending the script inside bundled string data.
     const script = runtime.replace(/<\/script/gi, '<\\/script');

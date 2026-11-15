@@ -37,8 +37,7 @@
     "gallery",
     "src/collection-bundle.js",
     "src/collection-artifact.js",
-    "src/collection-assets.js",
-    "src/absent-packages.js"
+    "src/collection-assets.js"
   ],
   "scripts": {
     "test": "node --test tests/*.test.js",
@@ -51,7 +50,7 @@
     "mime-types": "^3.0.2"
   },
   "peerDependencies": {
-    "@gramlot/gramlot": ">=0.3.35",
+    "@gramlot/gramlot": ">=0.3.39",
     "@gramlot/gramlot-examples": ">=0.3.26"
   },
   "peerDependenciesMeta": {

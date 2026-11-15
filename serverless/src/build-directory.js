@@ -1,7 +1,8 @@
 import {collectionAssets} from '@gramlot/gramlot/server';
-import {absentPackagePlugin} from './absent-packages.js';
+import {absentPackagePlugin, libraryPlugin} from '@gramlot/gramlot/build-plugins';
+import {coreAssetPlugin} from './collection-assets.js';
 import {GramlotServer} from '@gramlot/gramlot/gramlot-server';
-import {collectionBundle} from './collection-bundle.js';
+import {collectionBundle, libraryBundles} from './collection-bundle.js';
 import {build as bundle} from 'esbuild';
 import {runtimeNotices} from './runtime-notices.js';
 import {markdownBundlePlugin} from './markdown-bundle.js';
@@ -112,7 +113,7 @@ function documentFor(route, PageClass) {
     return '<!doctype html>' + document.render();
 }
 
-function bootstrapFor(worker, modules, route, collectionUrls, installable) {
+function bootstrapFor(worker, modules, route, collectionUrls, libraryUrls, installable) {
     const relativeRoot = route === 'index' ? './' : '../'.repeat(route.split('/').length);
     const manifest = installable ? `
     if (['http:', 'https:'].includes(new URL(document.baseURI).protocol)) {
@@ -125,12 +126,14 @@ function bootstrapFor(worker, modules, route, collectionUrls, installable) {
     return `(() => {${manifest}
     const blob = text => URL.createObjectURL(new Blob([text], {type: 'text/javascript'}));
     const workerUrl = blob(${JSON.stringify(worker)});
-    const selected = Object.fromEntries(${JSON.stringify(collectionUrls)}.map(url => [url, gramlotCollectionModules[url]]));
+    const libraries = ${JSON.stringify(libraryUrls)};
+    const selected = Object.fromEntries([...${JSON.stringify(collectionUrls)}, ...libraries].map(url => [url, gramlotCollectionModules[url]]));
     const modules = Object.fromEntries(Object.entries({...${JSON.stringify(modules)}, ...selected}).map(([url, text]) => [url, blob(text)]));
     GramlotStandalone.mount({workerUrl, modules, assetRoot: new URL(${JSON.stringify(relativeRoot)}, document.baseURI).href})
         .then(app => { globalThis.gramlot = app; })
         .catch(error => { console.error(error); })
-        .finally(() => { for (const url of [workerUrl, ...Object.values(modules)]) URL.revokeObjectURL(url); });
+        // A library loads on first use, after the start: its module stays available for the life of the page.
+        .finally(() => { for (const url of [workerUrl, ...Object.entries(modules).filter(([key]) => !libraries.includes(key)).map(([, url]) => url)]) URL.revokeObjectURL(url); });
 })();`;
 }
 
@@ -217,7 +220,7 @@ export async function buildDirectory({pages, output, assets = [], collections = 
     await mkdir(stage);
     try {
         await mkdir(join(stage, 'assets/workers'), {recursive: true});
-        const runtime = await bundle({...workerOptions, entryPoints: [standalone], globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin(), absentPackagePlugin]});
+        const runtime = await bundle({...workerOptions, entryPoints: [standalone], globalName: 'GramlotStandalone', plugins:[await markdownBundlePlugin(), absentPackagePlugin, libraryPlugin, coreAssetPlugin]});
         await writeFile(join(stage, 'assets/standalone.js'), runtime.outputFiles[0].text);
         await writeFile(join(stage, 'assets/runtime-notices.json'),
             JSON.stringify(await runtimeNotices(core.runtime), null, 2) + '\n');
@@ -235,6 +238,9 @@ export async function buildDirectory({pages, output, assets = [], collections = 
             if (!asset) throw new Error(`Collection module asset not provided: ${module}`);
             collectionModules[module] = await collectionBundle(collection,asset.source);
         }
+        // The libraries load as blob modules: an export opened from file:// cannot import a module file.
+        Object.assign(collectionModules, await libraryBundles(registry, declared,
+            new Map(copies.map(({source, target}) => ['/' + target, source]))));
         await writeFile(join(stage, 'assets/collections.js'),
             `const gramlotCollectionModules = ${JSON.stringify(collectionModules)};\n`);
         for (const [route, page] of entries) {
@@ -248,10 +254,12 @@ export async function buildDirectory({pages, output, assets = [], collections = 
             const modules = logic ? {[logic.url]: await logicBundle(logic, workerOptions)} : {};
             await mkdir(dirname(join(stage, 'assets/workers', `${route}.js`)), {recursive:true});
             const PageClass = loaded[route].module.Page;
-            const collectionUrls = registry.pageCollections(PageClass).map(item => item.module);
+            const pageCollections = registry.pageCollections(PageClass);
+            const collectionUrls = pageCollections.map(item => item.module);
+            const libraryUrls = Object.values(registry.libraryModules(pageCollections));
             const installable = route === 'index' && PageClass.installable === true;
             await writeFile(join(stage, 'assets/workers', `${route}.js`),
-                bootstrapFor(worker, modules, route, collectionUrls, installable));
+                bootstrapFor(worker, modules, route, collectionUrls, libraryUrls, installable));
             const htmlPath = route === 'index' ? join(stage, 'index.html') : join(stage, route, 'index.html');
             await mkdir(dirname(htmlPath), {recursive: true});
             await writeFile(htmlPath, documentFor(route, loaded[route].module.Page));

@@ -9,7 +9,8 @@ import {GramlotWorkerServer} from '../src/gramlot-worker-server.js';
 import {WorkerServerAdapter} from '../src/worker-server-adapter.js';
 import {WorkerTransport} from '../src/worker-transport.js';
 import {Gramlot, ServerAdapter} from '@gramlot/gramlot';
-import {mount, records} from './standard-collections.js';
+import {files, libraries, mount, records} from './standard-collections.js';
+import {mount as mountPage} from '../src/standalone.js';
 
 const BASE_THEME = '/themes/gramlot-base/theme.css';
 
@@ -114,7 +115,7 @@ test('Worker rejects unknown messages, invalid envelopes, unsupported pages and 
     }
     class Styled extends Hello { static css = ['/theme.css', '/runner.css']; }
     const styled = channel(Styled);
-    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: [], collections: records});
+    assert.deepEqual((await styled.transport.open()).resources, {css: [BASE_THEME, ...Styled.css], js: [], collections: records, libraries});
     styled.transport.dispose();
     const {transport} = channel(Hello);
     await assert.rejects(transport.request({operation: 'main'}), {name: 'TypeError', message: 'Unknown Worker message'});
@@ -164,6 +165,25 @@ function workers(t, PageClass, options, Server) {
     return endpoints;
 }
 const module = text => `data:text/javascript,${encodeURIComponent(text)}`;
+
+test('mount maps each library the Worker names to @gramlot/libraries/<name> in the import map', async t => {
+    workers(t, Hello);
+    const doc = document();
+    const app = await mount({workerUrl: 'page-worker.js', document: doc, nonce: 'n0'});
+    t.after(() => app.dispose());
+    const map = doc.querySelector('script[type=importmap]');
+    assert.equal(map.nonce, 'n0');
+    const {imports} = JSON.parse(map.textContent);
+    assert.ok(Object.keys(libraries).length > 0);
+    for (const [name, url] of Object.entries(libraries)) {
+        assert.match(imports[`@gramlot/libraries/${name}`], new RegExp(`/assets/libraries/${name}\\.js$`), url);
+    }
+    workers(t, Hello);
+    // The collections alone: the first library the Worker names has no module.
+    const collectionModules = Object.fromEntries(Object.entries(files).map(([url, file]) => [url, file.href]));
+    await assert.rejects(mountPage({workerUrl: 'page-worker.js', document: document(), modules: collectionModules}),
+        {message: `Standalone library not provided: ${Object.values(libraries)[0]}`});
+});
 
 class Formula extends Page {
     static title = 'Companion';
@@ -289,7 +309,7 @@ test('the Worker returns the theme, Page.css, then the same-name stylesheet, and
     class Listed extends Hello { static css = [BASE_THEME, '/theme.css']; }
     const linked = channel(Styled, {stylesheet: '/assets/styles/index.css', logic: '/index.js'});
     assert.deepEqual((await linked.transport.open()).resources,
-        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}], collections: records});
+        {css: [BASE_THEME, '/theme.css', '/assets/styles/index.css'], js: [{url: '/index.js', group: null}], collections: records, libraries});
     linked.transport.dispose();
     for (const [PageClass, css] of [[Compact, ['/themes/gramlot-compact/theme.css', '/theme.css']],
         [Bare, ['/theme.css']], [Listed, [BASE_THEME, '/theme.css']]]) {
@@ -302,7 +322,7 @@ test('the Worker returns the theme, Page.css, then the same-name stylesheet, and
     base.transport.dispose();
     for (const PageClass of [Styled, Compact, Listed]) {
         const inline = channel(PageClass, {stylesheet: '/assets/styles/index.css', inlineCss: true});
-        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: [], collections: records}, PageClass.name);
+        assert.deepEqual((await inline.transport.open()).resources, {css: [], js: [], collections: records, libraries}, PageClass.name);
         inline.transport.dispose();
     }
 });
